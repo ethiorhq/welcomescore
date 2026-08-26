@@ -35,14 +35,25 @@ export async function POST(request: NextRequest) {
     const cached = await readReviewCache(contextHash);
     const cachedReview = validateAlgofoxReview(cached, context);
 
-    if (cachedReview) {
+    const hasConfiguredProvider = Boolean(process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY);
+    const shouldUpgradeDeterministicCache =
+      cachedReview?.provider === "rule-engine" && hasConfiguredProvider;
+
+    if (cachedReview && !shouldUpgradeDeterministicCache) {
       return response({ review: cachedReview, cache: "hit" });
     }
 
-    const review = (await generateProviderReview(context)) ?? generateDeterministicReview(context);
-    await writeReviewCache(context, contextHash, review);
+    const providerReview = await generateProviderReview(context);
+    const review = providerReview ?? cachedReview ?? generateDeterministicReview(context);
 
-    return response({ review, cache: "miss" });
+    if (providerReview || !cachedReview) {
+      await writeReviewCache(context, contextHash, review);
+    }
+
+    return response({
+      review,
+      cache: providerReview && cachedReview ? "upgraded" : cachedReview ? "hit" : "miss",
+    });
   } catch (error) {
     if (error instanceof ScoreRepoError) {
       return response({ error: error.code }, error.status);
