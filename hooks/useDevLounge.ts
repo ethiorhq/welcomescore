@@ -13,6 +13,9 @@ import { getSupabaseBrowserClient } from "@/lib/supabaseBrowser";
 const MESSAGE_LIMIT = 50;
 const COOLDOWN_MS = 3000;
 
+export const LOUNGE_REACTIONS = ["thumbs_up", "lightbulb", "tada", "eyes"] as const;
+export type LoungeReaction = typeof LOUNGE_REACTIONS[number];
+
 export type LoungeScoreCard = {
   repo: string;
   score: number;
@@ -29,6 +32,14 @@ export type LoungeReply = {
   id: string;
   dev_handle: string;
   content: string;
+  created_at: string;
+};
+
+export type LoungeReactionRecord = {
+  id: string;
+  message_id: string;
+  session_hash: string;
+  reaction: LoungeReaction;
   created_at: string;
 };
 
@@ -50,6 +61,7 @@ type LoungeStatus = "connecting" | "ready" | "unavailable";
 export function useDevLounge() {
   const [identity, setIdentity] = useState<DevIdentity | null>(null);
   const [messages, setMessages] = useState<LoungeMessage[]>([]);
+  const [reactions, setReactions] = useState<LoungeReactionRecord[]>([]);
   const [status, setStatus] = useState<LoungeStatus>("connecting");
   const [onlineCount, setOnlineCount] = useState(0);
   const [cooldownUntil, setCooldownUntil] = useState(0);
@@ -64,6 +76,16 @@ export function useDevLounge() {
       }
 
       return [...current, incoming].slice(-MESSAGE_LIMIT);
+    });
+  }, []);
+
+  const appendReaction = useCallback((incoming: LoungeReactionRecord) => {
+    setReactions((current) => {
+      if (current.some((reaction) => reaction.id === incoming.id)) {
+        return current;
+      }
+
+      return [...current, incoming];
     });
   }, []);
 
@@ -101,13 +123,38 @@ export function useDevLounge() {
         return;
       }
 
-      setMessages((data ?? []) as LoungeMessage[]);
+      const activeMessages = (data ?? []) as LoungeMessage[];
+      setMessages(activeMessages);
+
+      if (activeMessages.length > 0) {
+        const { data: reactionData } = await client
+          .from("lounge_reactions")
+          .select("*")
+          .in("message_id", activeMessages.map((message) => message.id))
+          .order("created_at", { ascending: true });
+
+        if (isMounted) {
+          setReactions((reactionData ?? []) as LoungeReactionRecord[]);
+        }
+      } else {
+        setReactions([]);
+      }
+
+      if (!isMounted) {
+        return;
+      }
+
       channel = client
         .channel("welcomescore-dev-lounge")
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "lounge_messages" },
           (payload) => appendMessage(payload.new as LoungeMessage),
+        )
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "lounge_reactions" },
+          (payload) => appendReaction(payload.new as LoungeReactionRecord),
         )
         .on("presence", { event: "sync" }, () => {
           if (!channel) {
@@ -137,7 +184,7 @@ export function useDevLounge() {
         void client.removeChannel(channel);
       }
     };
-  }, [appendMessage, identity, supabase]);
+  }, [appendMessage, appendReaction, identity, supabase]);
 
   const sendMessage = useCallback(
     async ({
@@ -184,13 +231,48 @@ export function useDevLounge() {
     [cooldownUntil, identity, supabase],
   );
 
+  const addReaction = useCallback(
+    async ({ messageId, reaction }: { messageId: string; reaction: LoungeReaction }) => {
+      if (!supabase || !identity) {
+        return { error: "The lounge is not configured yet." };
+      }
+
+      const existingReaction = reactions.find(
+        (record) => record.message_id === messageId && record.session_hash === identity.sessionHash,
+      );
+      if (existingReaction) {
+        return { error: "You have already reacted to this message." };
+      }
+
+      const { data, error } = await supabase
+        .from("lounge_reactions")
+        .insert({ message_id: messageId, session_hash: identity.sessionHash, reaction })
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          error: error.code === "23505"
+            ? "You have already reacted to this message."
+            : "Unable to add that reaction right now.",
+        };
+      }
+
+      appendReaction(data as LoungeReactionRecord);
+      return { error: null };
+    },
+    [appendReaction, identity, reactions, supabase],
+  );
+
   return {
     identity,
     messages,
+    reactions,
     onlineCount,
     status,
     cooldownRemaining: Math.max(0, Math.ceil((cooldownUntil - now) / 1000)),
     sendMessage,
+    addReaction,
   };
 }
 

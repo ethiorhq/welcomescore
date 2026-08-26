@@ -8,11 +8,19 @@ import { createDevAvatar } from "@/lib/devIdentity";
 import {
   useDevLounge,
   type LoungeMessage,
+  type LoungeReaction,
+  type LoungeReactionRecord,
   type LoungeReply,
   type LoungeScoreCard,
 } from "@/hooks/useDevLounge";
 
 const FOLLOW_THRESHOLD_PX = 96;
+const REACTION_OPTIONS: Record<LoungeReaction, { icon: string; label: string }> = {
+  thumbs_up: { icon: "👍", label: "Helpful" },
+  lightbulb: { icon: "💡", label: "Insightful" },
+  tada: { icon: "🎉", label: "Celebrate" },
+  eyes: { icon: "👀", label: "Following" },
+};
 
 export default function DevLoungePage() {
   return (
@@ -28,10 +36,12 @@ function DevLoungeContent() {
   const {
     identity,
     messages,
+    reactions,
     onlineCount,
     status,
     cooldownRemaining,
     sendMessage,
+    addReaction,
   } = useDevLounge();
   const [draft, setDraft] = useState("");
   const [error, setError] = useState("");
@@ -39,6 +49,8 @@ function DevLoungeContent() {
   const [attachedScore, setAttachedScore] = useState<LoungeScoreCard | null>(null);
   const [replyingTo, setReplyingTo] = useState<LoungeReply | null>(null);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [reactionPickerMessageId, setReactionPickerMessageId] = useState<string | null>(null);
+  const [reactionError, setReactionError] = useState("");
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const chatViewportRef = useRef<HTMLDivElement>(null);
   const hasInitializedScrollRef = useRef(false);
@@ -109,6 +121,8 @@ function DevLoungeContent() {
     setUnreadMessageCount((count) => count + newlyReceivedMessages.length);
   }, [messages, scrollToLatest, status]);
 
+  const reactionsByMessage = useMemo(() => groupReactionsByMessage(reactions), [reactions]);
+
   const statusLabel = useMemo(() => {
     if (status === "ready") {
       return `${Math.max(onlineCount, 1)} developer${Math.max(onlineCount, 1) === 1 ? "" : "s"} active`;
@@ -144,6 +158,17 @@ function DevLoungeContent() {
   function selectReply(message: LoungeMessage) {
     setReplyingTo(replySnapshotFromMessage(message));
     setError("");
+  }
+
+  async function handleReaction(messageId: string, reaction: LoungeReaction) {
+    setReactionError("");
+    const outcome = await addReaction({ messageId, reaction });
+    if (outcome.error) {
+      setReactionError(outcome.error);
+      return;
+    }
+
+    setReactionPickerMessageId(null);
   }
 
   return (
@@ -206,6 +231,17 @@ function DevLoungeContent() {
                         onOpenScore={setSelectedScore}
                         onReply={selectReply}
                         isReplyTarget={replyingTo?.id === message.id}
+                        reactions={reactionsByMessage.get(message.id) ?? []}
+                        ownReaction={reactions.find(
+                          (reaction) => reaction.message_id === message.id && reaction.session_hash === identity?.sessionHash,
+                        )?.reaction ?? null}
+                        isReactionPickerOpen={reactionPickerMessageId === message.id}
+                        reactionError={reactionPickerMessageId === message.id ? reactionError : ""}
+                        onToggleReactionPicker={() => {
+                          setReactionError("");
+                          setReactionPickerMessageId((current) => current === message.id ? null : message.id);
+                        }}
+                        onReact={handleReaction}
                       />
                     ))}
                   </div>
@@ -321,6 +357,30 @@ function DevLoungeContent() {
   );
 }
 
+function groupReactionsByMessage(reactions: LoungeReactionRecord[]) {
+  const grouped = new Map<string, LoungeReactionRecord[]>();
+
+  reactions.forEach((reaction) => {
+    const messageReactions = grouped.get(reaction.message_id) ?? [];
+    messageReactions.push(reaction);
+    grouped.set(reaction.message_id, messageReactions);
+  });
+
+  return grouped;
+}
+
+function summarizeReactions(reactions: LoungeReactionRecord[]) {
+  return Object.keys(REACTION_OPTIONS)
+    .map((reaction) => {
+      const typedReaction = reaction as LoungeReaction;
+      return {
+        reaction: typedReaction,
+        count: reactions.filter((entry) => entry.reaction === typedReaction).length,
+      };
+    })
+    .filter(({ count }) => count > 0);
+}
+
 function isNearChatBottom(viewport: HTMLElement) {
   return viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= FOLLOW_THRESHOLD_PX;
 }
@@ -342,11 +402,23 @@ function MessageItem({
   onOpenScore,
   onReply,
   isReplyTarget,
+  reactions,
+  ownReaction,
+  isReactionPickerOpen,
+  reactionError,
+  onToggleReactionPicker,
+  onReact,
 }: {
   message: LoungeMessage;
   onOpenScore: (scoreCard: LoungeScoreCard) => void;
   onReply: (message: LoungeMessage) => void;
   isReplyTarget: boolean;
+  reactions: LoungeReactionRecord[];
+  ownReaction: LoungeReaction | null;
+  isReactionPickerOpen: boolean;
+  reactionError: string;
+  onToggleReactionPicker: () => void;
+  onReact: (messageId: string, reaction: LoungeReaction) => Promise<void>;
 }) {
   const longPressTimer = useRef<number | null>(null);
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
@@ -457,9 +529,61 @@ function MessageItem({
             {message.pet_reaction.quote}
           </p>
         ) : null}
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {summarizeReactions(reactions).map(({ reaction, count }) => (
+            <span
+              key={reaction}
+              className={`inline-flex h-7 items-center gap-1 rounded-md border px-2 font-mono text-xs ${
+                ownReaction === reaction
+                  ? "border-accent/45 bg-accent/10 text-accent"
+                  : "border-muted/25 bg-base/25 text-muted"
+              }`}
+              title={`${count} ${REACTION_OPTIONS[reaction].label.toLowerCase()} reaction${count === 1 ? "" : "s"}`}
+            >
+              <span aria-hidden="true">{REACTION_OPTIONS[reaction].icon}</span>
+              <span>{count}</span>
+            </span>
+          ))}
+          {ownReaction ? (
+            <span className="font-sans text-xs text-muted">Reaction added</span>
+          ) : (
+            <button
+              type="button"
+              onClick={onToggleReactionPicker}
+              onPointerDown={(event) => event.stopPropagation()}
+              onPointerUp={(event) => event.stopPropagation()}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-muted/30 bg-base/25 font-mono text-sm text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:bg-accent/10 hover:text-accent focus:border-accent/45 focus:bg-accent/10 focus:text-accent"
+              aria-label={`Add a reaction to ${message.dev_handle}'s message`}
+              aria-expanded={isReactionPickerOpen}
+            >
+              +
+            </button>
+          )}
+        </div>
+        {isReactionPickerOpen ? (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 rounded-md border border-muted/25 bg-base/35 p-2" role="group" aria-label="Choose one reaction">
+            {Object.entries(REACTION_OPTIONS).map(([reaction, option]) => (
+              <button
+                key={reaction}
+                type="button"
+                onClick={() => void onReact(message.id, reaction as LoungeReaction)}
+                onPointerDown={(event) => event.stopPropagation()}
+                onPointerUp={(event) => event.stopPropagation()}
+                className="inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-muted/25 bg-surface px-2 text-base transition-colors duration-180 ease-out hover:border-accent/45 hover:bg-accent/10 focus:border-accent/45 focus:bg-accent/10"
+                aria-label={option.label}
+                title={option.label}
+              >
+                {option.icon}
+              </button>
+            ))}
+            {reactionError ? <p className="basis-full px-1 pt-1 font-sans text-xs text-muted">{reactionError}</p> : null}
+          </div>
+        ) : null}
         <button
           type="button"
           onClick={() => onReply(message)}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
           className="mt-2 inline-flex h-7 items-center rounded-md px-2 font-mono text-xs text-muted transition-colors duration-180 ease-out hover:bg-accent/10 hover:text-accent focus:bg-accent/10 focus:text-accent sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
           aria-label={`Reply to ${message.dev_handle}`}
         >
