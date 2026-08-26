@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, PointerEvent, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, PointerEvent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import BackButton from "@/app/components/BackButton";
 import { createDevAvatar } from "@/lib/devIdentity";
@@ -11,6 +11,8 @@ import {
   type LoungeReply,
   type LoungeScoreCard,
 } from "@/hooks/useDevLounge";
+
+const FOLLOW_THRESHOLD_PX = 96;
 
 export default function DevLoungePage() {
   return (
@@ -36,7 +38,12 @@ function DevLoungeContent() {
   const [selectedScore, setSelectedScore] = useState<LoungeScoreCard | null>(null);
   const [attachedScore, setAttachedScore] = useState<LoungeScoreCard | null>(null);
   const [replyingTo, setReplyingTo] = useState<LoungeReply | null>(null);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
+  const chatViewportRef = useRef<HTMLDivElement>(null);
+  const hasInitializedScrollRef = useRef(false);
+  const wasNearBottomRef = useRef(true);
+  const knownMessageIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (sharedScore) {
@@ -50,6 +57,57 @@ function DevLoungeContent() {
       messageInputRef.current?.focus();
     }
   }, [replyingTo]);
+
+  const scrollToLatest = useCallback((behavior: ScrollBehavior = preferredScrollBehavior()) => {
+    const viewport = chatViewportRef.current;
+    if (!viewport) {
+      return;
+    }
+
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior });
+    wasNearBottomRef.current = true;
+    setUnreadMessageCount(0);
+  }, []);
+
+  function handleChatScroll() {
+    const viewport = chatViewportRef.current;
+    if (!viewport) {
+      return;
+    }
+
+    wasNearBottomRef.current = isNearChatBottom(viewport);
+    if (wasNearBottomRef.current) {
+      setUnreadMessageCount(0);
+    }
+  }
+
+  useEffect(() => {
+    if (status !== "ready" || messages.length === 0) {
+      return;
+    }
+
+    const currentMessageIds = new Set(messages.map((message) => message.id));
+    const newlyReceivedMessages = messages.filter((message) => !knownMessageIdsRef.current.has(message.id));
+
+    if (!hasInitializedScrollRef.current) {
+      hasInitializedScrollRef.current = true;
+      knownMessageIdsRef.current = currentMessageIds;
+      const frame = window.requestAnimationFrame(() => scrollToLatest("auto"));
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    knownMessageIdsRef.current = currentMessageIds;
+    if (newlyReceivedMessages.length === 0) {
+      return;
+    }
+
+    if (wasNearBottomRef.current) {
+      const frame = window.requestAnimationFrame(() => scrollToLatest());
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    setUnreadMessageCount((count) => count + newlyReceivedMessages.length);
+  }, [messages, scrollToLatest, status]);
 
   const statusLabel = useMemo(() => {
     if (status === "ready") {
@@ -80,6 +138,7 @@ function DevLoungeContent() {
     setDraft("");
     setAttachedScore(null);
     setReplyingTo(null);
+    scrollToLatest();
   }
 
   function selectReply(message: LoungeMessage) {
@@ -129,21 +188,39 @@ function DevLoungeContent() {
               </span>
             </div>
 
-            <div className="min-h-[380px] max-h-[58vh] overflow-y-auto px-5 py-5" aria-live="polite">
-              {status === "unavailable" ? <SetupState /> : null}
-              {status !== "unavailable" && messages.length === 0 ? <EmptyLoungeState /> : null}
-              {status !== "unavailable" ? (
-                <div className="space-y-5">
-                  {messages.map((message) => (
-                    <MessageItem
-                      key={message.id}
-                      message={message}
-                      onOpenScore={setSelectedScore}
-                      onReply={selectReply}
-                      isReplyTarget={replyingTo?.id === message.id}
-                    />
-                  ))}
-                </div>
+            <div className="relative">
+              <div
+                ref={chatViewportRef}
+                onScroll={handleChatScroll}
+                className="min-h-[380px] max-h-[58vh] overflow-y-auto px-5 py-5"
+                aria-live="polite"
+              >
+                {status === "unavailable" ? <SetupState /> : null}
+                {status !== "unavailable" && messages.length === 0 ? <EmptyLoungeState /> : null}
+                {status !== "unavailable" ? (
+                  <div className="space-y-5">
+                    {messages.map((message) => (
+                      <MessageItem
+                        key={message.id}
+                        message={message}
+                        onOpenScore={setSelectedScore}
+                        onReply={selectReply}
+                        isReplyTarget={replyingTo?.id === message.id}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              {unreadMessageCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => scrollToLatest()}
+                  className="absolute bottom-4 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-2 rounded-md border border-accent/45 bg-surface px-3 py-2 font-mono text-xs font-semibold text-accent shadow-lg transition-colors duration-180 ease-out hover:bg-accent/10 focus:bg-accent/10"
+                  aria-label={`Jump to ${unreadMessageCount} new ${unreadMessageCount === 1 ? "message" : "messages"}`}
+                >
+                  <span aria-hidden="true">↓</span>
+                  {unreadMessageCount} new {unreadMessageCount === 1 ? "message" : "messages"}
+                </button>
               ) : null}
             </div>
 
@@ -242,6 +319,14 @@ function DevLoungeContent() {
       {selectedScore ? <ScorePreview scoreCard={selectedScore} onClose={() => setSelectedScore(null)} /> : null}
     </main>
   );
+}
+
+function isNearChatBottom(viewport: HTMLElement) {
+  return viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= FOLLOW_THRESHOLD_PX;
+}
+
+function preferredScrollBehavior(): ScrollBehavior {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 }
 
 function LoungeLoadingState() {
