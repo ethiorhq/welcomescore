@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
+import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 
 const SITE_URL = "https://welcomescore.vercel.app";
 
@@ -49,6 +51,7 @@ export default function BadgeShareModal({
   onClose: () => void;
 }) {
   const [feedback, setFeedback] = useState<"embed" | "share" | null>(null);
+  const { setAlgofoxState } = useAlgofoxPet();
   const [style, setStyle] = useState<BadgeStyleId>("1");
   const [format, setFormat] = useState<EmbedFormat>("markdown");
   const [owner, repo] = repoPath.split("/");
@@ -81,6 +84,9 @@ export default function BadgeShareModal({
     try {
       await navigator.clipboard.writeText(value);
       setFeedback(type);
+      if (type === "embed") {
+        setAlgofoxState("jumping", "Badge copied. Your README is ready for an Algofox-approved signal.", 4_000);
+      }
       window.setTimeout(() => setFeedback(null), 1500);
     } catch {
       setFeedback(null);
@@ -149,7 +155,10 @@ export default function BadgeShareModal({
                 <button
                   key={option.id}
                   type="button"
-                  onClick={() => setStyle(option.id)}
+                  onClick={() => {
+                    setStyle(option.id);
+                    setAlgofoxState("review", "Reviewing this live badge style.", 3_000);
+                  }}
                   className={`rounded-md border px-3 py-2.5 text-left transition-colors duration-180 ease-out ${
                     isSelected
                       ? "border-accent/45 bg-accent/10"
@@ -169,16 +178,24 @@ export default function BadgeShareModal({
 
         <div className="mt-4 border-t border-muted/20 pt-4">
           <div className="rounded-md border border-muted/25 bg-base/35 p-3">
-            <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">Live preview</p>
-            <div className="mt-3">
-            <Image
-              src={badgePath}
-              alt={`WelcomeScore ${selectedStyle.name} badge preview for ${repoPath}`}
-              width={selectedStyle.width}
-              height={selectedStyle.height}
-              unoptimized
-              className="h-auto max-w-full"
-            />
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">Live preview</p>
+                <div className="mt-3">
+                  <Image
+                    src={badgePath}
+                    alt={`WelcomeScore ${selectedStyle.name} badge preview for ${repoPath}`}
+                    width={selectedStyle.width}
+                    height={selectedStyle.height}
+                    unoptimized
+                    className="h-auto max-w-full"
+                  />
+                </div>
+              </div>
+              <div className="hidden w-14 shrink-0 flex-col items-center text-center sm:flex">
+                <AlgofoxSprite state="review" size={48} />
+                <span className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-muted">Reviewing</span>
+              </div>
             </div>
           </div>
         </div>

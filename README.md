@@ -107,3 +107,9 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_or_anon_key
 ```
 
 Use a Supabase publishable or anon key only. Do not use `SUPABASE_SERVICE_ROLE_KEY` in a `NEXT_PUBLIC_` variable. Lounge messages are limited to 300 characters, locally filtered for basic spam/profanity, throttled to one send every three seconds per browser session, and automatically purged after 24 hours. Hover a message on desktop or swipe/long-press it on touch devices to reply; a quoted snapshot keeps the conversational context readable even after the original message expires. The chat follows fresh messages while a reader is near the bottom, otherwise presents an unread-message control. Every message also has a compact reaction picker with Helpful, Insightful, Celebrate, and Following choices.
+
+## Algofox companion
+
+WelcomeScore includes **Algofox**, the supplied cyber-fox sprite companion, as an optional visual guide. Algofox appears in the global bottom-right dock, the repository audit flow, the badge embed preview, and the Dev Lounge header. It uses the provided 8×9 WebP atlas and adapts its animation to focused audits, strong results, repositories still improving, badge review/copy actions, successful Lounge posts, and inactivity.
+
+Algofox is deliberately non-authoritative: it never scans repositories, posts chat messages, adds Hall of Fame entries, plays audio, or triggers disruptive effects on its own. The dock can be hidden at any time, respects reduced-motion preferences, and keeps guidance inside the existing WelcomeScore dark palette.

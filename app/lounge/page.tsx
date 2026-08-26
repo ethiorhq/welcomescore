@@ -5,6 +5,8 @@ import { FormEvent, PointerEvent, Suspense, useCallback, useEffect, useMemo, use
 import { useSearchParams } from "next/navigation";
 import BackButton from "@/app/components/BackButton";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
+import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import { createDevAvatar } from "@/lib/devIdentity";
 import {
   useDevLounge,
@@ -44,6 +46,7 @@ function DevLoungeContent() {
     sendMessage,
     addReaction,
   } = useDevLounge();
+  const { state: algofoxState, setAlgofoxState } = useAlgofoxPet();
   const [draft, setDraft] = useState("");
   const [error, setError] = useState("");
   const [selectedScore, setSelectedScore] = useState<LoungeScoreCard | null>(null);
@@ -153,6 +156,11 @@ function DevLoungeContent() {
     setDraft("");
     setAttachedScore(null);
     setReplyingTo(null);
+    setAlgofoxState(
+      "waving",
+      attachedScore ? "Score shared. Algofox is cheering for practical contributor progress." : "Message sent. Keep the developer conversation constructive.",
+      4_000,
+    );
     scrollToLatest();
   }
 
@@ -203,9 +211,12 @@ function DevLoungeContent() {
         <section className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
           <div className="rounded-lg border border-muted/25 bg-surface">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-muted/20 px-5 py-4">
-              <div>
-                <h2 className="font-mono text-sm font-bold">Live developer chat</h2>
-                <p className="mt-1 font-sans text-xs text-muted">Be constructive. Never share secrets or personal data.</p>
+              <div className="flex items-center gap-3">
+                <AlgofoxSprite state={algofoxState} size={42} />
+                <div>
+                  <h2 className="font-mono text-sm font-bold">Live developer chat</h2>
+                  <p className="mt-1 font-sans text-xs text-muted">Algofox helps keep it constructive. Never share secrets or personal data.</p>
+                </div>
               </div>
               <span className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-1 font-mono text-xs ${
                 status === "ready" ? "border-good/45 bg-good/10 text-good" : "border-muted/30 text-muted"
@@ -300,6 +311,7 @@ function DevLoungeContent() {
                 id="lounge-message"
                 value={draft}
                 onChange={(event) => setDraft(event.target.value.slice(0, 300))}
+                onFocus={() => setAlgofoxState("waving", "I’m listening. Keep it practical and kind.", 3_500)}
                 placeholder="Ask a contributor question or share a small win…"
                 rows={3}
                 disabled={status !== "ready"}
