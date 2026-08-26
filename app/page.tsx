@@ -333,7 +333,7 @@ function ResultsCard({ result }: { result: ScoreResult }) {
             onClick={() => setIsBadgeModalOpen(true)}
             className="h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
           >
-            Copy badge
+              Embed badge
           </button>
           <Link
             href={`/lounge?repo=${encodeURIComponent(result.repo)}&score=${result.score}&grade=${encodeURIComponent(result.grade)}`}

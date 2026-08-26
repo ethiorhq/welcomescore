@@ -50,7 +50,20 @@ WelcomeScore returns a grade from **A** through **F** alongside the individual c
 
 `GET /api/score?repo=owner/repo` returns the JSON score result. The `repo` parameter also accepts a full `github.com/owner/repo` URL.
 
-`GET /api/badge?repo=owner/repo` returns a 600 × 315 PNG score badge suitable for sharing.
+`GET /api/badge?repo=owner/repo` returns the existing 600 × 315 PNG score badge suitable for sharing. Existing copied badge URLs remain supported.
+
+### Dynamic SVG rank badges
+
+`GET /api/badge/owner/repo?style=1` returns a compact, live SVG contributor-health badge suitable for a repository README. The badge recalculates from the same cached scoring pipeline used by the audit API and returns cache headers suitable for repeated README loads.
+
+| Style | Query value | Purpose |
+| --- | --- | --- |
+| Minimal | `style=1` | Compact dual-segment README pill. |
+| Rank shield | `style=2` | Rank certification with a tier emblem. |
+| Metrics | `style=3` | One-line score, grade, and rank summary. |
+| Dark glow | `style=4` | Developer-tool card with the WelcomeScore primary accent. |
+
+The rank framework is **Standard Repo** below 75, **Bronze Maintainer** from 75–84, **Silver Maintainer** from 85–94, and **Elite Maintainer** from 95–100. The completed audit’s **Embed badge** action offers copy-ready Markdown and HTML for every style.
 
 ## Verify a production build
 
