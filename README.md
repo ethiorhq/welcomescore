@@ -79,3 +79,18 @@ Additional routes:
 - `POST /api/leaderboard/add?repo=owner/repo` adds a freshly verified eligible repository after an explicit user request.
 - `POST /api/leaderboard/refresh?repo=owner/repo` refreshes an existing leaderboard entry through the scoring pipeline.
 - `GET /check/owner/repo` opens a shareable full-audit route.
+
+## Anonymous Dev Lounge
+
+The [Dev Lounge](/lounge) is a lightweight, anonymous 24-hour chat for contributor questions, score celebrations, and practical open-source encouragement. A visitor receives a deterministic temporary developer handle and DiceBear avatar stored only in that browser’s local storage. The lounge never uses the leaderboard service-role credential in the browser.
+
+Run `supabase/migrations/20260826_dev_lounge.sql` in the Supabase SQL Editor before using the lounge. The migration creates the `lounge_messages` table, enables Realtime, applies explicit read/insert-only RLS permissions, and schedules hourly deletion of expired messages.
+
+Set the following **browser-safe** values in `.env.local` and the matching Vercel environments:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_or_anon_key
+```
+
+Use a Supabase publishable or anon key only. Do not use `SUPABASE_SERVICE_ROLE_KEY` in a `NEXT_PUBLIC_` variable. Lounge messages are limited to 300 characters, locally filtered for basic spam/profanity, throttled to one send every three seconds per browser session, and automatically purged after 24 hours.

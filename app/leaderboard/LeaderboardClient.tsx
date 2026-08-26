@@ -104,6 +104,12 @@ export default function LeaderboardClient() {
             >
               Check a repository
             </Link>
+            <Link
+              href="/lounge"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+            >
+              Dev Lounge
+            </Link>
           </div>
         </header>
 

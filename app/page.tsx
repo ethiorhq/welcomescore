@@ -138,12 +138,20 @@ export default function Home({
             </span>
           </div>
 
-          <Link
-            className="mt-5 inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
-            href="/leaderboard"
-          >
-            Explore the Hall of Fame
-          </Link>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Link
+              className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+              href="/leaderboard"
+            >
+              Explore the Hall of Fame
+            </Link>
+            <Link
+              className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+              href="/lounge"
+            >
+              Open Dev Lounge
+            </Link>
+          </div>
 
           <form
             className="mx-auto mt-5 flex w-full max-w-2xl flex-col gap-3 sm:flex-row"
@@ -326,13 +334,21 @@ function ResultsCard({ result }: { result: ScoreResult }) {
         <h2 className="font-sans text-sm font-semibold text-muted">
           Share your score
         </h2>
-        <button
-          type="button"
-          onClick={() => setIsBadgeModalOpen(true)}
-          className="mt-3 h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted"
-        >
-          Copy badge
-        </button>
+        <div className="mt-3 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setIsBadgeModalOpen(true)}
+            className="h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+          >
+            Copy badge
+          </button>
+          <Link
+            href={`/lounge?repo=${encodeURIComponent(result.repo)}&score=${result.score}&grade=${encodeURIComponent(result.grade)}`}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+          >
+            Share to Dev Lounge
+          </Link>
+        </div>
       </div>
 
       {selectedTemplate ? (
