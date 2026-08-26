@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getLeaderboard } from "@/lib/leaderboard";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 60;
+export const revalidate = 0;
 
 export async function GET() {
   try {
@@ -15,7 +15,7 @@ export async function GET() {
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "Cache-Control": "no-store, max-age=0",
         },
       },
     );
@@ -26,7 +26,7 @@ export async function GET() {
       { entries: [], generatedAt: new Date().toISOString() },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+          "Cache-Control": "no-store, max-age=0",
         },
       },
     );

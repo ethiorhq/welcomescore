@@ -35,7 +35,9 @@ export default function LeaderboardClient() {
 
   const loadLeaderboard = useCallback(async () => {
     try {
-      const response = await fetch("/api/leaderboard", { cache: "no-store" });
+      const response = await fetch(`/api/leaderboard?ts=${Date.now()}`, {
+        cache: "no-store",
+      });
       const data = (await response.json()) as LeaderboardResponse;
       setEntries(data.entries ?? []);
       setLoadError(!response.ok);
