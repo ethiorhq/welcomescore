@@ -44,6 +44,7 @@ export async function generateProviderReview(context: TrustedReviewContext) {
 async function generateGroqReview(context: TrustedReviewContext) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
+    console.info("Algofox Groq review provider is not configured");
     return null;
   }
 
@@ -78,6 +79,7 @@ async function generateGroqReview(context: TrustedReviewContext) {
     });
 
     if (!response.ok) {
+      console.warn("Algofox Groq review provider returned an error", { status: response.status });
       return null;
     }
 
@@ -85,8 +87,15 @@ async function generateGroqReview(context: TrustedReviewContext) {
       choices?: Array<{ message?: { content?: string | null } }>;
     };
     const content = payload.choices?.[0]?.message?.content;
-    return validateProviderCandidate(content, context, "groq");
-  } catch {
+    const review = validateProviderCandidate(content, context, "groq");
+    if (!review) {
+      console.warn("Algofox Groq review provider returned an invalid response");
+    }
+    return review;
+  } catch (error) {
+    console.warn("Algofox Groq review provider request failed", {
+      error: error instanceof Error ? error.name : "unknown",
+    });
     return null;
   }
 }
@@ -94,6 +103,7 @@ async function generateGroqReview(context: TrustedReviewContext) {
 async function generateGeminiReview(context: TrustedReviewContext) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
+    console.info("Algofox Gemini review provider is not configured");
     return null;
   }
 
@@ -121,18 +131,26 @@ async function generateGeminiReview(context: TrustedReviewContext) {
     );
 
     if (!response.ok) {
+      console.warn("Algofox Gemini review provider returned an error", { status: response.status });
       return null;
     }
 
     const payload = (await response.json()) as {
       candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
     };
-    return validateProviderCandidate(
+    const review = validateProviderCandidate(
       payload.candidates?.[0]?.content?.parts?.[0]?.text,
       context,
       "gemini",
     );
-  } catch {
+    if (!review) {
+      console.warn("Algofox Gemini review provider returned an invalid response");
+    }
+    return review;
+  } catch (error) {
+    console.warn("Algofox Gemini review provider request failed", {
+      error: error instanceof Error ? error.name : "unknown",
+    });
     return null;
   }
 }
