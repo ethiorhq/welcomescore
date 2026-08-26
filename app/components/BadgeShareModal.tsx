@@ -106,17 +106,17 @@ export default function BadgeShareModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 p-4"
+      className="fixed inset-0 z-50 overflow-y-auto bg-base/85 px-3 py-4 sm:px-6 sm:py-8"
       onMouseDown={onClose}
     >
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby="badge-share-modal-title"
-        className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-lg border border-muted/25 bg-surface p-5 shadow-2xl sm:p-6"
+        className="mx-auto w-full max-w-xl rounded-lg border border-muted/25 bg-surface p-4 shadow-2xl sm:my-4 sm:p-5"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 border-b border-muted/20 pb-4">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-accent">
               Embed your rank badge
@@ -124,8 +124,8 @@ export default function BadgeShareModal({
             <h2 id="badge-share-modal-title" className="mt-2 break-all font-mono text-lg font-bold">
               {repoPath}
             </h2>
-            <p className="mt-2 max-w-xl font-sans text-sm leading-6 text-muted">
-              Pick a live SVG style. It recalculates from the repository audit whenever the badge is requested.
+            <p className="mt-1.5 max-w-lg font-sans text-sm leading-5 text-muted">
+              Select a live SVG style, then copy a README-ready embed.
             </p>
           </div>
           <button
@@ -138,11 +138,11 @@ export default function BadgeShareModal({
           </button>
         </div>
 
-        <fieldset className="mt-5">
+        <fieldset className="mt-4">
           <legend className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-muted">
             Badge style
           </legend>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {BADGE_STYLES.map((option) => {
               const isSelected = option.id === style;
               return (
@@ -150,7 +150,7 @@ export default function BadgeShareModal({
                   key={option.id}
                   type="button"
                   onClick={() => setStyle(option.id)}
-                  className={`rounded-md border px-3 py-3 text-left transition-colors duration-180 ease-out ${
+                  className={`rounded-md border px-3 py-2.5 text-left transition-colors duration-180 ease-out ${
                     isSelected
                       ? "border-accent/45 bg-accent/10"
                       : "border-muted/25 bg-base/25 hover:border-muted/45"
@@ -160,28 +160,30 @@ export default function BadgeShareModal({
                   <span className={`block font-mono text-sm font-semibold ${isSelected ? "text-accent" : "text-text"}`}>
                     {option.name}
                   </span>
-                  <span className="mt-1 block font-sans text-xs text-muted">{option.description}</span>
+                  <span className="mt-0.5 block font-sans text-xs leading-4 text-muted">{option.description}</span>
                 </button>
               );
             })}
           </div>
         </fieldset>
 
-        <div className="mt-5 rounded-md border border-muted/25 bg-base/35 p-4">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">Live preview</p>
-          <div className="mt-4 overflow-x-auto pb-1">
+        <div className="mt-4 border-t border-muted/20 pt-4">
+          <div className="rounded-md border border-muted/25 bg-base/35 p-3">
+            <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">Live preview</p>
+            <div className="mt-3">
             <Image
               src={badgePath}
               alt={`WelcomeScore ${selectedStyle.name} badge preview for ${repoPath}`}
               width={selectedStyle.width}
               height={selectedStyle.height}
               unoptimized
-              className="h-auto max-w-none"
+              className="h-auto max-w-full"
             />
+            </div>
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-4 flex flex-col gap-3 border-t border-muted/20 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="inline-flex rounded-md border border-muted/25 bg-base/25 p-1" aria-label="Embed format">
             {(["markdown", "html"] as const).map((option) => (
               <button
@@ -200,11 +202,11 @@ export default function BadgeShareModal({
           <p className="font-sans text-xs text-muted">Live SVG · cached for fast README loads</p>
         </div>
 
-        <pre className="mt-3 max-h-36 overflow-auto rounded-md border border-muted/35 bg-base/40 p-4 font-mono text-xs leading-6 text-text whitespace-pre-wrap">
+        <pre className="mt-2 max-h-28 overflow-auto rounded-md border border-muted/35 bg-base/40 p-3 font-mono text-xs leading-5 text-text whitespace-pre-wrap">
           {embed}
         </pre>
 
-        <div className="mt-5 flex flex-wrap gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-muted/20 pt-4">
           <button
             type="button"
             onClick={() => void copy(embed, "embed")}

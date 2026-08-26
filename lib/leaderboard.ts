@@ -119,6 +119,30 @@ export async function persistEvaluation(
   return rows[0] ? toLeaderboardEntry(rows[0]) : null;
 }
 
+export async function getLeaderboardEntry(repoPath: string) {
+  if (!isLeaderboardStoreConfigured()) {
+    return null;
+  }
+
+  const query = new URLSearchParams({
+    select:
+      "id,repo_owner,repo_name,repo_path,score,grade,primary_language,stars_count,forks_count,roast_text,is_eligible_for_leaderboard,evaluated_at,updated_at",
+    repo_path: `eq.${repoPath}`,
+    is_eligible_for_leaderboard: "eq.true",
+    limit: "1",
+  });
+  const response = await supabaseRequest(
+    `/rest/v1/${LEADERBOARD_TABLE}?${query.toString()}`,
+  );
+
+  if (!response.ok) {
+    throw new Error(`Leaderboard entry lookup failed with status ${response.status}`);
+  }
+
+  const rows = (await response.json()) as RepoEvaluationRow[];
+  return rows[0] ? toLeaderboardEntry(rows[0]) : null;
+}
+
 export async function getLeaderboard(limit = 50) {
   if (!isLeaderboardStoreConfigured()) {
     return [] as LeaderboardEntry[];

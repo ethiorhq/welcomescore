@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { persistEvaluation } from "@/lib/leaderboard";
+import {
+  getLeaderboardEntry,
+  persistEvaluation,
+} from "@/lib/leaderboard";
 import {
   parseRepository,
   scoreRepo,
@@ -22,6 +25,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "not-eligible", result }, { status: 422 });
     }
 
+    const existingEntry = await getLeaderboardEntry(result.repo);
+    if (existingEntry) {
+      return NextResponse.json({
+        result,
+        evaluation: existingEntry,
+        alreadyListed: true,
+      });
+    }
+
     const evaluation = await persistEvaluation(result, {
       starsCount: result.starsCount,
       forksCount: result.forksCount,
@@ -30,7 +42,7 @@ export async function POST(request: NextRequest) {
       hasLicense: result.hasLicense,
     });
 
-    return NextResponse.json({ result, evaluation });
+    return NextResponse.json({ result, evaluation, alreadyListed: false });
   } catch (error) {
     if (error instanceof ScoreRepoError) {
       return NextResponse.json(

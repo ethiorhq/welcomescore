@@ -54,6 +54,13 @@ type ScoreError = {
   error?: string;
 };
 
+type HallOfFameStatus =
+  | "checking"
+  | "ready"
+  | "already-listed"
+  | "added"
+  | "unavailable";
+
 export default function Home({
   initialRepository,
 }: {
@@ -190,22 +197,61 @@ function ResultsCard({ result }: { result: ScoreResult }) {
     null,
   );
   const [isAddingToLeaderboard, setIsAddingToLeaderboard] = useState(false);
-  const [leaderboardStatus, setLeaderboardStatus] = useState<
-    "idle" | "added" | "unavailable"
-  >("idle");
+  const [hallOfFameStatus, setHallOfFameStatus] = useState<HallOfFameStatus>(
+    result.isEligibleForLeaderboard ? "checking" : "ready",
+  );
+
+  useEffect(() => {
+    if (!result.isEligibleForLeaderboard) {
+      return;
+    }
+
+    let cancelled = false;
+    setHallOfFameStatus("checking");
+
+    void fetch(`/api/leaderboard/status?repo=${encodeURIComponent(result.repo)}`, {
+      cache: "no-store",
+    })
+      .then(async (response) => {
+        const payload = (await response.json().catch(() => null)) as {
+          listed?: boolean;
+        } | null;
+
+        if (!cancelled) {
+          setHallOfFameStatus(payload?.listed ? "already-listed" : "ready");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHallOfFameStatus("ready");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [result.isEligibleForLeaderboard, result.repo]);
 
   async function handleAddToLeaderboard() {
     setIsAddingToLeaderboard(true);
-    setLeaderboardStatus("idle");
 
     try {
       const response = await fetch(
         `/api/leaderboard/add?repo=${encodeURIComponent(result.repo)}`,
         { method: "POST" },
       );
-      setLeaderboardStatus(response.ok ? "added" : "unavailable");
+      const payload = (await response.json().catch(() => null)) as {
+        alreadyListed?: boolean;
+      } | null;
+      setHallOfFameStatus(
+        response.ok
+          ? payload?.alreadyListed
+            ? "already-listed"
+            : "added"
+          : "unavailable",
+      );
     } catch {
-      setLeaderboardStatus("unavailable");
+      setHallOfFameStatus("unavailable");
     } finally {
       setIsAddingToLeaderboard(false);
     }
@@ -285,43 +331,12 @@ function ResultsCard({ result }: { result: ScoreResult }) {
         </section>
       ) : null}
 
-      {result.isEligibleForLeaderboard ? (
-        <section className="mt-9 border-t border-muted/20 pt-6" aria-labelledby="hall-of-fame-title">
-          <h2 id="hall-of-fame-title" className="font-sans text-sm font-semibold text-muted">
-            Hall of Fame
-          </h2>
-          <p className="mt-2 max-w-xl font-sans text-sm leading-6 text-muted">
-            This repository meets the score, social-proof, README, and license requirements.
-            Add it when you are ready to make it public on the community leaderboard.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => void handleAddToLeaderboard()}
-              disabled={isAddingToLeaderboard || leaderboardStatus === "added"}
-              className={`h-10 rounded-md border px-4 font-sans text-sm font-medium disabled:cursor-not-allowed ${
-                leaderboardStatus === "added"
-                  ? "border-good/45 bg-good/15 text-good"
-                  : "border-accent/45 bg-accent/10 text-accent"
-              }`}
-            >
-              {leaderboardStatus === "added"
-                ? "Added to Hall of Fame"
-                : isAddingToLeaderboard
-                  ? "Adding…"
-                  : "Add to Hall of Fame"}
-            </button>
-            {leaderboardStatus === "added" ? (
-              <Link className="text-link font-sans text-sm underline underline-offset-4" href="/leaderboard">
-                View Hall of Fame
-              </Link>
-            ) : null}
-            {leaderboardStatus === "unavailable" ? (
-              <p className="font-sans text-sm text-muted">Unable to add this repository right now. Please try again.</p>
-            ) : null}
-          </div>
-        </section>
-      ) : null}
+      <HallOfFamePanel
+        result={result}
+        status={hallOfFameStatus}
+        isAdding={isAddingToLeaderboard}
+        onAdd={() => void handleAddToLeaderboard()}
+      />
 
       <div className="mt-9 border-t border-muted/20 pt-6">
         <h2 className="font-sans text-sm font-semibold text-muted">
@@ -361,6 +376,106 @@ function ResultsCard({ result }: { result: ScoreResult }) {
       ) : null}
     </section>
   );
+}
+
+function HallOfFamePanel({
+  result,
+  status,
+  isAdding,
+  onAdd,
+}: {
+  result: ScoreResult;
+  status: HallOfFameStatus;
+  isAdding: boolean;
+  onAdd: () => void;
+}) {
+  const isComplete = status === "already-listed" || status === "added";
+
+  if (!result.isEligibleForLeaderboard) {
+    const nextSteps = hallOfFameNextSteps(result);
+
+    return (
+      <section className="mt-9 border-t border-muted/20 pt-6" aria-labelledby="hall-progress-title">
+        <h2 id="hall-progress-title" className="font-sans text-sm font-semibold text-muted">
+          On your way to the Hall of Fame
+        </h2>
+        <p className="mt-2 max-w-xl font-sans text-sm leading-6 text-muted">
+          Every contributor-friendly improvement counts. Clear the next milestone, run another audit, and the Hall of Fame option will unlock automatically.
+        </p>
+        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Next Hall of Fame milestones">
+          {nextSteps.map((step) => (
+            <li key={step} className="rounded-md border border-muted/30 bg-base/25 px-3 py-2 font-sans text-sm text-muted">
+              {step}
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  }
+
+  const description =
+    status === "already-listed"
+      ? "This repository is already posted in the public Hall of Fame. Rechecking it will never create a duplicate entry."
+      : status === "added"
+        ? "This repository has been added to the public Hall of Fame."
+        : "This repository meets the score, social-proof, README, and license requirements. Add it when you are ready to make it public on the community leaderboard.";
+
+  return (
+    <section className="mt-9 border-t border-muted/20 pt-6" aria-labelledby="hall-of-fame-title">
+      <h2 id="hall-of-fame-title" className="font-sans text-sm font-semibold text-muted">
+        Hall of Fame
+      </h2>
+      <p className="mt-2 max-w-xl font-sans text-sm leading-6 text-muted">{description}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        {isComplete ? (
+          <span className="inline-flex h-10 items-center rounded-md border border-good/45 bg-good/15 px-4 font-sans text-sm font-medium text-good">
+            {status === "already-listed" ? "Already in Hall of Fame" : "Added to Hall of Fame"}
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={onAdd}
+            disabled={isAdding || status === "checking"}
+            className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent disabled:cursor-not-allowed disabled:border-muted/25 disabled:bg-base/30 disabled:text-muted"
+          >
+            {status === "checking"
+              ? "Checking Hall of Fame…"
+              : isAdding
+                ? "Adding…"
+                : "Add to Hall of Fame"}
+          </button>
+        )}
+        {isComplete ? (
+          <Link className="text-link font-sans text-sm underline underline-offset-4" href="/leaderboard">
+            View Hall of Fame
+          </Link>
+        ) : null}
+        {status === "unavailable" ? (
+          <p className="font-sans text-sm text-muted">Unable to add this repository right now. Please try again.</p>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function hallOfFameNextSteps(result: ScoreResult) {
+  const steps: string[] = [];
+
+  if (result.score < 75) {
+    const pointsNeeded = 75 - result.score;
+    steps.push(`Earn ${pointsNeeded} more point${pointsNeeded === 1 ? "" : "s"} to reach 75`);
+  }
+  if (!result.hasReadme) {
+    steps.push("Add a clear README");
+  }
+  if (!result.hasLicense) {
+    steps.push("Add an open-source license");
+  }
+  if (result.starsCount < 5 && result.forksCount < 2) {
+    steps.push("Build community proof with stars or forks");
+  }
+
+  return steps.length > 0 ? steps : ["Keep strengthening the contributor journey"];
 }
 
 function CheckPill({
