@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, PointerEvent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import BackButton from "@/app/components/BackButton";
+import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import { createDevAvatar } from "@/lib/devIdentity";
 import {
   useDevLounge,
@@ -179,8 +180,9 @@ function DevLoungeContent() {
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent">
               Anonymous community chat
             </p>
-            <h1 className="mt-3 font-mono text-3xl font-bold tracking-tight sm:text-5xl">
-              WelcomeScore Dev Lounge
+            <h1 className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-3xl sm:text-5xl">
+              <WelcomeScoreWordmark badgeClassName="sm:mt-1.5" />
+              <span className="font-mono font-bold tracking-tight">Dev Lounge</span>
             </h1>
             <p className="mt-3 max-w-2xl font-sans text-sm leading-6 text-muted sm:text-base">
               A temporary space for first-contributor questions, score celebrations, and practical open-source encouragement.

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import BackButton from "@/app/components/BackButton";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
+import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import {
   CODE_OF_CONDUCT_TEMPLATE,
   CONTRIBUTING_TEMPLATE,
@@ -126,17 +127,9 @@ export default function Home({
       ) : null}
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center">
         <section className="w-full text-center" aria-labelledby="page-title">
-          <div className="flex items-start justify-center gap-2">
-            <h1
-              id="page-title"
-              className="font-mono text-3xl font-bold tracking-tight text-accent sm:text-6xl"
-            >
-              WelcomeScore
-            </h1>
-            <span className="mt-0.5 inline-flex rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-xs font-semibold text-amber-500 sm:mt-2 sm:px-2 sm:py-1">
-              .js.org
-            </span>
-          </div>
+          <h1 id="page-title" className="text-3xl text-accent sm:text-6xl">
+            <WelcomeScoreWordmark />
+          </h1>
 
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link

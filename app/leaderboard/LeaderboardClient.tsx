@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import BackButton from "@/app/components/BackButton";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
+import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 
 type EvaluationFreshness = "fresh" | "stale" | "expired";
 
@@ -88,8 +89,9 @@ export default function LeaderboardClient() {
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent">
               Community leaderboard
             </p>
-            <h1 className="mt-3 font-mono text-3xl font-bold tracking-tight text-text sm:text-5xl">
-              WelcomeScore Hall of Fame
+            <h1 className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-3xl text-text sm:text-5xl">
+              <WelcomeScoreWordmark badgeClassName="sm:mt-1.5" />
+              <span className="font-mono font-bold tracking-tight">Hall of Fame</span>
             </h1>
             <p className="mt-3 max-w-2xl font-sans text-sm leading-6 text-muted sm:text-base">
               Repositories that make first-time contributors feel genuinely welcome.
