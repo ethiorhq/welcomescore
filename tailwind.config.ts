@@ -8,12 +8,21 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)"],
+        mono: ["var(--font-mono)"],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        base: "#12141C",
+        surface: "#1B1E29",
+        text: "#F2EEE6",
+        muted: "#8B8F9E",
+        accent: "#E8A23D",
+        good: "#7A9B76",
       },
     },
   },
   plugins: [],
 };
+
 export default config;

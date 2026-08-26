@@ -1,101 +1,213 @@
-import Image from "next/image";
+"use client";
+
+import { FormEvent, useState } from "react";
+
+const BADGE_BASE_URL = "https://welcomescore.vercel.app";
+const COMPANY_NAME = "ETHIOR";
+const COMPANY_URL = "https://ethior.com";
+
+type Check = {
+  label: string;
+  passed: boolean;
+  points: number;
+  maxPoints?: number;
+};
+
+type ScoreResult = {
+  repo: string;
+  score: number;
+  grade: string;
+  checks: Check[];
+};
+
+type ScoreError = {
+  error?: string;
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [repository, setRepository] = useState("");
+  const [isChecking, setIsChecking] = useState(false);
+  const [result, setResult] = useState<ScoreResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const isRepositoryEmpty = repository.trim().length === 0;
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const requestedRepository = repository.trim();
+    if (!requestedRepository) {
+      return;
+    }
+
+    setIsChecking(true);
+    setResult(null);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch(
+        `/api/score?repo=${encodeURIComponent(requestedRepository)}`,
+      );
+
+      if (!response.ok) {
+        const error = (await response.json().catch(() => ({}))) as ScoreError;
+
+        if (response.status === 404) {
+          setErrorMessage("Couldn't find that repo, check the spelling");
+        } else if (response.status === 429 || error.error === "rate-limit") {
+          setErrorMessage(
+            "Too many checks right now — try again in a few minutes",
+          );
+        } else {
+          setErrorMessage("Something went wrong, try again");
+        }
+        return;
+      }
+
+      const scoreResult = (await response.json()) as ScoreResult;
+      setResult(scoreResult);
+    } catch {
+      setErrorMessage("Something went wrong, try again");
+    } finally {
+      setIsChecking(false);
+    }
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-20">
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center">
+        <section className="w-full text-center" aria-labelledby="page-title">
+          <div className="flex items-start justify-center gap-2">
+            <h1
+              id="page-title"
+              className="font-mono text-3xl font-bold tracking-tight text-accent sm:text-6xl"
+            >
+              WelcomeScore
+            </h1>
+            <span className="mt-0.5 inline-flex rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-xs font-semibold text-amber-500 sm:mt-2 sm:px-2 sm:py-1">
+              .js.org
+            </span>
+          </div>
+
+          <form
+            className="mx-auto mt-8 flex w-full max-w-2xl flex-col gap-3 sm:flex-row"
+            onSubmit={handleSubmit}
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            <label className="sr-only" htmlFor="repository">
+              Repository
+            </label>
+            <input
+              id="repository"
+              type="text"
+              value={repository}
+              onChange={(event) => setRepository(event.target.value)}
+              placeholder="owner/repo — e.g. vercel/next.js"
+              className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-sm text-text outline-none placeholder:text-muted focus:border-accent"
             />
-            Deploy now
+            <button
+              type="submit"
+              disabled={isChecking || isRepositoryEmpty}
+              className="h-12 shrink-0 rounded-md bg-accent px-6 font-sans text-sm font-semibold text-base disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted"
+            >
+              {isChecking ? "Checking…" : "Check"}
+            </button>
+          </form>
+
+          {errorMessage ? (
+            <p className="mt-3 font-sans text-sm text-muted" role="status">
+              {errorMessage}
+            </p>
+          ) : null}
+        </section>
+
+        {result ? <ResultsCard result={result} /> : null}
+      </div>
+
+      <footer className="mt-10 text-center font-sans text-xs text-muted">
+        <p>
+          Built by{" "}
+          <a className="text-link underline underline-offset-4" href={COMPANY_URL}>
+            {COMPANY_NAME}
           </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+        </p>
       </footer>
-    </div>
+    </main>
+  );
+}
+
+function ResultsCard({ result }: { result: ScoreResult }) {
+  const [isBadgeCopied, setIsBadgeCopied] = useState(false);
+
+  async function handleCopyBadge() {
+    const markdown = `[![WelcomeScore](${BADGE_BASE_URL}/api/badge?repo=${result.repo})](${BADGE_BASE_URL}/?repo=${result.repo})`;
+
+    try {
+      await navigator.clipboard.writeText(markdown);
+      setIsBadgeCopied(true);
+      window.setTimeout(() => setIsBadgeCopied(false), 1500);
+    } catch {
+      setIsBadgeCopied(false);
+    }
+  }
+
+  return (
+    <section
+      className="mt-8 w-full max-w-2xl rounded-lg border border-muted/25 bg-surface p-5 text-left sm:mt-10 sm:p-8"
+      aria-labelledby="results-title"
+    >
+      <p className="break-all font-mono text-sm text-muted">{result.repo}</p>
+
+      <div className="relative mt-4 flex items-center gap-3 sm:gap-4" id="results-title">
+        <span className="score-glow" aria-hidden="true" />
+        <span className="relative font-mono text-6xl font-bold leading-none tracking-tight text-text sm:text-8xl">
+          {result.score}
+        </span>
+        <span className="relative font-mono text-3xl font-bold text-accent sm:text-5xl">
+          {result.grade}
+        </span>
+      </div>
+
+      <div className="mt-8 flex flex-wrap gap-2" aria-label="Repository checks">
+        {result.checks.map((check) => (
+          <CheckPill key={check.label} check={check} />
+        ))}
+      </div>
+
+      <div className="mt-9 border-t border-muted/20 pt-6">
+        <h2 className="font-sans text-sm font-semibold text-muted">
+          Share your score
+        </h2>
+        <button
+          type="button"
+          onClick={handleCopyBadge}
+          className={`mt-3 h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium ${
+            isBadgeCopied ? "text-good" : "text-muted"
+          }`}
+        >
+          {isBadgeCopied ? "Copied!" : "Copy badge"}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function CheckPill({ check }: { check: Check }) {
+  const pointLabel = check.passed
+    ? `+${check.points}`
+    : `0/${check.maxPoints ?? check.points}`;
+
+  return (
+    <span
+      className={
+        check.passed
+          ? "inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-full bg-good px-3 py-1.5 font-sans text-xs font-medium text-base"
+          : "inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-full border border-muted/55 px-3 py-1.5 font-sans text-xs font-medium text-muted"
+      }
+    >
+      <span aria-hidden="true" className="font-mono font-bold">
+        {check.passed ? "✓" : "–"}
+      </span>
+      <span className="break-words">{check.label}</span>
+      <span className="font-mono">{pointLabel}</span>
+    </span>
   );
 }

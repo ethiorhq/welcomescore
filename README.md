@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WelcomeScore
 
-## Getting Started
+**WelcomeScore** gives a public GitHub repository a practical readiness score for first-time contributors. It checks the small signals that make a project easier to join: contributor documentation, a code of conduct, setup guidance, a license, beginner-friendly open issues, and recent activity.
 
-First, run the development server:
+## Run locally
+
+Install the project dependencies and start the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application runs at [http://localhost:3005](http://localhost:3005).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Optional GitHub token
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+WelcomeScore works with public repositories without authentication, but GitHub applies a lower API rate limit to unauthenticated requests. To raise that limit, create a local environment file and add a GitHub token:
 
-## Learn More
+```bash
+cp .env.example .env.local
+```
 
-To learn more about Next.js, take a look at the following resources:
+Then set the optional value in `.env.local`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+GITHUB_TOKEN=your_token_here
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The token is used only by the server-side repository scoring requests and is never exposed to the browser.
 
-## Deploy on Vercel
+## How scoring works
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The score ranges from 0 to 100 and uses these checks:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Check | Maximum points |
+| --- | ---: |
+| `CONTRIBUTING.md` | 20 |
+| `CODE_OF_CONDUCT.md` | 15 |
+| README setup or install section | 15 |
+| License detected by GitHub | 10 |
+| Beginner-friendly open issues | 25 |
+| Activity within the last three months | 15 |
+
+WelcomeScore returns a grade from **A** through **F** alongside the individual checks. Results use GitHub data cached for five minutes to reduce repeated API calls.
+
+## API routes
+
+`GET /api/score?repo=owner/repo` returns the JSON score result. The `repo` parameter also accepts a full `github.com/owner/repo` URL.
+
+`GET /api/badge?repo=owner/repo` returns a 600 × 315 PNG score badge suitable for sharing.
+
+## Verify a production build
+
+```bash
+npm run build
+```

@@ -24,4 +24,43 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  .text-link {
+    color: #8b8f9e;
+    transition: color 180ms ease;
+  }
+
+  .text-link:hover {
+    color: #e8a23d;
+  }
+}
+
+.score-glow {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 13rem;
+  height: 13rem;
+  transform: translate(-28%, -50%) scale(0.8);
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgb(232 162 61 / 0.45) 0%,
+    rgb(232 162 61 / 0) 68%
+  );
+  opacity: 0;
+  pointer-events: none;
+  animation: score-glow-reveal 700ms ease-out forwards;
+}
+
+@keyframes score-glow-reveal {
+  from {
+    transform: translate(-28%, -50%) scale(0.8);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-28%, -50%) scale(1);
+    opacity: 0.6;
+  }
 }
