@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import AlgofoxReviewCard from "@/app/components/AlgofoxReviewCard";
 import BackButton from "@/app/components/BackButton";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
@@ -346,6 +347,8 @@ function ResultsCard({ result }: { result: ScoreResult }) {
           ) : null}
         </section>
       ) : null}
+
+      <AlgofoxReviewCard repo={result.repo} />
 
       <HallOfFamePanel
         result={result}

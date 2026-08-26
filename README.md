@@ -113,3 +113,51 @@ Use a Supabase publishable or anon key only. Do not use `SUPABASE_SERVICE_ROLE_K
 WelcomeScore includes **Algofox**, the supplied cyber-fox sprite companion, as an optional visual guide. Algofox appears in the global bottom-right dock, the repository audit flow, the badge embed preview, and the Dev Lounge header. It uses the provided 8×9 WebP atlas and adapts its animation to focused audits, strong results, repositories still improving, badge review/copy actions, successful Lounge posts, and inactivity.
 
 Algofox is deliberately non-authoritative: it never scans repositories, posts chat messages, adds Hall of Fame entries, plays audio, or triggers disruptive effects on its own. The dock can be hidden at any time, respects reduced-motion preferences, and keeps guidance inside the existing WelcomeScore dark palette.
+
+## Algofox Review Engine
+
+After an audit completes, visitors can explicitly select **Ask Algofox for a review**. The review endpoint rescans the public repository through the existing server-side score pipeline, then bases its response only on the six verified contributor checks, score, grade, repository language, license/readme flags, and beginner-issue count. It never receives README bodies, issue text, source code, browser-submitted metrics, or Hall of Fame/Lounge data.
+
+`POST /api/review` accepts only this JSON body:
+
+```json
+{ "repo": "owner/repo" }
+```
+
+The endpoint always works in **deterministic mode** with concise, evidence-bound guidance. To enable an optional structured-provider pass, set one or both server-only provider keys and redeploy. Every provider response is validated again against the local audit evidence; an unavailable, invalid, or slow provider automatically falls back to the deterministic engine.
+
+```bash
+# Optional; never expose these values through NEXT_PUBLIC_ variables.
+GROQ_API_KEY=your_key
+GROQ_REVIEW_MODEL=openai/gpt-oss-20b
+GEMINI_API_KEY=your_key
+GEMINI_REVIEW_MODEL=gemini-2.5-flash
+
+# Optional but recommended in deployed environments. Use a long random secret.
+ALGOFOX_REVIEW_RATE_LIMIT_SALT=your_long_random_value
+```
+
+Run `supabase/migrations/20260826_algofox_review_engine.sql` once in the Supabase SQL Editor to enable the private review cache and server-side rate-limit accounting. The migration creates separate `review_cache` and `review_rate_limits` tables with RLS enabled and no browser grants; it does **not** modify `repo_evaluations`, Hall of Fame behavior, or Dev Lounge data. A valid provider review caches for seven days, and a deterministic review caches for 24 hours. Until the migration is applied, reviews continue to work safely without cache persistence.
+
+The review interface defaults to constructive **Guidance**. The compact technical roast remains opt-in through its own tab, and none of these interactions can automatically share, publish, add a Hall entry, or send a Dev Lounge message.
+
+## Required Supabase migrations
+
+For a full deployment, run each migration in `supabase/migrations` that has not already been applied, including the Dev Lounge migrations and `20260826_algofox_review_engine.sql`. Migrations are additive and written to be safe to re-run. Verify the new review migration with:
+
+```sql
+select tablename, rowsecurity
+from pg_tables
+where schemaname = 'public'
+  and tablename in ('review_cache', 'review_rate_limits');
+
+select jobid, jobname, schedule
+from cron.job
+where jobname = 'purge-expired-algofox-review-cache';
+```
+
+> The optional provider keys and the Supabase service-role key are deployment secrets. Keep them server-side, do not commit them, and never place them in variables prefixed with `NEXT_PUBLIC_`.
+
+## Privacy and security notes
+
+Review caching is keyed by a SHA-256 hash of a normalized, versioned audit context. If the optional rate-limit salt is set, a salted hash of the request IP is used only for the short review-rate-limit bucket; the raw IP is never stored. The cache has no public browser permissions. Review generation is user-triggered, and it remains fully separate from the explicit Hall of Fame write flow and the anonymous Dev Lounge.
