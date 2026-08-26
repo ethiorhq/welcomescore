@@ -70,7 +70,7 @@ async function generateGroqReview(context: TrustedReviewContext) {
         temperature: 0.5,
         max_tokens: 250,
       }),
-      signal: AbortSignal.timeout(1_800),
+      signal: AbortSignal.timeout(6_000),
     });
 
     if (!response.ok) {
