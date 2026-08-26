@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 
 export default function AlgofoxWidget() {
   const { state, quote, isVisible, hideAlgofox, showAlgofox, setAlgofoxState } = useAlgofoxPet();
   const [isMobileBubbleOpen, setIsMobileBubbleOpen] = useState(false);
+
+  useEffect(() => {
+    if (!quote) {
+      setIsMobileBubbleOpen(false);
+    }
+  }, [quote]);
 
   if (!isVisible) {
     return (

@@ -33,15 +33,20 @@ type AlgofoxPetContextValue = {
 
 const AlgofoxPetContext = createContext<AlgofoxPetContextValue | null>(null);
 const IDLE_QUOTE = "Algofox is ready to inspect your contributor path.";
+const DEFAULT_BUBBLE_DURATION_MS = 4_500;
 
 export default function AlgofoxPetProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AlgofoxState>("idle");
-  const [quote, setQuote] = useState<string | null>(IDLE_QUOTE);
+  const [quote, setQuote] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const resetTimerRef = useRef<number | null>(null);
 
   const setAlgofoxState = useCallback(
-    (nextState: AlgofoxState, nextQuote?: string, durationMs = 0) => {
+    (
+      nextState: AlgofoxState,
+      nextQuote?: string,
+      durationMs = nextQuote ? DEFAULT_BUBBLE_DURATION_MS : 0,
+    ) => {
       if (resetTimerRef.current) {
         window.clearTimeout(resetTimerRef.current);
       }
@@ -52,12 +57,17 @@ export default function AlgofoxPetProvider({ children }: { children: ReactNode }
       if (durationMs > 0) {
         resetTimerRef.current = window.setTimeout(() => {
           setState("idle");
-          setQuote(IDLE_QUOTE);
+          setQuote(null);
+          resetTimerRef.current = null;
         }, durationMs);
       }
     },
     [],
   );
+
+  useEffect(() => {
+    setAlgofoxState("idle", IDLE_QUOTE, DEFAULT_BUBBLE_DURATION_MS);
+  }, [setAlgofoxState]);
 
   useEffect(() => {
     let inactivityTimer: number | null = null;
@@ -67,8 +77,11 @@ export default function AlgofoxPetProvider({ children }: { children: ReactNode }
         window.clearTimeout(inactivityTimer);
       }
       inactivityTimer = window.setTimeout(() => {
-        setState("waiting");
-        setQuote("Quiet moment detected. I’ll be here when you are ready.");
+        setAlgofoxState(
+          "waiting",
+          "Quiet moment detected. I’ll be here when you are ready.",
+          DEFAULT_BUBBLE_DURATION_MS,
+        );
       }, 60_000);
     };
 
@@ -92,7 +105,7 @@ export default function AlgofoxPetProvider({ children }: { children: ReactNode }
       }
       events.forEach((event) => window.removeEventListener(event, markActive));
     };
-  }, []);
+  }, [setAlgofoxState]);
 
   const value = useMemo(
     () => ({
