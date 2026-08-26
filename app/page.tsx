@@ -3,6 +3,8 @@
 import { FormEvent, useState } from "react";
 
 const BADGE_BASE_URL = "https://welcomescore.vercel.app";
+// Increment when the generated badge design changes to refresh external image caches.
+const BADGE_VERSION = "3";
 const COMPANY_NAME = "ETHIOR";
 const COMPANY_URL = "https://ethior.com";
 
@@ -163,7 +165,8 @@ function ResultsCard({ result }: { result: ScoreResult }) {
   const [isBadgeCopied, setIsBadgeCopied] = useState(false);
 
   async function handleCopyBadge() {
-    const markdown = `[![WelcomeScore](${BADGE_BASE_URL}/api/badge?repo=${result.repo})](${BADGE_BASE_URL}/?repo=${result.repo})`;
+    const badgeImageUrl = `${BADGE_BASE_URL}/api/badge?repo=${result.repo}&v=${BADGE_VERSION}`;
+    const markdown = `[![WelcomeScore](${badgeImageUrl})](${BADGE_BASE_URL}/?repo=${result.repo})`;
 
     try {
       await navigator.clipboard.writeText(markdown);

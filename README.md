@@ -1,6 +1,6 @@
 # WelcomeScore
 
-[![WelcomeScore](https://welcomescore.vercel.app/api/badge?repo=ethiorhq/welcomescore)](https://welcomescore.vercel.app/?repo=ethiorhq/welcomescore)
+[![WelcomeScore](https://welcomescore.vercel.app/api/badge?repo=ethiorhq/welcomescore&v=3)](https://welcomescore.vercel.app/?repo=ethiorhq/welcomescore)
 
 **WelcomeScore** gives a public GitHub repository a practical readiness score for first-time contributors. It checks the small signals that make a project easier to join: contributor documentation, a code of conduct, setup guidance, a license, beginner-friendly open issues, and recent activity.
 
