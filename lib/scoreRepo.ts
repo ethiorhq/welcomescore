@@ -5,16 +5,24 @@ export type Check = {
   maxPoints?: number;
 };
 
+export type GoodFirstIssue = {
+  title: string;
+  url: string;
+};
+
 export type ScoreResult = {
   repo: string;
   score: number;
   grade: string;
   checks: Check[];
+  defaultBranch: string;
+  goodFirstIssues: GoodFirstIssue[];
 };
 
 type GitHubRepository = {
   license: unknown | null;
   pushed_at: string | null;
+  default_branch: string;
 };
 
 type GitHubFile = {
@@ -26,8 +34,14 @@ type GitHubReadme = {
   encoding?: string;
 };
 
+type GitHubIssue = {
+  title: string;
+  html_url: string;
+};
+
 type GitHubIssueSearch = {
   total_count?: number;
+  items?: GitHubIssue[];
 };
 
 export type ScoreRepoErrorCode =
@@ -110,6 +124,10 @@ export async function scoreRepo(
   const hasReadmeSetup = readme ? readmeHasSetupSection(readme) : false;
   const hasLicense = repository.license !== null;
   const beginnerIssueCount = Math.max(0, issueSearch.total_count ?? 0);
+  const goodFirstIssues = (issueSearch.items ?? []).slice(0, 5).map((issue) => ({
+    title: issue.title,
+    url: issue.html_url,
+  }));
   const beginnerIssuePoints = Math.round(
     (Math.min(beginnerIssueCount, 10) / 10) * 25,
   );
@@ -156,6 +174,8 @@ export async function scoreRepo(
     score,
     grade: gradeForScore(score),
     checks,
+    defaultBranch: repository.default_branch,
+    goodFirstIssues,
   };
 }
 
