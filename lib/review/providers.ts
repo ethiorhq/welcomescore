@@ -64,16 +64,9 @@ async function generateGroqReview(context: TrustedReviewContext) {
           },
           { role: "user", content: reviewProviderPrompt(context) },
         ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "algofox_review",
-            // Local validation still enforces the exact evidence-bound contract. Best-effort
-            // mode avoids provider-side strict-schema rejections while preserving JSON guidance.
-            strict: false,
-            schema: RESPONSE_SCHEMA,
-          },
-        },
+        // JSON Object Mode avoids provider-side schema compatibility failures. The response
+        // is still parsed and fully validated against the local, evidence-bound contract below.
+        response_format: { type: "json_object" },
         temperature: 0.5,
         max_tokens: 250,
       }),
