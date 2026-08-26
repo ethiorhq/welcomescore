@@ -16,6 +16,7 @@ export type ScoreResult = {
   grade: string;
   checks: Check[];
   defaultBranch: string;
+  goodFirstIssueCount: number;
   goodFirstIssues: GoodFirstIssue[];
 };
 
@@ -87,7 +88,7 @@ export async function scoreRepo(
     `repo:${owner}/${repo}`,
     "is:issue",
     "is:open",
-    '(label:"good first issue" OR label:"good-first-issue" OR label:"help wanted" OR label:"beginner friendly")',
+    'label:"good first issue","good-first-issue","help wanted","beginner friendly"',
   ].join(" ");
   const issueSearchUrl = new URL(`${GITHUB_API}/search/issues`);
   issueSearchUrl.searchParams.set("q", issueQuery);
@@ -175,6 +176,7 @@ export async function scoreRepo(
     grade: gradeForScore(score),
     checks,
     defaultBranch: repository.default_branch,
+    goodFirstIssueCount: beginnerIssueCount,
     goodFirstIssues,
   };
 }

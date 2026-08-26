@@ -1,6 +1,10 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import {
+  CODE_OF_CONDUCT_TEMPLATE,
+  CONTRIBUTING_TEMPLATE,
+} from "@/lib/templates";
 
 const BADGE_BASE_URL = "https://welcomescore.vercel.app";
 // Increment when the generated badge design changes to refresh external image caches.
@@ -16,6 +20,19 @@ const FOOTER_LINKS = [
   "Terms & Conditions",
 ] as const;
 
+const TEMPLATE_OPTIONS = {
+  "CONTRIBUTING.md": {
+    title: "CONTRIBUTING.md template",
+    content: CONTRIBUTING_TEMPLATE,
+  },
+  "CODE_OF_CONDUCT.md": {
+    title: "CODE_OF_CONDUCT.md template",
+    content: CODE_OF_CONDUCT_TEMPLATE,
+  },
+} as const;
+
+type TemplateFile = keyof typeof TEMPLATE_OPTIONS;
+
 type Check = {
   label: string;
   passed: boolean;
@@ -23,11 +40,19 @@ type Check = {
   maxPoints?: number;
 };
 
+type GoodFirstIssue = {
+  title: string;
+  url: string;
+};
+
 type ScoreResult = {
   repo: string;
   score: number;
   grade: string;
   checks: Check[];
+  defaultBranch: string;
+  goodFirstIssueCount: number;
+  goodFirstIssues: GoodFirstIssue[];
 };
 
 type ScoreError = {
@@ -140,7 +165,10 @@ export default function Home() {
 function Footer() {
   return (
     <footer className="mt-10 border-t border-muted/20 pt-6 text-center font-sans text-xs text-muted">
-      <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+      <nav
+        aria-label="Footer navigation"
+        className="flex flex-wrap justify-center gap-x-4 gap-y-2"
+      >
         {FOOTER_LINKS.map((label) => (
           <a
             key={label}
@@ -163,6 +191,9 @@ function Footer() {
 
 function ResultsCard({ result }: { result: ScoreResult }) {
   const [isBadgeCopied, setIsBadgeCopied] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateFile | null>(
+    null,
+  );
 
   async function handleCopyBadge() {
     const badgeImageUrl = `${BADGE_BASE_URL}/api/badge?repo=${result.repo}&v=${BADGE_VERSION}`;
@@ -177,6 +208,9 @@ function ResultsCard({ result }: { result: ScoreResult }) {
     }
   }
 
+  const issueCount = result.goodFirstIssueCount;
+  const issueSearchUrl = `https://github.com/${result.repo}/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22`;
+
   return (
     <section
       className="mt-8 w-full max-w-2xl rounded-lg border border-muted/25 bg-surface p-5 text-left sm:mt-10 sm:p-8"
@@ -184,7 +218,10 @@ function ResultsCard({ result }: { result: ScoreResult }) {
     >
       <p className="break-all font-mono text-sm text-muted">{result.repo}</p>
 
-      <div className="relative mt-4 flex items-center gap-3 sm:gap-4" id="results-title">
+      <div
+        className="relative mt-4 flex items-center gap-3 sm:gap-4"
+        id="results-title"
+      >
         <span className="score-glow" aria-hidden="true" />
         <span className="relative font-mono text-6xl font-bold leading-none tracking-tight text-text sm:text-8xl">
           {result.score}
@@ -196,9 +233,54 @@ function ResultsCard({ result }: { result: ScoreResult }) {
 
       <div className="mt-8 flex flex-wrap gap-2" aria-label="Repository checks">
         {result.checks.map((check) => (
-          <CheckPill key={check.label} check={check} />
+          <CheckPill
+            key={check.label}
+            check={check}
+            repo={result.repo}
+            defaultBranch={result.defaultBranch}
+            onOpenTemplate={setSelectedTemplate}
+          />
         ))}
       </div>
+
+      {result.goodFirstIssues.length > 0 ? (
+        <section
+          className="mt-7 border-t border-muted/20 pt-6"
+          aria-labelledby="beginner-issues-title"
+        >
+          <h2
+            id="beginner-issues-title"
+            className="font-sans text-sm font-semibold text-muted"
+          >
+            {issueCount} beginner-friendly issue{issueCount === 1 ? "" : "s"}{" "}
+            open
+          </h2>
+          <ul className="mt-3 space-y-2 font-sans text-sm">
+            {result.goodFirstIssues.map((issue) => (
+              <li key={issue.url}>
+                <a
+                  className="text-link underline underline-offset-4"
+                  href={issue.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {issue.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+          {issueCount > result.goodFirstIssues.length ? (
+            <a
+              className="mt-3 inline-block font-sans text-sm text-link underline underline-offset-4"
+              href={issueSearchUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              See all {issueCount} on GitHub
+            </a>
+          ) : null}
+        </section>
+      ) : null}
 
       <div className="mt-9 border-t border-muted/20 pt-6">
         <h2 className="font-sans text-sm font-semibold text-muted">
@@ -214,14 +296,41 @@ function ResultsCard({ result }: { result: ScoreResult }) {
           {isBadgeCopied ? "Copied!" : "Copy badge"}
         </button>
       </div>
+
+      {selectedTemplate ? (
+        <TemplateModal
+          title={TEMPLATE_OPTIONS[selectedTemplate].title}
+          content={TEMPLATE_OPTIONS[selectedTemplate].content}
+          onClose={() => setSelectedTemplate(null)}
+        />
+      ) : null}
     </section>
   );
 }
 
-function CheckPill({ check }: { check: Check }) {
+function CheckPill({
+  check,
+  repo,
+  defaultBranch,
+  onOpenTemplate,
+}: {
+  check: Check;
+  repo: string;
+  defaultBranch: string;
+  onOpenTemplate: (template: TemplateFile) => void;
+}) {
   const pointLabel = check.passed
     ? `+${check.points}`
     : `0/${check.maxPoints ?? check.points}`;
+  const templateFile = isTemplateFile(check.label) ? check.label : null;
+  const canCreateOnGitHub = [
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "LICENSE",
+  ].includes(check.label);
+  const createFileUrl = `https://github.com/${repo}/new/${encodeURIComponent(
+    defaultBranch,
+  )}?filename=${encodeURIComponent(check.label)}`;
 
   return (
     <span
@@ -236,6 +345,101 @@ function CheckPill({ check }: { check: Check }) {
       </span>
       <span className="break-words">{check.label}</span>
       <span className="font-mono">{pointLabel}</span>
+      {!check.passed && (templateFile || canCreateOnGitHub) ? (
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1 border-l border-muted/35 pl-2">
+          {templateFile ? (
+            <button
+              type="button"
+              className="text-link underline underline-offset-2"
+              onClick={() => onOpenTemplate(templateFile)}
+            >
+              Get template
+            </button>
+          ) : null}
+          {canCreateOnGitHub ? (
+            <a
+              className="text-link underline underline-offset-2"
+              href={createFileUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Create on GitHub
+            </a>
+          ) : null}
+        </span>
+      ) : null}
     </span>
+  );
+}
+
+function isTemplateFile(label: string): label is TemplateFile {
+  return label === "CONTRIBUTING.md" || label === "CODE_OF_CONDUCT.md";
+}
+
+function TemplateModal({
+  title,
+  content,
+  onClose,
+}: {
+  title: string;
+  content: string;
+  onClose: () => void;
+}) {
+  const [isCopied, setIsCopied] = useState(false);
+
+  async function handleCopyTemplate() {
+    try {
+      await navigator.clipboard.writeText(content);
+      setIsCopied(true);
+      window.setTimeout(() => setIsCopied(false), 1500);
+    } catch {
+      setIsCopied(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 p-4"
+      onMouseDown={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="template-modal-title"
+        className="w-full max-w-2xl rounded-lg border border-muted/25 bg-surface p-5 shadow-2xl sm:p-6"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <h2
+            id="template-modal-title"
+            className="font-mono text-base font-semibold text-text"
+          >
+            {title}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-link -mt-1 text-xl leading-none"
+            aria-label="Close template"
+          >
+            ×
+          </button>
+        </div>
+
+        <pre className="mt-5 max-h-[55vh] overflow-auto rounded-md border border-muted/35 bg-base/40 p-4 font-mono text-xs leading-6 text-text whitespace-pre-wrap">
+          {content}
+        </pre>
+
+        <button
+          type="button"
+          onClick={handleCopyTemplate}
+          className={`mt-5 h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium ${
+            isCopied ? "text-good" : "text-muted"
+          }`}
+        >
+          {isCopied ? "Copied!" : "Copy to clipboard"}
+        </button>
+      </div>
+    </div>
   );
 }
