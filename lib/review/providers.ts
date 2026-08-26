@@ -68,7 +68,9 @@ async function generateGroqReview(context: TrustedReviewContext) {
           type: "json_schema",
           json_schema: {
             name: "algofox_review",
-            strict: true,
+            // Local validation still enforces the exact evidence-bound contract. Best-effort
+            // mode avoids provider-side strict-schema rejections while preserving JSON guidance.
+            strict: false,
             schema: RESPONSE_SCHEMA,
           },
         },
@@ -79,7 +81,10 @@ async function generateGroqReview(context: TrustedReviewContext) {
     });
 
     if (!response.ok) {
-      console.warn("Algofox Groq review provider returned an error", { status: response.status });
+      console.warn("Algofox Groq review provider returned an error", {
+        status: response.status,
+        model: process.env.GROQ_REVIEW_MODEL ?? "openai/gpt-oss-20b",
+      });
       return null;
     }
 
@@ -107,52 +112,68 @@ async function generateGeminiReview(context: TrustedReviewContext) {
     return null;
   }
 
-  try {
-    const model = process.env.GEMINI_REVIEW_MODEL ?? "gemini-2.5-flash";
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "x-goog-api-key": apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: reviewProviderPrompt(context) }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            responseJsonSchema: RESPONSE_SCHEMA,
-            temperature: 0.5,
-            maxOutputTokens: 250,
+  for (const model of geminiModelCandidates()) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "x-goog-api-key": apiKey,
+            "Content-Type": "application/json",
           },
-        }),
-        signal: AbortSignal.timeout(2_500),
-      },
-    );
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: reviewProviderPrompt(context) }] }],
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseJsonSchema: RESPONSE_SCHEMA,
+              temperature: 0.5,
+              maxOutputTokens: 250,
+            },
+          }),
+          signal: AbortSignal.timeout(2_500),
+        },
+      );
 
-    if (!response.ok) {
-      console.warn("Algofox Gemini review provider returned an error", { status: response.status });
-      return null;
-    }
+      if (!response.ok) {
+        console.warn("Algofox Gemini review provider returned an error", {
+          status: response.status,
+          model,
+        });
+        if (response.status === 404) {
+          continue;
+        }
+        return null;
+      }
 
-    const payload = (await response.json()) as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-    };
-    const review = validateProviderCandidate(
-      payload.candidates?.[0]?.content?.parts?.[0]?.text,
-      context,
-      "gemini",
-    );
-    if (!review) {
-      console.warn("Algofox Gemini review provider returned an invalid response");
+      const payload = (await response.json()) as {
+        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      };
+      const review = validateProviderCandidate(
+        payload.candidates?.[0]?.content?.parts?.[0]?.text,
+        context,
+        "gemini",
+      );
+      if (!review) {
+        console.warn("Algofox Gemini review provider returned an invalid response", { model });
+      }
+      return review;
+    } catch (error) {
+      console.warn("Algofox Gemini review provider request failed", {
+        error: error instanceof Error ? error.name : "unknown",
+        model,
+      });
     }
-    return review;
-  } catch (error) {
-    console.warn("Algofox Gemini review provider request failed", {
-      error: error instanceof Error ? error.name : "unknown",
-    });
-    return null;
   }
+
+  return null;
+}
+
+function geminiModelCandidates() {
+  const configured = process.env.GEMINI_REVIEW_MODEL?.trim().replace(/^models\//, "");
+  return Array.from(
+    new Set([configured, "gemini-3.7-flash", "gemini-2.5-flash"].filter(Boolean)),
+  ) as string[];
 }
 
 function validateProviderCandidate(
