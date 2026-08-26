@@ -2,14 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import BadgeShareModal from "@/app/components/BadgeShareModal";
 import {
   CODE_OF_CONDUCT_TEMPLATE,
   CONTRIBUTING_TEMPLATE,
 } from "@/lib/templates";
-
-const BADGE_BASE_URL = "https://welcomescore.vercel.app";
-// Increment when the generated badge design changes to refresh external image caches.
-const BADGE_VERSION = "3";
 const COMPANY_NAME = "ETHIOR";
 const COMPANY_URL = "https://ethior.com";
 
@@ -52,6 +49,12 @@ type ScoreResult = {
   grade: string;
   checks: Check[];
   defaultBranch: string;
+  starsCount: number;
+  forksCount: number;
+  primaryLanguage: string;
+  hasReadme: boolean;
+  hasLicense: boolean;
+  isEligibleForLeaderboard: boolean;
   goodFirstIssueCount: number;
   goodFirstIssues: GoodFirstIssue[];
 };
@@ -214,21 +217,29 @@ function Footer() {
 }
 
 function ResultsCard({ result }: { result: ScoreResult }) {
-  const [isBadgeCopied, setIsBadgeCopied] = useState(false);
+  const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateFile | null>(
     null,
   );
+  const [isAddingToLeaderboard, setIsAddingToLeaderboard] = useState(false);
+  const [leaderboardStatus, setLeaderboardStatus] = useState<
+    "idle" | "added" | "unavailable"
+  >("idle");
 
-  async function handleCopyBadge() {
-    const badgeImageUrl = `${BADGE_BASE_URL}/api/badge?repo=${result.repo}&v=${BADGE_VERSION}`;
-    const markdown = `[![WelcomeScore](${badgeImageUrl})](${BADGE_BASE_URL}/?repo=${result.repo})`;
+  async function handleAddToLeaderboard() {
+    setIsAddingToLeaderboard(true);
+    setLeaderboardStatus("idle");
 
     try {
-      await navigator.clipboard.writeText(markdown);
-      setIsBadgeCopied(true);
-      window.setTimeout(() => setIsBadgeCopied(false), 1500);
+      const response = await fetch(
+        `/api/leaderboard/add?repo=${encodeURIComponent(result.repo)}`,
+        { method: "POST" },
+      );
+      setLeaderboardStatus(response.ok ? "added" : "unavailable");
     } catch {
-      setIsBadgeCopied(false);
+      setLeaderboardStatus("unavailable");
+    } finally {
+      setIsAddingToLeaderboard(false);
     }
   }
 
@@ -306,18 +317,54 @@ function ResultsCard({ result }: { result: ScoreResult }) {
         </section>
       ) : null}
 
+      {result.isEligibleForLeaderboard ? (
+        <section className="mt-9 border-t border-muted/20 pt-6" aria-labelledby="hall-of-fame-title">
+          <h2 id="hall-of-fame-title" className="font-sans text-sm font-semibold text-muted">
+            Hall of Fame
+          </h2>
+          <p className="mt-2 max-w-xl font-sans text-sm leading-6 text-muted">
+            This repository meets the score, social-proof, README, and license requirements.
+            Add it when you are ready to make it public on the community leaderboard.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => void handleAddToLeaderboard()}
+              disabled={isAddingToLeaderboard || leaderboardStatus === "added"}
+              className={`h-10 rounded-md border px-4 font-sans text-sm font-medium disabled:cursor-not-allowed ${
+                leaderboardStatus === "added"
+                  ? "border-good/45 bg-good/15 text-good"
+                  : "border-accent/45 bg-accent/10 text-accent"
+              }`}
+            >
+              {leaderboardStatus === "added"
+                ? "Added to Hall of Fame"
+                : isAddingToLeaderboard
+                  ? "Adding…"
+                  : "Add to Hall of Fame"}
+            </button>
+            {leaderboardStatus === "added" ? (
+              <Link className="text-link font-sans text-sm underline underline-offset-4" href="/leaderboard">
+                View Hall of Fame
+              </Link>
+            ) : null}
+            {leaderboardStatus === "unavailable" ? (
+              <p className="font-sans text-sm text-muted">Unable to add this repository right now. Please try again.</p>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
       <div className="mt-9 border-t border-muted/20 pt-6">
         <h2 className="font-sans text-sm font-semibold text-muted">
           Share your score
         </h2>
         <button
           type="button"
-          onClick={handleCopyBadge}
-          className={`mt-3 h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium ${
-            isBadgeCopied ? "text-good" : "text-muted"
-          }`}
+          onClick={() => setIsBadgeModalOpen(true)}
+          className="mt-3 h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted"
         >
-          {isBadgeCopied ? "Copied!" : "Copy badge"}
+          Copy badge
         </button>
       </div>
 
@@ -326,6 +373,14 @@ function ResultsCard({ result }: { result: ScoreResult }) {
           title={TEMPLATE_OPTIONS[selectedTemplate].title}
           content={TEMPLATE_OPTIONS[selectedTemplate].content}
           onClose={() => setSelectedTemplate(null)}
+        />
+      ) : null}
+
+      {isBadgeModalOpen ? (
+        <BadgeShareModal
+          repoPath={result.repo}
+          score={result.score}
+          onClose={() => setIsBadgeModalOpen(false)}
         />
       ) : null}
     </section>

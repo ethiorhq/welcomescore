@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { persistEvaluation } from "@/lib/leaderboard";
 import {
   parseRepository,
   scoreRepo,
@@ -17,21 +16,6 @@ export async function GET(request: NextRequest) {
 
   try {
     const result = await scoreRepo(parsedRepository.owner, parsedRepository.repo);
-
-    // Public scans are the leaderboard's passive ingestion mechanism. A storage
-    // issue should never prevent a visitor from receiving their live audit.
-    try {
-      await persistEvaluation(result, {
-        starsCount: result.starsCount,
-        forksCount: result.forksCount,
-        primaryLanguage: result.primaryLanguage,
-        hasReadme: result.hasReadme,
-        hasLicense: result.hasLicense,
-      });
-    } catch (error) {
-      console.error("Unable to cache repository evaluation", error);
-    }
-
     return NextResponse.json(result);
   } catch (error) {
     if (error instanceof ScoreRepoError) {

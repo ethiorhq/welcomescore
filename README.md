@@ -60,7 +60,7 @@ npm run build
 
 ## Community leaderboard
 
-The [Hall of Fame](/leaderboard) is populated passively when someone checks a public repository. Each completed scan is cached in Supabase. A repository appears publicly only when it has a score of **75 or higher**, at least **5 stars or 2 forks**, and both a `README.md` and a detected license.
+A public scan does **not** enter the [Hall of Fame](/leaderboard) automatically. When a repository meets the eligibility rules—a score of **75 or higher**, at least **5 stars or 2 forks**, plus both a `README.md` and a detected license—the completed audit shows an explicit **Add to Hall of Fame** action. Only that user action writes the public leaderboard evaluation to Supabase.
 
 Leaderboard reads are served from the cached evaluation store. Evaluations remain fresh for seven days; entries aged between eight and 30 days are served immediately and rechecked opportunistically in the background; entries older than 30 days are refreshed on the next leaderboard visit. This preserves fast rankings while avoiding continuous GitHub polling.
 
@@ -76,5 +76,6 @@ Never expose `SUPABASE_SERVICE_ROLE_KEY` to the browser or prefix it with `NEXT_
 Additional routes:
 
 - `GET /api/leaderboard` returns the top 50 eligible cached evaluations.
-- `POST /api/leaderboard/refresh?repo=owner/repo` refreshes one repository through the existing scoring pipeline.
+- `POST /api/leaderboard/add?repo=owner/repo` adds a freshly verified eligible repository after an explicit user request.
+- `POST /api/leaderboard/refresh?repo=owner/repo` refreshes an existing leaderboard entry through the scoring pipeline.
 - `GET /check/owner/repo` opens a shareable full-audit route.
