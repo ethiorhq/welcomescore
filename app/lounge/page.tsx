@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
+import { FormEvent, PointerEvent, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import BackButton from "@/app/components/BackButton";
 import { createDevAvatar } from "@/lib/devIdentity";
 import {
   useDevLounge,
   type LoungeMessage,
+  type LoungeReply,
   type LoungeScoreCard,
 } from "@/hooks/useDevLounge";
 
@@ -33,12 +34,22 @@ function DevLoungeContent() {
   const [draft, setDraft] = useState("");
   const [error, setError] = useState("");
   const [selectedScore, setSelectedScore] = useState<LoungeScoreCard | null>(null);
+  const [attachedScore, setAttachedScore] = useState<LoungeScoreCard | null>(null);
+  const [replyingTo, setReplyingTo] = useState<LoungeReply | null>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (sharedScore) {
-      setDraft(`Just checked my project health score!`);
+      setAttachedScore(sharedScore);
+      setDraft("Just checked my project health score!");
     }
   }, [sharedScore]);
+
+  useEffect(() => {
+    if (replyingTo) {
+      messageInputRef.current?.focus();
+    }
+  }, [replyingTo]);
 
   const statusLabel = useMemo(() => {
     if (status === "ready") {
@@ -56,13 +67,24 @@ function DevLoungeContent() {
     event.preventDefault();
     setError("");
 
-    const outcome = await sendMessage({ content: draft, scoreCard: sharedScore ?? undefined });
+    const outcome = await sendMessage({
+      content: draft,
+      scoreCard: attachedScore ?? undefined,
+      replyTo: replyingTo ?? undefined,
+    });
     if (outcome.error) {
       setError(outcome.error);
       return;
     }
 
     setDraft("");
+    setAttachedScore(null);
+    setReplyingTo(null);
+  }
+
+  function selectReply(message: LoungeMessage) {
+    setReplyingTo(replySnapshotFromMessage(message));
+    setError("");
   }
 
   return (
@@ -117,6 +139,8 @@ function DevLoungeContent() {
                       key={message.id}
                       message={message}
                       onOpenScore={setSelectedScore}
+                      onReply={selectReply}
+                      isReplyTarget={replyingTo?.id === message.id}
                     />
                   ))}
                 </div>
@@ -125,12 +149,39 @@ function DevLoungeContent() {
 
             <form className="border-t border-muted/20 p-4" onSubmit={handleSubmit}>
               <label className="sr-only" htmlFor="lounge-message">Send a message</label>
-              {sharedScore ? (
-                <div className="mb-3 rounded-md border border-accent/35 bg-accent/10 px-3 py-2 font-sans text-xs text-muted">
-                  Your score card for <span className="font-mono text-text">{sharedScore.repo}</span> will be attached to this message.
+              {replyingTo ? (
+                <div className="mb-3 flex items-start justify-between gap-3 rounded-md border border-accent/35 border-l-2 bg-accent/10 px-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs font-semibold text-accent">Replying to {replyingTo.dev_handle}</p>
+                    <p className="mt-1 truncate font-sans text-xs text-muted">{replyingTo.content}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setReplyingTo(null)}
+                    className="text-link shrink-0 font-mono text-lg leading-none"
+                    aria-label="Cancel reply"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : null}
+              {attachedScore ? (
+                <div className="mb-3 flex items-start justify-between gap-3 rounded-md border border-accent/35 bg-accent/10 px-3 py-2 font-sans text-xs text-muted">
+                  <p>
+                    Your score card for <span className="font-mono text-text">{attachedScore.repo}</span> will be attached to this message.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setAttachedScore(null)}
+                    className="text-link shrink-0 font-mono text-lg leading-none"
+                    aria-label="Remove attached score card"
+                  >
+                    ×
+                  </button>
                 </div>
               ) : null}
               <textarea
+                ref={messageInputRef}
                 id="lounge-message"
                 value={draft}
                 onChange={(event) => setDraft(event.target.value.slice(0, 300))}
@@ -204,12 +255,78 @@ function LoungeLoadingState() {
 function MessageItem({
   message,
   onOpenScore,
+  onReply,
+  isReplyTarget,
 }: {
   message: LoungeMessage;
   onOpenScore: (scoreCard: LoungeScoreCard) => void;
+  onReply: (message: LoungeMessage) => void;
+  isReplyTarget: boolean;
 }) {
+  const longPressTimer = useRef<number | null>(null);
+  const pointerStart = useRef<{ x: number; y: number } | null>(null);
+
+  function clearReplyGesture() {
+    if (longPressTimer.current !== null) {
+      window.clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }
+
+  function handlePointerDown(event: PointerEvent<HTMLElement>) {
+    if (event.pointerType === "mouse") {
+      return;
+    }
+
+    pointerStart.current = { x: event.clientX, y: event.clientY };
+    longPressTimer.current = window.setTimeout(() => {
+      onReply(message);
+      window.navigator.vibrate?.(12);
+      clearReplyGesture();
+    }, 450);
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLElement>) {
+    if (!pointerStart.current) {
+      return;
+    }
+
+    const movedX = Math.abs(event.clientX - pointerStart.current.x);
+    const movedY = Math.abs(event.clientY - pointerStart.current.y);
+    if (movedX > 12 || movedY > 12) {
+      clearReplyGesture();
+    }
+  }
+
+  function handlePointerUp(event: PointerEvent<HTMLElement>) {
+    const start = pointerStart.current;
+    pointerStart.current = null;
+    clearReplyGesture();
+
+    if (!start) {
+      return;
+    }
+
+    const movedX = event.clientX - start.x;
+    const movedY = event.clientY - start.y;
+    if (Math.abs(movedX) >= 56 && Math.abs(movedX) > Math.abs(movedY)) {
+      onReply(message);
+    }
+  }
+
   return (
-    <article className="flex gap-3">
+    <article
+      className={`group -mx-2 flex gap-3 rounded-md px-2 py-1 transition-colors duration-180 ease-out ${
+        isReplyTarget ? "bg-accent/[0.07]" : "hover:bg-base/30"
+      }`}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => {
+        pointerStart.current = null;
+        clearReplyGesture();
+      }}
+    >
       <img
         src={createDevAvatar(message.avatar_seed)}
         alt=""
@@ -222,6 +339,12 @@ function MessageItem({
             {formatMessageTime(message.created_at)}
           </time>
         </div>
+        {message.reply_to ? (
+          <div className="mt-2 rounded-md border border-muted/30 border-l-2 border-l-accent/60 bg-base/35 px-3 py-2">
+            <p className="font-mono text-xs font-semibold text-accent">Replying to {message.reply_to.dev_handle}</p>
+            <p className="mt-1 max-h-10 overflow-hidden break-words font-sans text-xs leading-5 text-muted">{message.reply_to.content}</p>
+          </div>
+        ) : null}
         {message.content ? <p className="mt-1 break-words font-sans text-sm leading-6 text-text">{message.content}</p> : null}
         {message.score_card ? (
           <button
@@ -249,6 +372,14 @@ function MessageItem({
             {message.pet_reaction.quote}
           </p>
         ) : null}
+        <button
+          type="button"
+          onClick={() => onReply(message)}
+          className="mt-2 inline-flex h-7 items-center rounded-md px-2 font-mono text-xs text-muted transition-colors duration-180 ease-out hover:bg-accent/10 hover:text-accent focus:bg-accent/10 focus:text-accent sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+          aria-label={`Reply to ${message.dev_handle}`}
+        >
+          Reply
+        </button>
       </div>
     </article>
   );
@@ -306,6 +437,15 @@ function ScorePreview({
       </section>
     </div>
   );
+}
+
+function replySnapshotFromMessage(message: LoungeMessage): LoungeReply {
+  return {
+    id: message.id,
+    dev_handle: message.dev_handle,
+    content: message.content || "Shared a WelcomeScore score card.",
+    created_at: message.created_at,
+  };
 }
 
 function scoreCardFromSearchParams(searchParams: ReturnType<typeof useSearchParams>): LoungeScoreCard | null {

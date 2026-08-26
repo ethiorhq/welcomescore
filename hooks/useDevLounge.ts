@@ -25,6 +25,13 @@ export type PetReaction = {
   quote: string;
 };
 
+export type LoungeReply = {
+  id: string;
+  dev_handle: string;
+  content: string;
+  created_at: string;
+};
+
 export type LoungeMessage = {
   id: string;
   session_hash: string;
@@ -33,6 +40,7 @@ export type LoungeMessage = {
   content: string;
   score_card: LoungeScoreCard | null;
   pet_reaction: PetReaction | null;
+  reply_to: LoungeReply | null;
   created_at: string;
   expires_at: string;
 };
@@ -135,9 +143,11 @@ export function useDevLounge() {
     async ({
       content,
       scoreCard,
+      replyTo,
     }: {
       content: string;
       scoreCard?: LoungeScoreCard;
+      replyTo?: LoungeReply;
     }) => {
       if (!supabase || !identity) {
         return { error: "The lounge is not configured yet." };
@@ -152,14 +162,17 @@ export function useDevLounge() {
         return { error: "Please rewrite that message and try again." };
       }
 
-      const { error } = await supabase.from("lounge_messages").insert({
+      const messageToInsert = {
         session_hash: identity.sessionHash,
         dev_handle: identity.handle,
         avatar_seed: identity.sessionId,
         content: sanitizedContent,
         score_card: scoreCard ?? null,
         pet_reaction: scoreCard ? getPetReaction(scoreCard.score) : null,
-      });
+        ...(replyTo ? { reply_to: replyTo } : {}),
+      };
+
+      const { error } = await supabase.from("lounge_messages").insert(messageToInsert);
 
       if (error) {
         return { error: "Unable to send the message right now." };
