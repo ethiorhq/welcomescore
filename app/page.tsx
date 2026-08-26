@@ -6,6 +6,14 @@ const BADGE_BASE_URL = "https://welcomescore.vercel.app";
 const COMPANY_NAME = "ETHIOR";
 const COMPANY_URL = "https://ethior.com";
 
+// TODO: Replace placeholder destinations with published help and legal pages.
+const FOOTER_LINKS = [
+  "How it works",
+  "FAQ",
+  "Privacy Policy",
+  "Terms & Conditions",
+] as const;
+
 type Check = {
   label: string;
   passed: boolean;
@@ -122,15 +130,32 @@ export default function Home() {
         {result ? <ResultsCard result={result} /> : null}
       </div>
 
-      <footer className="mt-10 text-center font-sans text-xs text-muted">
-        <p>
-          Built by{" "}
-          <a className="text-link underline underline-offset-4" href={COMPANY_URL}>
-            {COMPANY_NAME}
-          </a>
-        </p>
-      </footer>
+      <Footer />
     </main>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="mt-10 border-t border-muted/20 pt-6 text-center font-sans text-xs text-muted">
+      <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+        {FOOTER_LINKS.map((label) => (
+          <a
+            key={label}
+            className="text-link underline underline-offset-4"
+            href="#"
+          >
+            {label}
+          </a>
+        ))}
+      </nav>
+      <p className="mt-4">
+        Built by{" "}
+        <a className="text-link underline underline-offset-4" href={COMPANY_URL}>
+          {COMPANY_NAME}
+        </a>
+      </p>
+    </footer>
   );
 }
 

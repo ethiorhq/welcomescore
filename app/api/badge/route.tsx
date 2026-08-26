@@ -37,32 +37,65 @@ export async function GET(request: Request) {
             fontFamily: "IBM Plex Mono",
           }}
         >
-          <div
+          <svg
+            width="600"
+            height="315"
+            viewBox="0 0 600 315"
+            fill="none"
             style={{
               position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: 330,
-              height: 330,
-              transform: "translate(-50%, -50%)",
-              borderRadius: "50%",
-              background:
-                "radial-gradient(circle, rgba(232, 162, 61, 0.34) 0%, rgba(232, 162, 61, 0) 68%)",
+              inset: 0,
             }}
-          />
+          >
+            <defs>
+              <radialGradient id="score-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#E8A23D" stopOpacity="0.32" />
+                <stop offset="38%" stopColor="#E8A23D" stopOpacity="0.16" />
+                <stop offset="72%" stopColor="#E8A23D" stopOpacity="0.035" />
+                <stop offset="100%" stopColor="#E8A23D" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            <circle cx="300" cy="158" r="166" fill="url(#score-glow)" />
+          </svg>
 
           <div
             style={{
               position: "absolute",
-              top: 30,
-              left: 36,
+              top: 26,
+              left: 32,
               display: "flex",
-              color: "#8B8F9E",
-              fontSize: 22,
-              fontWeight: 400,
+              alignItems: "flex-start",
+              gap: 8,
+              fontFamily: "IBM Plex Mono",
             }}
           >
-            WelcomeScore
+            <span
+              style={{
+                display: "flex",
+                color: "#E8A23D",
+                fontSize: 28,
+                fontWeight: 700,
+                lineHeight: 1,
+              }}
+            >
+              WelcomeScore
+            </span>
+            <span
+              style={{
+                display: "flex",
+                marginTop: 1,
+                padding: "4px 7px",
+                border: "1px solid rgba(232, 162, 61, 0.3)",
+                borderRadius: 6,
+                backgroundColor: "rgba(232, 162, 61, 0.1)",
+                color: "#E8A23D",
+                fontSize: 11,
+                fontWeight: 700,
+                lineHeight: 1,
+              }}
+            >
+              .js.org
+            </span>
           </div>
 
           <div
