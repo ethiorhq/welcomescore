@@ -16,6 +16,12 @@ export type ScoreResult = {
   grade: string;
   checks: Check[];
   defaultBranch: string;
+  starsCount: number;
+  forksCount: number;
+  primaryLanguage: string;
+  hasReadme: boolean;
+  hasLicense: boolean;
+  isEligibleForLeaderboard: boolean;
   goodFirstIssueCount: number;
   goodFirstIssues: GoodFirstIssue[];
 };
@@ -24,6 +30,9 @@ type GitHubRepository = {
   license: unknown | null;
   pushed_at: string | null;
   default_branch: string;
+  stargazers_count: number | null;
+  forks_count: number | null;
+  language: string | null;
 };
 
 type GitHubFile = {
@@ -122,8 +131,12 @@ export async function scoreRepo(
   const fileNames = new Set(files.map((file) => file.name.toLowerCase()));
   const hasContributingGuide = fileNames.has("contributing.md");
   const hasCodeOfConduct = fileNames.has("code_of_conduct.md");
+  const hasReadme = fileNames.has("readme.md");
   const hasReadmeSetup = readme ? readmeHasSetupSection(readme) : false;
   const hasLicense = repository.license !== null;
+  const starsCount = Math.max(0, repository.stargazers_count ?? 0);
+  const forksCount = Math.max(0, repository.forks_count ?? 0);
+  const primaryLanguage = repository.language ?? "Unknown";
   const beginnerIssueCount = Math.max(0, issueSearch.total_count ?? 0);
   const goodFirstIssues = (issueSearch.items ?? []).slice(0, 5).map((issue) => ({
     title: issue.title,
@@ -169,6 +182,11 @@ export async function scoreRepo(
   ];
 
   const score = checks.reduce((total, check) => total + check.points, 0);
+  const isEligibleForLeaderboard =
+    score >= 75 &&
+    (starsCount >= 5 || forksCount >= 2) &&
+    hasReadme &&
+    hasLicense;
 
   return {
     repo: `${owner}/${repo}`,
@@ -176,6 +194,12 @@ export async function scoreRepo(
     grade: gradeForScore(score),
     checks,
     defaultBranch: repository.default_branch,
+    starsCount,
+    forksCount,
+    primaryLanguage,
+    hasReadme,
+    hasLicense,
+    isEligibleForLeaderboard,
     goodFirstIssueCount: beginnerIssueCount,
     goodFirstIssues,
   };

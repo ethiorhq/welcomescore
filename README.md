@@ -57,3 +57,24 @@ WelcomeScore returns a grade from **A** through **F** alongside the individual c
 ```bash
 npm run build
 ```
+
+## Community leaderboard
+
+The [Hall of Fame](/leaderboard) is populated passively when someone checks a public repository. Each completed scan is cached in Supabase. A repository appears publicly only when it has a score of **75 or higher**, at least **5 stars or 2 forks**, and both a `README.md` and a detected license.
+
+Leaderboard reads are served from the cached evaluation store. Evaluations remain fresh for seven days; entries aged between eight and 30 days are served immediately and rechecked opportunistically in the background; entries older than 30 days are refreshed on the next leaderboard visit. This preserves fast rankings while avoiding continuous GitHub polling.
+
+Set these server-only variables in `.env.local` for local leaderboard persistence, and in the matching production environment for deployment:
+
+```bash
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+Never expose `SUPABASE_SERVICE_ROLE_KEY` to the browser or prefix it with `NEXT_PUBLIC_`.
+
+Additional routes:
+
+- `GET /api/leaderboard` returns the top 50 eligible cached evaluations.
+- `POST /api/leaderboard/refresh?repo=owner/repo` refreshes one repository through the existing scoring pipeline.
+- `GET /check/owner/repo` opens a shareable full-audit route.

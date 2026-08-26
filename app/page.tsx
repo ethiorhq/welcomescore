@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   CODE_OF_CONDUCT_TEMPLATE,
   CONTRIBUTING_TEMPLATE,
@@ -59,18 +60,21 @@ type ScoreError = {
   error?: string;
 };
 
-export default function Home() {
-  const [repository, setRepository] = useState("");
+export default function Home({
+  initialRepository,
+}: {
+  initialRepository?: string;
+}) {
+  const [repository, setRepository] = useState(initialRepository ?? "");
   const [isChecking, setIsChecking] = useState(false);
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const initialScanStarted = useRef(false);
   const isRepositoryEmpty = repository.trim().length === 0;
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const requestedRepository = repository.trim();
-    if (!requestedRepository) {
+  async function runCheck(requestedRepository: string) {
+    const normalizedRepository = requestedRepository.trim();
+    if (!normalizedRepository) {
       return;
     }
 
@@ -80,7 +84,7 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        `/api/score?repo=${encodeURIComponent(requestedRepository)}`,
+        `/api/score?repo=${encodeURIComponent(normalizedRepository)}`,
       );
 
       if (!response.ok) {
@@ -107,6 +111,19 @@ export default function Home() {
     }
   }
 
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void runCheck(repository);
+  }
+
+  useEffect(() => {
+    if (initialRepository && !initialScanStarted.current) {
+      initialScanStarted.current = true;
+      setRepository(initialRepository);
+      void runCheck(initialRepository);
+    }
+  }, [initialRepository]);
+
   return (
     <main className="flex min-h-screen flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-20">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center">
@@ -123,8 +140,15 @@ export default function Home() {
             </span>
           </div>
 
+          <Link
+            className="text-link mt-5 inline-block font-sans text-sm underline underline-offset-4"
+            href="/leaderboard"
+          >
+            Explore the Hall of Fame
+          </Link>
+
           <form
-            className="mx-auto mt-8 flex w-full max-w-2xl flex-col gap-3 sm:flex-row"
+            className="mx-auto mt-5 flex w-full max-w-2xl flex-col gap-3 sm:flex-row"
             onSubmit={handleSubmit}
           >
             <label className="sr-only" htmlFor="repository">
