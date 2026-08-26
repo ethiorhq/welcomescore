@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import BackButton from "@/app/components/BackButton";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
 
 type EvaluationFreshness = "fresh" | "stale" | "expired";
@@ -95,12 +96,15 @@ export default function LeaderboardClient() {
               Rankings are earned through real contributor-health audits and added by a visitor only after qualification.
             </p>
           </div>
-          <Link
-            href="/"
-            className="text-link shrink-0 font-sans text-sm underline underline-offset-4"
-          >
-            Check a repository
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <BackButton />
+            <Link
+              href="/"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+            >
+              Check a repository
+            </Link>
+          </div>
         </header>
 
         <section className="mt-6 rounded-lg border border-accent/25 bg-surface px-5 py-4 sm:flex sm:items-center sm:justify-between sm:gap-6">

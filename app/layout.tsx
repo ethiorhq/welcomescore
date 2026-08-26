@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import SiteFooter from "@/app/components/SiteFooter";
 import "./globals.css";
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -53,8 +54,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable}`}>
-        {children}
+      <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} bg-base text-text`}>
+        <div className="flex min-h-screen flex-col">
+          {children}
+          <SiteFooter />
+        </div>
       </body>
     </html>
   );

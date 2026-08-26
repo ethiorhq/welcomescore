@@ -2,22 +2,12 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import BackButton from "@/app/components/BackButton";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
 import {
   CODE_OF_CONDUCT_TEMPLATE,
   CONTRIBUTING_TEMPLATE,
 } from "@/lib/templates";
-const COMPANY_NAME = "ETHIOR";
-const COMPANY_URL = "https://ethior.com";
-
-// TODO: Replace placeholder destinations with published help and legal pages.
-const FOOTER_LINKS = [
-  "How it works",
-  "FAQ",
-  "Privacy Policy",
-  "Terms & Conditions",
-] as const;
-
 const TEMPLATE_OPTIONS = {
   "CONTRIBUTING.md": {
     title: "CONTRIBUTING.md template",
@@ -128,7 +118,12 @@ export default function Home({
   }, [initialRepository]);
 
   return (
-    <main className="flex min-h-screen flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-20">
+    <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-20">
+      {initialRepository ? (
+        <div className="mx-auto w-full max-w-3xl">
+          <BackButton />
+        </div>
+      ) : null}
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center">
         <section className="w-full text-center" aria-labelledby="page-title">
           <div className="flex items-start justify-center gap-2">
@@ -144,7 +139,7 @@ export default function Home({
           </div>
 
           <Link
-            className="text-link mt-5 inline-block font-sans text-sm underline underline-offset-4"
+            className="mt-5 inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
             href="/leaderboard"
           >
             Explore the Hall of Fame
@@ -184,35 +179,7 @@ export default function Home({
         {result ? <ResultsCard result={result} /> : null}
       </div>
 
-      <Footer />
     </main>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="mt-10 border-t border-muted/20 pt-6 text-center font-sans text-xs text-muted">
-      <nav
-        aria-label="Footer navigation"
-        className="flex flex-wrap justify-center gap-x-4 gap-y-2"
-      >
-        {FOOTER_LINKS.map((label) => (
-          <a
-            key={label}
-            className="text-link underline underline-offset-4"
-            href="#"
-          >
-            {label}
-          </a>
-        ))}
-      </nav>
-      <p className="mt-4">
-        Built by{" "}
-        <a className="text-link underline underline-offset-4" href={COMPANY_URL}>
-          {COMPANY_NAME}
-        </a>
-      </p>
-    </footer>
   );
 }
 
