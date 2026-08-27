@@ -120,11 +120,11 @@ function DevLoungeContent() {
   }, [replyingTo]);
 
   useEffect(() => {
-    if (!isVerifiedGateway && requiresPreparedContext(topic)) {
+    if (gatewayState === "legacy" && !isVerifiedGateway && requiresPreparedContext(topic)) {
       setTopic("contributor_question");
       setPreparedContext(null);
     }
-  }, [isVerifiedGateway, topic]);
+  }, [gatewayState, isVerifiedGateway, topic]);
 
   const scrollToLatest = useCallback((behavior: ScrollBehavior = preferredScrollBehavior()) => {
     const viewport = chatViewportRef.current;
