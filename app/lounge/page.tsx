@@ -689,8 +689,11 @@ function scoreCardFromSearchParams(searchParams: ReturnType<typeof useSearchPara
   };
 }
 
-function petName(pet: "sukuna" | "gob" | "algofox") {
-  return pet === "sukuna" ? "Sukuna" : pet === "gob" ? "Gob" : "Algofox";
+function petName(_pet: string) {
+  // Older 24-hour Lounge rows can contain pre-Algofox companion labels.
+  // This display-only normalization preserves the user message while ensuring
+  // the product presents one consistent mascot identity.
+  return "Algofox";
 }
 
 function formatMessageTime(value: string) {

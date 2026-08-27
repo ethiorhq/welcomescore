@@ -24,7 +24,7 @@ export type LoungeScoreCard = {
 };
 
 export type PetReaction = {
-  pet: "sukuna" | "gob" | "algofox";
+  pet: "algofox";
   quote: string;
 };
 
@@ -283,21 +283,16 @@ function countPresence(state: Record<string, unknown[]>) {
 function getPetReaction(score: number): PetReaction | null {
   if (score < 50) {
     return {
-      pet: "sukuna",
+      pet: "algofox",
       quote: "The contributor path needs attention. Start with the clearest missing check and build upward.",
     };
   }
 
   if (score > 85) {
-    return score % 2 === 0
-      ? {
-          pet: "gob",
-          quote: "Excellent signal! This project is making first-time contributors feel at home.",
-        }
-      : {
-          pet: "algofox",
-          quote: "High contributor readiness detected. Recommendation: keep the welcome path well maintained.",
-        };
+    return {
+      pet: "algofox",
+      quote: "High contributor readiness detected. Recommendation: keep the welcome path well maintained.",
+    };
   }
 
   return null;
