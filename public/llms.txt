@@ -12,7 +12,7 @@
 - Terms & Conditions: https://welcomescore.vercel.app/terms
 - Dev Lounge Policy: https://welcomescore.vercel.app/dev-lounge-policy
 - JavaScript Health dashboard: https://welcomescore.vercel.app/js
-- Local npm CLI: `npx @ethiorhq/welcomescore` (package publication pending maintainer release)
+- Local npm CLI: `npx @ethiorhq/welcomescore` (published as `@ethiorhq/welcomescore@0.1.0`: https://www.npmjs.com/package/@ethiorhq/welcomescore)
 
 ## What WelcomeScore does
 

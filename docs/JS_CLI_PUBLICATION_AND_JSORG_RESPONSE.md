@@ -1,6 +1,6 @@
 # WelcomeScore CLI Publication and JS.ORG Response
 
-**Status:** Publication-ready source is included in this repository. The `@ethiorhq/welcomescore` package has **not** been published to npm by this document or by the application. Do not state that `npx @ethiorhq/welcomescore` is available until the maintainer has completed the publication checks below.
+**Status:** [`@ethiorhq/welcomescore@0.1.0` is publicly published on npm](https://www.npmjs.com/package/@ethiorhq/welcomescore). A clean public install has verified both `npx @ethiorhq/welcomescore --version` and its local CI mode. Do not submit the JS.ORG response draft until Vercel custom-domain configuration and the exact JS.ORG mapping are also verified.
 
 ## What this release contributes to the JavaScript ecosystem
 
@@ -50,7 +50,7 @@ Publishing is an external, irreversible distribution action. Complete these chec
 
 ## JS.ORG response draft
 
-Use this only **after** the npm package is publicly available and the links below have been manually verified. Replace bracketed placeholders with the actual package version, release URL, and JS.ORG pull request link.
+Use this only **after** Vercel custom-domain configuration, the JS.ORG mapping, and the links below have been manually verified. Replace bracketed placeholders with the actual package version, release URL, and JS.ORG pull request link.
 
 ```text
 Hi @MattIPv4,

@@ -36,7 +36,7 @@ The application runs at [http://localhost:3005](http://localhost:3005).
 
 [JavaScript Health](https://welcomescore.vercel.app/js) is a separate, deterministic 100-point review for JavaScript and TypeScript project foundations. It evaluates observable package telemetry, Node tooling, CI workflow signals, and contributor health. It is not a security audit, package-safety guarantee, code-quality certification, legal opinion, popularity ranking, or endorsement.
 
-The companion source package lives in [`packages/cli`](packages/cli). After the maintainer publishes the package, developers will be able to run it directly in a local JavaScript/TypeScript project:
+The companion package is published as [`@ethiorhq/welcomescore` on npm](https://www.npmjs.com/package/@ethiorhq/welcomescore) (current version `0.1.0`); its source lives in [`packages/cli`](packages/cli). Developers can run it directly in a local JavaScript/TypeScript project:
 
 ```bash
 npx @ethiorhq/welcomescore
