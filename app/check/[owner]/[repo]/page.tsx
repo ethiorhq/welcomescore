@@ -1,9 +1,9 @@
-import Home from "@/app/page";
+import AuditHome from "@/app/components/AuditHome";
 
 export default function RepositoryAuditPage({
   params,
 }: {
   params: { owner: string; repo: string };
 }) {
-  return <Home initialRepository={`${params.owner}/${params.repo}`} />;
+  return <AuditHome initialRepository={`${params.owner}/${params.repo}`} />;
 }
