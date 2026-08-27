@@ -689,7 +689,9 @@ function scoreCardFromSearchParams(searchParams: ReturnType<typeof useSearchPara
   };
 }
 
-function petName(_pet: string) {
+function petName(pet: string) {
+  // Accept the stored companion value without exposing a legacy identity in the UI.
+  void pet;
   // Older 24-hour Lounge rows can contain pre-Algofox companion labels.
   // This display-only normalization preserves the user message while ensuring
   // the product presents one consistent mascot identity.
