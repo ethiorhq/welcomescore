@@ -30,6 +30,16 @@ const RESPONSE_SCHEMA = {
   additionalProperties: false,
 } as const;
 
+// Groq strict JSON Schema accepts the same trusted fields but keeps cardinality
+// enforcement in our local validator, where it is independently guaranteed.
+const GROQ_RESPONSE_SCHEMA = {
+  ...RESPONSE_SCHEMA,
+  properties: {
+    ...RESPONSE_SCHEMA.properties,
+    focusChecks: { type: "array", items: { type: "string" } },
+  },
+} as const;
+
 const GROQ_DEFAULT_MODEL = "openai/gpt-oss-20b";
 const GEMINI_DEFAULT_MODEL = "gemini-3.7-flash";
 const PROVIDER_ERROR_BODY_LIMIT = 1_200;
@@ -63,18 +73,25 @@ async function generateGroqReview(context: TrustedReviewContext) {
         messages: [
           {
             role: "system",
-            // Groq JSON Object Mode requires the literal word JSON in the prompt.
-            content: "Generate one safe, evidence-bound Algofox review. Return only a valid JSON object.",
+            content:
+              "Generate one safe, evidence-bound Algofox review. Return only a valid JSON object matching the supplied schema.",
           },
           { role: "user", content: reviewProviderPrompt(context) },
         ],
-        // JSON Object Mode is paired with explicit JSON instructions above and in reviewProviderPrompt.
-        // Local validation remains the enforcement boundary for the trusted review contract.
-        response_format: { type: "json_object" },
+        // GPT-OSS 20B/120B supports strict JSON Schema. This prevents the
+        // json_validate_failed response that occurred in JSON Object Mode.
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "algofox_review",
+            strict: true,
+            schema: GROQ_RESPONSE_SCHEMA,
+          },
+        },
         temperature: 0.5,
         max_tokens: 250,
       }),
-      signal: AbortSignal.timeout(6_000),
+      signal: AbortSignal.timeout(8_000),
     });
 
     if (!response.ok) {
@@ -103,26 +120,32 @@ async function generateGeminiReview(context: TrustedReviewContext) {
 
   for (const model of geminiModelCandidates()) {
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-        {
-          method: "POST",
-          headers: {
-            "x-goog-api-key": apiKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: reviewProviderPrompt(context) }] }],
-            generationConfig: {
-              responseMimeType: "application/json",
-              responseJsonSchema: RESPONSE_SCHEMA,
-              temperature: 0.5,
-              maxOutputTokens: 250,
-            },
-          }),
-          signal: AbortSignal.timeout(2_500),
+      const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+        method: "POST",
+        headers: {
+          "x-goog-api-key": apiKey,
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          model,
+          input: reviewProviderPrompt(context),
+          system_instruction:
+            "You are Algofox, a concise constructive open-source reviewer. Return only valid JSON matching the requested schema.",
+          // Review calls are one-shot. Avoid Gemini-side interaction retention.
+          store: false,
+          response_format: {
+            type: "text",
+            mime_type: "application/json",
+            schema: RESPONSE_SCHEMA,
+          },
+          generation_config: {
+            temperature: 0.5,
+            max_output_tokens: 250,
+            thinking_level: "low",
+          },
+        }),
+        signal: AbortSignal.timeout(8_000),
+      });
 
       if (!response.ok) {
         logProviderAttempt("gemini", model, "http_error", response.status, await readDiagnosticBody(response));
@@ -132,14 +155,8 @@ async function generateGeminiReview(context: TrustedReviewContext) {
         return null;
       }
 
-      const payload = (await response.json()) as {
-        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-      };
-      const review = validateProviderCandidate(
-        payload.candidates?.[0]?.content?.parts?.[0]?.text,
-        context,
-        "gemini",
-      );
+      const payload = (await response.json()) as GeminiInteractionResponse;
+      const review = validateProviderCandidate(getGeminiOutputText(payload), context, "gemini");
       logProviderAttempt("gemini", model, review ? "validated" : "invalid_response", response.status);
       return review;
     } catch (error) {
@@ -152,7 +169,27 @@ async function generateGeminiReview(context: TrustedReviewContext) {
 
 function geminiModelCandidates() {
   const configured = process.env.GEMINI_REVIEW_MODEL?.trim().replace(/^models\//, "");
-  return Array.from(new Set([configured, GEMINI_DEFAULT_MODEL, "gemini-2.5-flash"].filter(Boolean))) as string[];
+  // Gemini 2.5 Flash returns 404 for newly created projects; 3.6 Flash is the
+  // documented stable fallback when the requested latest Flash model is unavailable.
+  return Array.from(new Set([configured, GEMINI_DEFAULT_MODEL, "gemini-3.6-flash"].filter(Boolean))) as string[];
+}
+
+type GeminiInteractionResponse = {
+  steps?: Array<{
+    type?: string;
+    content?: Array<{ type?: string; text?: string }>;
+  }>;
+};
+
+function getGeminiOutputText(payload: GeminiInteractionResponse) {
+  const text = payload.steps
+    ?.filter((step) => step.type === "model_output")
+    .flatMap((step) => step.content ?? [])
+    .filter((content) => content.type === "text" && typeof content.text === "string")
+    .map((content) => content.text ?? "")
+    .join("\n");
+
+  return text || undefined;
 }
 
 async function readDiagnosticBody(response: Response) {
