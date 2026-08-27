@@ -18,7 +18,7 @@
 | [NOTICE](NOTICE), [ATTRIBUTION.md](ATTRIBUTION.md), and [TRADEMARKS.md](TRADEMARKS.md) | Copyright, permitted use, required original-project credit, and brand-use boundaries. |
 | [How It Works](https://welcomescore.vercel.app/how-it-works), [FAQ](https://welcomescore.vercel.app/faq), [Privacy Policy](https://welcomescore.vercel.app/privacy), [Terms](https://welcomescore.vercel.app/terms), and [Dev Lounge Policy](https://welcomescore.vercel.app/dev-lounge-policy) | Public product, privacy, community-chat, and service-boundary information. |
 
-## Run locally
+## Quick start and setup
 
 Install the project dependencies and start the development server:
 
