@@ -1,5 +1,3 @@
-import "server-only";
-
 import { reviewProviderPrompt } from "@/lib/review/context";
 import {
   ALGOFOX_REVIEW_SCHEMA_VERSION,
@@ -32,6 +30,10 @@ const RESPONSE_SCHEMA = {
   additionalProperties: false,
 } as const;
 
+const GROQ_DEFAULT_MODEL = "openai/gpt-oss-20b";
+const GEMINI_DEFAULT_MODEL = "gemini-3.7-flash";
+const PROVIDER_ERROR_BODY_LIMIT = 1_200;
+
 export async function generateProviderReview(context: TrustedReviewContext) {
   const groqReview = await generateGroqReview(context);
   if (groqReview) {
@@ -43,8 +45,9 @@ export async function generateProviderReview(context: TrustedReviewContext) {
 
 async function generateGroqReview(context: TrustedReviewContext) {
   const apiKey = process.env.GROQ_API_KEY;
+  const model = process.env.GROQ_REVIEW_MODEL?.trim() || GROQ_DEFAULT_MODEL;
   if (!apiKey) {
-    console.info("Algofox Groq review provider is not configured");
+    logProviderAttempt("groq", model, "not_configured");
     return null;
   }
 
@@ -56,16 +59,17 @@ async function generateGroqReview(context: TrustedReviewContext) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.GROQ_REVIEW_MODEL ?? "openai/gpt-oss-20b",
+        model,
         messages: [
           {
             role: "system",
-            content: "Generate a safe, evidence-bound Algofox review using the supplied JSON schema.",
+            // Groq JSON Object Mode requires the literal word JSON in the prompt.
+            content: "Generate one safe, evidence-bound Algofox review. Return only a valid JSON object.",
           },
           { role: "user", content: reviewProviderPrompt(context) },
         ],
-        // JSON Object Mode avoids provider-side schema compatibility failures. The response
-        // is still parsed and fully validated against the local, evidence-bound contract below.
+        // JSON Object Mode is paired with explicit JSON instructions above and in reviewProviderPrompt.
+        // Local validation remains the enforcement boundary for the trusted review contract.
         response_format: { type: "json_object" },
         temperature: 0.5,
         max_tokens: 250,
@@ -74,26 +78,18 @@ async function generateGroqReview(context: TrustedReviewContext) {
     });
 
     if (!response.ok) {
-      console.warn("Algofox Groq review provider returned an error", {
-        status: response.status,
-        model: process.env.GROQ_REVIEW_MODEL ?? "openai/gpt-oss-20b",
-      });
+      logProviderAttempt("groq", model, "http_error", response.status, await readDiagnosticBody(response));
       return null;
     }
 
     const payload = (await response.json()) as {
       choices?: Array<{ message?: { content?: string | null } }>;
     };
-    const content = payload.choices?.[0]?.message?.content;
-    const review = validateProviderCandidate(content, context, "groq");
-    if (!review) {
-      console.warn("Algofox Groq review provider returned an invalid response");
-    }
+    const review = validateProviderCandidate(payload.choices?.[0]?.message?.content, context, "groq");
+    logProviderAttempt("groq", model, review ? "validated" : "invalid_response", response.status);
     return review;
   } catch (error) {
-    console.warn("Algofox Groq review provider request failed", {
-      error: error instanceof Error ? error.name : "unknown",
-    });
+    logProviderAttempt("groq", model, "request_failed", undefined, errorName(error));
     return null;
   }
 }
@@ -101,7 +97,7 @@ async function generateGroqReview(context: TrustedReviewContext) {
 async function generateGeminiReview(context: TrustedReviewContext) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.info("Algofox Gemini review provider is not configured");
+    logProviderAttempt("gemini", process.env.GEMINI_REVIEW_MODEL?.trim() || GEMINI_DEFAULT_MODEL, "not_configured");
     return null;
   }
 
@@ -129,10 +125,7 @@ async function generateGeminiReview(context: TrustedReviewContext) {
       );
 
       if (!response.ok) {
-        console.warn("Algofox Gemini review provider returned an error", {
-          status: response.status,
-          model,
-        });
+        logProviderAttempt("gemini", model, "http_error", response.status, await readDiagnosticBody(response));
         if (response.status === 404) {
           continue;
         }
@@ -147,15 +140,10 @@ async function generateGeminiReview(context: TrustedReviewContext) {
         context,
         "gemini",
       );
-      if (!review) {
-        console.warn("Algofox Gemini review provider returned an invalid response", { model });
-      }
+      logProviderAttempt("gemini", model, review ? "validated" : "invalid_response", response.status);
       return review;
     } catch (error) {
-      console.warn("Algofox Gemini review provider request failed", {
-        error: error instanceof Error ? error.name : "unknown",
-        model,
-      });
+      logProviderAttempt("gemini", model, "request_failed", undefined, errorName(error));
     }
   }
 
@@ -164,9 +152,42 @@ async function generateGeminiReview(context: TrustedReviewContext) {
 
 function geminiModelCandidates() {
   const configured = process.env.GEMINI_REVIEW_MODEL?.trim().replace(/^models\//, "");
-  return Array.from(
-    new Set([configured, "gemini-3.7-flash", "gemini-2.5-flash"].filter(Boolean)),
-  ) as string[];
+  return Array.from(new Set([configured, GEMINI_DEFAULT_MODEL, "gemini-2.5-flash"].filter(Boolean))) as string[];
+}
+
+async function readDiagnosticBody(response: Response) {
+  try {
+    return summarizeDiagnostic(await response.text());
+  } catch {
+    return "unavailable";
+  }
+}
+
+function summarizeDiagnostic(value: string) {
+  const compact = value.replace(/\s+/g, " ").trim();
+  return compact.length > PROVIDER_ERROR_BODY_LIMIT
+    ? `${compact.slice(0, PROVIDER_ERROR_BODY_LIMIT)}…`
+    : compact || "empty";
+}
+
+function errorName(error: unknown) {
+  return error instanceof Error ? error.name : "unknown";
+}
+
+function logProviderAttempt(
+  provider: "groq" | "gemini",
+  model: string,
+  outcome: "not_configured" | "http_error" | "validated" | "invalid_response" | "request_failed",
+  status?: number,
+  detail?: string,
+) {
+  const payload = { provider, model, outcome, ...(status ? { status } : {}), ...(detail ? { detail } : {}) };
+  if (outcome === "validated") {
+    console.info("Algofox review provider attempt", payload);
+    return;
+  }
+
+  console.warn("Algofox review provider attempt", payload);
 }
 
 function validateProviderCandidate(
