@@ -188,9 +188,10 @@ function createGlowBadge(data: BadgeData, rank: RankConfig) {
     <text x="20" y="26" fill="${rank.color}" font-size="10" font-weight="700" letter-spacing="1.5">WELCOMESCORE .JS.ORG</text>
     <text x="20" y="47" class="text" font-size="15" font-weight="700">${escapeXml(repo)}</text>
     <text x="20" y="72" class="muted" font-size="12">${escapeXml(rank.level)} · ${escapeXml(rank.status)}</text>
-    ${emblemSvg(rank, 311, 29, 26, rank.color)}
-    <text x="394" y="65" text-anchor="end" fill="${rank.color}" font-size="46" font-weight="700">${data.score}</text>
-    <text x="394" y="85" text-anchor="end" class="muted" font-size="12">${escapeXml(data.grade)} grade / 100</text>
+    <!-- Reserve an explicit column for the rank emblem so it never collides with a three-digit score. -->
+    ${emblemSvg(rank, 294, 32, 22, rank.color)}
+    <text x="404" y="65" text-anchor="end" fill="${rank.color}" font-size="42" font-weight="700">${data.score}</text>
+    <text x="404" y="85" text-anchor="end" class="muted" font-size="12">${escapeXml(data.grade)} grade / 100</text>
   `);
 }
 
