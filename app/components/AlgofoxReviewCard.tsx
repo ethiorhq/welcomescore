@@ -28,7 +28,6 @@ export default function AlgofoxReviewCard({ repo }: { repo: string }) {
   const [review, setReview] = useState<AlgofoxReview | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"guidance" | "roast">("guidance");
 
   async function requestReview() {
     setIsLoading(true);
@@ -132,59 +131,13 @@ export default function AlgofoxReviewCard({ repo }: { repo: string }) {
             </ul>
           ) : null}
 
-          <div className="mt-5 border-b border-muted/20" role="tablist" aria-label="Algofox review views">
-            <button
-              id="algofox-guidance-tab"
-              type="button"
-              role="tab"
-              aria-controls="algofox-guidance-panel"
-              aria-selected={activeTab === "guidance"}
-              onClick={() => setActiveTab("guidance")}
-              className={`mr-5 border-b-2 pb-2 font-sans text-sm font-medium transition-colors duration-180 ease-out ${
-                activeTab === "guidance"
-                  ? "border-accent text-accent"
-                  : "border-transparent text-muted hover:text-text"
-              }`}
-            >
-              Guidance
-            </button>
-            <button
-              id="algofox-roast-tab"
-              type="button"
-              role="tab"
-              aria-controls="algofox-roast-panel"
-              aria-selected={activeTab === "roast"}
-              onClick={() => setActiveTab("roast")}
-              className={`border-b-2 pb-2 font-sans text-sm font-medium transition-colors duration-180 ease-out ${
-                activeTab === "roast"
-                  ? "border-accent text-accent"
-                  : "border-transparent text-muted hover:text-text"
-              }`}
-            >
+          <div className="mt-5 border-t border-muted/20 pt-4">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-accent">
               Technical roast
-            </button>
-          </div>
-
-          <div className="pt-4">
-            {activeTab === "guidance" ? (
-              <p
-                id="algofox-guidance-panel"
-                role="tabpanel"
-                aria-labelledby="algofox-guidance-tab"
-                className="font-sans text-sm leading-6 text-text"
-              >
-                {review.motivationText}
-              </p>
-            ) : (
-              <p
-                id="algofox-roast-panel"
-                role="tabpanel"
-                aria-labelledby="algofox-roast-tab"
-                className="font-sans text-sm leading-6 text-text"
-              >
-                {review.roastText}
-              </p>
-            )}
+            </p>
+            <p className="mt-2 font-sans text-sm leading-6 text-text">
+              {review.roastText}
+            </p>
           </div>
 
           <p className="mt-5 font-mono text-[11px] text-muted">
