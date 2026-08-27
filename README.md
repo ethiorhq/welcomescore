@@ -131,11 +131,13 @@ The endpoint always works in **deterministic mode** with concise, evidence-bound
 GROQ_API_KEY=your_key
 GROQ_REVIEW_MODEL=openai/gpt-oss-20b
 GEMINI_API_KEY=your_key
-GEMINI_REVIEW_MODEL=gemini-2.5-flash
+GEMINI_REVIEW_MODEL=gemini-3.7-flash
 
 # Optional but recommended in deployed environments. Use a long random secret.
 ALGOFOX_REVIEW_RATE_LIMIT_SALT=your_long_random_value
 ```
+
+Gemini provider reviews use the [Gemini Interactions API](https://ai.google.dev/gemini-api/docs/interactions) with `store: false`, so each review is a one-shot request rather than a stored provider interaction. If the configured latest Flash model is unavailable, the server safely tries `gemini-3.6-flash` before returning to the deterministic review engine.
 
 Run `supabase/migrations/20260826_algofox_review_engine.sql` once in the Supabase SQL Editor to enable the private review cache and server-side rate-limit accounting. The migration creates separate `review_cache` and `review_rate_limits` tables with RLS enabled and no browser grants; it does **not** modify `repo_evaluations`, Hall of Fame behavior, or Dev Lounge data. A valid provider review caches for seven days, and a deterministic review caches for 24 hours. Until the migration is applied, reviews continue to work safely without cache persistence.
 
