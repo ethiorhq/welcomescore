@@ -17,6 +17,7 @@ export const PUBLIC_ROUTE_PATHS = [
   "/terms",
   "/dev-lounge-policy",
   "/guides",
+  "/js",
 ] as const;
 
 export function absoluteUrl(path = "/") {

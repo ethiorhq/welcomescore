@@ -32,6 +32,40 @@ npm run dev
 
 The application runs at [http://localhost:3005](http://localhost:3005).
 
+## JavaScript and TypeScript maintainer health
+
+[JavaScript Health](https://welcomescore.vercel.app/js) is a separate, deterministic 100-point review for JavaScript and TypeScript project foundations. It evaluates observable package telemetry, Node tooling, CI workflow signals, and contributor health. It is not a security audit, package-safety guarantee, code-quality certification, legal opinion, popularity ranking, or endorsement.
+
+The companion source package lives in [`packages/cli`](packages/cli). After the maintainer publishes the package, developers will be able to run it directly in a local JavaScript/TypeScript project:
+
+```bash
+npx welcomescore
+npx welcomescore --ci --threshold=80
+npx welcomescore --fix --dry-run
+```
+
+Until publication, validate it from this repository:
+
+```bash
+npm run cli:check
+npm run cli:test
+npm run cli:build
+npm run cli:pack:check
+node packages/cli/dist/bin.js --ci --threshold=80
+```
+
+The CLI reads only the selected local project directory and does not upload source files, package manifests, environment values, or Git credentials to WelcomeScore. Its fix mode creates only absent low-risk templates; it never overwrites a file, edits `package.json`, installs dependencies, runs scripts, commits code, changes GitHub, or publishes a package.
+
+### JavaScript Health endpoints
+
+`GET /api/js-health?repo=owner/repo` returns a read-only summary of allowlisted public package metadata, configuration-file paths, workflow indicators, and starter-label evidence. It does not return raw manifests or workflow bodies.
+
+`GET /badge/owner/repo.svg` returns a compact JavaScript Health SVG badge for a public repository README. For example:
+
+```md
+[![WelcomeScore JS Health](https://welcomescore.vercel.app/badge/ethiorhq/welcomescore.svg)](https://welcomescore.vercel.app/js)
+```
+
 ## Optional GitHub token
 
 WelcomeScore works with public repositories without authentication, but GitHub applies a lower API rate limit to unauthenticated requests. To raise that limit, create a local environment file and add a GitHub token:
@@ -76,11 +110,11 @@ WelcomeScore returns a grade from **A** through **F** alongside the individual c
 | Style | Query value | Purpose |
 | --- | --- | --- |
 | Minimal | `style=1` | Compact dual-segment README pill. |
-| Rank shield | `style=2` | Rank certification with a tier emblem. |
-| Metrics | `style=3` | One-line score, grade, and rank summary. |
+| Tier shield | `style=2` | Contributor-signal tier with a neutral emblem; not a certification. |
+| Metrics | `style=3` | One-line score, grade, and contributor-signal summary. |
 | Dark glow | `style=4` | Developer-tool card with the WelcomeScore primary accent. |
 
-The rank framework is **Standard Repo** below 75, **Bronze Maintainer** from 75–84, **Silver Maintainer** from 85–94, and **Elite Maintainer** from 95–100. The completed audit’s **Embed badge** action offers copy-ready Markdown and HTML for every style.
+Badge tiers are limited summaries of the published contributor-signal calculation; they are not a certification, quality claim, security assessment, legal opinion, or endorsement. The completed audit’s **Embed badge** action offers copy-ready Markdown and HTML for every style.
 
 ## Verify a production build
 

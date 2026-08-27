@@ -36,3 +36,9 @@ yarn-error.log*
 next-env.d.ts
 .chrome-test/
 dev-server.log
+
+# publishable CLI build output
+/packages/cli/dist/
+
+# workspace dependencies
+**/node_modules/

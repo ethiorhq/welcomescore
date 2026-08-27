@@ -11,10 +11,14 @@
 - Privacy Policy: https://welcomescore.vercel.app/privacy
 - Terms & Conditions: https://welcomescore.vercel.app/terms
 - Dev Lounge Policy: https://welcomescore.vercel.app/dev-lounge-policy
+- JavaScript Health dashboard: https://welcomescore.vercel.app/js
+- Local npm CLI: `npx welcomescore` (package publication pending maintainer release)
 
 ## What WelcomeScore does
 
 WelcomeScore reads public GitHub repository signals for six documented checks: contribution guidance, a code of conduct, README setup guidance, a published license, open good-first-issue labels, and recent repository activity. It returns a contributor-readiness score with the visible underlying checks.
+
+JavaScript Health is a separate deterministic 100-point review for JavaScript and TypeScript maintainers. It checks allowlisted public package metadata, Node tooling paths, CI/workflow indicators, and contributor foundations; it is not a security audit, package-safety guarantee, code-quality certification, legal opinion, popularity ranking, or endorsement. Its companion local CLI, `npx welcomescore`, reads a user-selected project directory without uploading source files, package manifests, environment values, or repository credentials to WelcomeScore.
 
 The optional Algofox review provides short, evidence-bound guidance based only on the completed audit. It is not a legal, security, financial, employment, hiring, or quality certification. Hall of Fame addition is always an explicit user action and follows separately documented eligibility rules. Dev Lounge is a temporary, anonymous public conversation feature and not private messaging or a marketplace.
 

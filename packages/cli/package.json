@@ -1,0 +1,72 @@
+{
+  "name": "welcomescore",
+  "version": "0.1.0",
+  "description": "Local JavaScript and TypeScript repository health checks for package, tooling, CI, and contributor foundations.",
+  "keywords": [
+    "javascript",
+    "typescript",
+    "npm",
+    "cli",
+    "repository-health",
+    "open-source",
+    "maintainers"
+  ],
+  "homepage": "https://welcomescore.vercel.app/js",
+  "bugs": {
+    "url": "https://github.com/ethiorhq/welcomescore/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ethiorhq/welcomescore.git",
+    "directory": "packages/cli"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "ETHIOR <https://ethior.com>",
+  "funding": "https://ethior.com",
+  "type": "module",
+  "bin": {
+    "welcomescore": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "ATTRIBUTION.md",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "npm@11.6.2",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsup src/bin.ts src/index.ts --format esm --dts --sourcemap --clean --platform node --out-dir dist --external react --external ink --external commander --external ora --external chalk",
+    "check": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "pack:check": "npm pack --dry-run"
+  },
+  "dependencies": {
+    "chalk": "^6.0.0",
+    "commander": "^15.0.0",
+    "ink": "^5.2.1",
+    "ora": "^9.4.1",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^18.3.23",
+    "tsup": "^8.5.1",
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.9"
+  }
+}

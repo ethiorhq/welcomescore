@@ -121,6 +121,12 @@ export default function AuditHome({
             >
               Open Dev Lounge
             </Link>
+            <Link
+              className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+              href="/js"
+            >
+              JavaScript Health
+            </Link>
           </div>
 
           <form
