@@ -1,9 +1,9 @@
 # WelcomeScore CLI
 
-`welcomescore` is a local JavaScript and TypeScript repository health tool for npm-package maintainers. It reviews observable package metadata, Node tooling, CI workflow signals, and contributor foundations.
+`@ethiorhq/welcomescore` is a local JavaScript and TypeScript repository health tool for npm-package maintainers. It reviews observable package metadata, Node tooling, CI workflow signals, and contributor foundations.
 
 ```bash
-npx welcomescore
+npx @ethiorhq/welcomescore
 ```
 
 The interactive terminal view presents a 0–100 **JavaScript Health Index**. Press `d` to show diagnostics and `q` or `Esc` to close.
@@ -13,14 +13,14 @@ The interactive terminal view presents a 0–100 **JavaScript Health Index**. Pr
 Use CI mode for a deterministic threshold check. It emits a concise result to standard error and returns `0` when the score meets the threshold, `1` when a completed audit is below it, and `2` for invalid input or scanner failure.
 
 ```bash
-npx welcomescore --ci --threshold=80
+npx @ethiorhq/welcomescore --ci --threshold=80
 ```
 
 Use `--json` when another program needs the full report on standard output, or `--markdown` for a human-readable report.
 
 ```bash
-npx welcomescore --json > welcomescore-report.json
-npx welcomescore --markdown > welcomescore-report.md
+npx @ethiorhq/welcomescore --json > welcomescore-report.json
+npx @ethiorhq/welcomescore --markdown > welcomescore-report.md
 ```
 
 ## Safe remediation templates
@@ -28,8 +28,8 @@ npx welcomescore --markdown > welcomescore-report.md
 `--fix` is deliberately conservative. It creates only absent low-risk templates and never overwrites an existing file, edits `package.json`, installs dependencies, runs package scripts, creates a commit, changes GitHub, or publishes a package.
 
 ```bash
-npx welcomescore --fix --dry-run
-npx welcomescore --fix
+npx @ethiorhq/welcomescore --fix --dry-run
+npx @ethiorhq/welcomescore --fix
 ```
 
 The package metadata suggestion is written as `welcomescore.package-fragment.json` for a maintainer to review and merge manually. Templates may include `.nvmrc`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and a starter issue template only when those paths do not already exist.
@@ -39,7 +39,7 @@ The package metadata suggestion is written as `welcomescore.package-fragment.jso
 The default scan is local. It does not upload source code, package manifests, environment variables, git credentials, or analytics to WelcomeScore. With explicit `--github`, the CLI may make one public GitHub API read to check for a curated starter-issue label on the `origin` repository.
 
 ```bash
-npx welcomescore --github
+npx @ethiorhq/welcomescore --github
 ```
 
 ## What the index means

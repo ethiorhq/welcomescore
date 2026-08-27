@@ -11,10 +11,10 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "cli:build": "npm run build --workspace=welcomescore",
-    "cli:test": "npm run test --workspace=welcomescore",
-    "cli:check": "npm run check --workspace=welcomescore",
-    "cli:pack:check": "npm run pack:check --workspace=welcomescore"
+    "cli:build": "npm run build --workspace=@ethiorhq/welcomescore",
+    "cli:test": "npm run test --workspace=@ethiorhq/welcomescore",
+    "cli:check": "npm run check --workspace=@ethiorhq/welcomescore",
+    "cli:pack:check": "npm run pack:check --workspace=@ethiorhq/welcomescore"
   },
   "dependencies": {
     "@dicebear/collection": "^9.4.2",

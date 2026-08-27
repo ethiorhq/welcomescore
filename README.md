@@ -39,9 +39,9 @@ The application runs at [http://localhost:3005](http://localhost:3005).
 The companion source package lives in [`packages/cli`](packages/cli). After the maintainer publishes the package, developers will be able to run it directly in a local JavaScript/TypeScript project:
 
 ```bash
-npx welcomescore
-npx welcomescore --ci --threshold=80
-npx welcomescore --fix --dry-run
+npx @ethiorhq/welcomescore
+npx @ethiorhq/welcomescore --ci --threshold=80
+npx @ethiorhq/welcomescore --fix --dry-run
 ```
 
 Until publication, validate it from this repository:

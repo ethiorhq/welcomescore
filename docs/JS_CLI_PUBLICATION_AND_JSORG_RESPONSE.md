@@ -1,6 +1,6 @@
 # WelcomeScore CLI Publication and JS.ORG Response
 
-**Status:** Publication-ready source is included in this repository. The `welcomescore` package has **not** been published to npm by this document or by the application. Do not state that `npx welcomescore` is available until the maintainer has completed the publication checks below.
+**Status:** Publication-ready source is included in this repository. The `@ethiorhq/welcomescore` package has **not** been published to npm by this document or by the application. Do not state that `npx @ethiorhq/welcomescore` is available until the maintainer has completed the publication checks below.
 
 ## What this release contributes to the JavaScript ecosystem
 
@@ -10,16 +10,16 @@ The tool is intentionally local-first. Its normal mode does not upload source co
 
 | Invocation | Intended use |
 |---|---|
-| `npx welcomescore` | Interactive local terminal report. |
-| `npx welcomescore --ci --threshold=80` | Headless CI threshold check with deterministic exit codes. |
-| `npx welcomescore --json` | Structured report for other local tools. |
-| `npx welcomescore --fix --dry-run` | Review safe template suggestions without creating files. |
+| `npx @ethiorhq/welcomescore` | Interactive local terminal report. |
+| `npx @ethiorhq/welcomescore --ci --threshold=80` | Headless CI threshold check with deterministic exit codes. |
+| `npx @ethiorhq/welcomescore --json` | Structured report for other local tools. |
+| `npx @ethiorhq/welcomescore --fix --dry-run` | Review safe template suggestions without creating files. |
 
 ## Maintainer publication checklist
 
 Publishing is an external, irreversible distribution action. Complete these checks deliberately from a secured maintainer environment.
 
-1. Confirm the registry name remains available: `npm view welcomescore version`. A `404` indicates that no public package currently occupies the name; a successful response means you must select a different scoped or unscoped name.
+1. Confirm the organization-scoped registry name remains available: `npm view @ethiorhq/welcomescore version`. A `404` indicates that no public package currently occupies the name; a successful response means you must select a different name.
 2. Review the custom source-available license, attribution, notice, and trademark terms in the root repository and packaged copies. Confirm npm distribution is permitted for the intended version; obtain appropriate legal review when needed.
 3. Run the exact verification suite from the repository root:
 
@@ -34,16 +34,17 @@ Publishing is an external, irreversible distribution action. Complete these chec
    ```
 
 4. Inspect the packed artifact. It must include only `dist`, `README.md`, `LICENSE`, `ATTRIBUTION.md`, `NOTICE`, and `package.json`; it must never include `.env` files, local reports, source secrets, or unrelated project files.
-5. Set up npm trusted publishing for the `ethiorhq/welcomescore` repository and the `Publish WelcomeScore CLI` GitHub Actions workflow. The workflow requests an OIDC identity token and does not require committing an npm token. Review npm’s trusted publisher documentation before enabling it.[1]
-6. Update the package version in `packages/cli/package.json`, build the package, create a GitHub Release deliberately, and verify the release workflow’s `npm publish --provenance --access public` result.
-7. Verify in a clean directory after publication:
+5. For the first release, sign in as a personal npm account that is authorized to publish for the `ethiorhq` organization, confirm the organization-scoped package name is still available, and run `npm publish --access public` from `packages/cli`. The package’s release preflight runs its typecheck, tests, build, and package preview before publication.
+6. After the first package is public, set up npm trusted publishing for the `ethiorhq/welcomescore` repository and the `Publish WelcomeScore CLI` GitHub Actions workflow. The workflow requests an OIDC identity token and does not require committing an npm token. Review npm’s trusted publisher documentation before enabling it.[1]
+7. For a later version, update `packages/cli/package.json`, build the package, create a GitHub Release deliberately, and verify the release workflow’s `npm publish --provenance --access public` result.
+8. Verify in a clean directory after publication:
 
    ```bash
-   npx --yes welcomescore --version
-   npx --yes welcomescore --ci --threshold=80
+   npx --yes @ethiorhq/welcomescore --version
+   npx --yes @ethiorhq/welcomescore --ci --threshold=80
    ```
 
-8. Confirm the public npm package page, package repository link, CLI help, JavaScript Health dashboard, and exact domain response below before updating the JS.ORG pull request.
+9. Confirm the public npm package page, package repository link, CLI help, JavaScript Health dashboard, and exact domain response below before updating the JS.ORG pull request.
 
 > npm provenance identifies the build origin of a published package. It is not a security certification or a guarantee about package behavior.[2]
 
@@ -57,12 +58,12 @@ Hi @MattIPv4,
 Thank you for the review. I have updated WelcomeScore so it directly serves JavaScript and TypeScript maintainers rather than functioning only as a general repository landing page.
 
 The project now includes a published npm CLI:
-https://www.npmjs.com/package/welcomescore
+https://www.npmjs.com/package/@ethiorhq/welcomescore
 
 Developers can run it locally with:
 
-npx welcomescore
-npx welcomescore --ci --threshold=80
+npx @ethiorhq/welcomescore
+npx @ethiorhq/welcomescore --ci --threshold=80
 
 The CLI audits JavaScript/TypeScript package metadata, Node and TypeScript tooling, GitHub Actions signals, and contributor foundations. It has local interactive, CI, JSON, and conservative template-preview/fix modes. The normal CLI does not upload project source or environment values.
 

@@ -78,7 +78,7 @@ export default function JsHealthDashboard() {
             </p>
           </div>
           <div className="rounded-md border border-accent/25 bg-surface/70 px-4 py-3 font-mono text-xs text-muted shadow-[0_0_35px_rgba(232,162,61,0.05)]">
-            <p className="text-accent">npx welcomescore</p>
+            <p className="text-accent">npx @ethiorhq/welcomescore</p>
             <p className="mt-1">Local CLI · no source upload</p>
           </div>
         </header>
@@ -143,9 +143,9 @@ export default function JsHealthDashboard() {
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-accent">Terminal-native companion</p>
             <h2 id="cli-title" className="mt-2 font-mono text-xl font-bold">Run the same local-first checks</h2>
             <p className="mt-2 font-sans text-sm leading-6 text-muted">The CLI reads only your selected local project directory. It does not upload source files, package manifests, environment values, or repository credentials to WelcomeScore.</p>
-            <CopyCommand value="npx welcomescore" />
-            <CopyCommand value="npx welcomescore --ci --threshold=80" />
-            <CopyCommand value="npx welcomescore --fix --dry-run" />
+            <CopyCommand value="npx @ethiorhq/welcomescore" />
+            <CopyCommand value="npx @ethiorhq/welcomescore --ci --threshold=80" />
+            <CopyCommand value="npx @ethiorhq/welcomescore --fix --dry-run" />
           </div>
           <div className="rounded-md border border-accent/25 bg-[radial-gradient(circle_at_top_right,rgba(232,162,61,0.12),transparent_52%)] p-5 sm:p-6">
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-accent">Remediation boundary</p>

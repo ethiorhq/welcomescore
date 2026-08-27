@@ -1,5 +1,5 @@
 {
-  "name": "welcomescore",
+  "name": "@ethiorhq/welcomescore",
   "version": "0.1.0",
   "description": "Local JavaScript and TypeScript repository health checks for package, tooling, CI, and contributor foundations.",
   "keywords": [
