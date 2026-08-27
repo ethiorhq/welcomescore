@@ -27,7 +27,7 @@ const sections: PolicySection[] = [
     title: "Service description and limits",
     content: (
       <>
-        <p>WelcomeScore evaluates a defined set of public GitHub contributor-readiness signals. It may display a score, grade, checklist, optional evidence-bound review, badge, and eligibility-related Hall of Fame information. The service may use caches, public APIs, databases, and optional review providers to deliver these features.</p>
+        <p>WelcomeScore evaluates a defined set of public GitHub contributor-readiness signals. It may display a score, grade, checklist, optional evidence-bound review, badge, explicitly requested dated audit receipt, and eligibility-related Hall of Fame information. The service may use caches, public APIs, databases, and optional review providers to deliver these features.</p>
         <p>The service is provided for general informational and developer-productivity purposes. It is not a security audit, legal opinion, compliance review, investment analysis, employment recommendation, due-diligence report, warranty, endorsement, certification, or guarantee of repository quality, maintainer conduct, availability, safety, legality, or suitability.</p>
         <PolicyCallout>Do not rely on a score, badge, review, Hall entry, chat message, external link, or another user’s statement as the sole basis for a contribution, business decision, hiring decision, financial transaction, legal decision, security decision, or off-platform interaction.</PolicyCallout>
       </>
@@ -39,7 +39,7 @@ const sections: PolicySection[] = [
     content: (
       <>
         <p>You may use the service for lawful, respectful purposes and only submit public repository paths or content that you are permitted to provide. You must not interfere with the service, evade rate limits or access controls, probe for vulnerabilities without authorization, introduce malicious code, scrape or overload the service, impersonate another person, or use the service to violate law, platform rules, privacy, intellectual-property rights, or these terms.</p>
-        <p>You must not submit credentials, tokens, passwords, private keys, payment details, personal data, private repository material, confidential information, exploit details, or unlawful or harmful content. Do not use the Dev Lounge for spam, scams, phishing, solicitation, recruiting, investment offers, paid services, transactions, or private deals.</p>
+        <p>You must not submit credentials, tokens, passwords, private keys, payment details, personal data, private repository material, confidential information, exploit details, or unlawful or harmful content. Do not use the Dev Lounge for spam, scams, phishing, solicitation, recruiting, investment offers, paid services, transactions, or private deals. Do not use a badge, dated audit receipt, Hall reference, or sharing prompt to solicit artificial stars, forks, follows, votes, reciprocal engagement, or to make unsupported quality, safety, legal, or endorsement claims.</p>
       </>
     ),
   },
@@ -71,7 +71,7 @@ const sections: PolicySection[] = [
       <>
         <p>WelcomeScore, WelcomeScore.js.org, ETHIOR, related logos, visual identity, software, documentation, and product content are protected by applicable intellectual-property laws. Except for the limited rights expressly granted in the project license or these terms, no rights are granted by implication.</p>
         <p>The public source repository is made available under a source-available attribution license. It is not an OSI-approved open-source license. Any permitted redistribution, derivative, or public deployment must retain the license, notices, and visible original-project attribution required by the license. See <Link className="text-link underline underline-offset-4" href="https://github.com/ethiorhq/welcomescore/blob/main/ATTRIBUTION.md">ATTRIBUTION.md</Link> for the practical attribution format.</p>
-        <p>A generated badge may be used to display the relevant WelcomeScore result, provided you do not alter it to misrepresent the score, claim endorsement, or conceal the source of the result. Badges and Hall entries are informational outputs, not certifications.</p>
+        <p>A generated badge may be used to display the relevant WelcomeScore result, provided you do not alter it to misrepresent the score, claim endorsement, or conceal the source of the result. An explicitly created Share With Purpose receipt is a limited, signed public snapshot with an expiry; it is not a current-state guarantee and must not be presented as a certificate. Badges, dated receipts, and Hall entries are informational outputs, not certifications.</p>
       </>
     ),
   },
@@ -81,7 +81,7 @@ const sections: PolicySection[] = [
     content: (
       <>
         <p>THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE.” TO THE MAXIMUM EXTENT PERMITTED BY LAW, ETHIOR DISCLAIMS ALL WARRANTIES, EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, ACCURACY, SECURITY, AVAILABILITY, AND ERROR-FREE OR UNINTERRUPTED OPERATION.</p>
-        <p>Public data, third-party APIs, review providers, caches, links, and user-generated content can be incomplete, stale, inaccurate, unavailable, altered, or misleading. ETHIOR does not guarantee the accuracy, completeness, reliability, timing, availability, or security of any audit, review, badge, Hall entry, chat message, link, or third-party service.</p>
+        <p>Public data, third-party APIs, review providers, caches, links, and user-generated content can be incomplete, stale, inaccurate, unavailable, altered, or misleading. A dated audit receipt reflects only the signed public snapshot and expires rather than updating itself. ETHIOR does not guarantee the accuracy, completeness, reliability, timing, availability, or security of any audit, review, badge, dated receipt, Hall entry, chat message, link, or third-party service.</p>
       </>
     ),
   },

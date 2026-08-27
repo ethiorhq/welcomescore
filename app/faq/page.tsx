@@ -41,6 +41,14 @@ const faqSchema = {
     },
     {
       "@type": "Question",
+      name: "Can I share a dated audit receipt?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes. After an explicit request, Share With Purpose can create a signed 21-day public snapshot of limited audit facts. It excludes private workspace notes and raw repository content. It is not a certification, endorsement, or guarantee of current repository state.",
+      },
+    },
+    {
+      "@type": "Question",
       name: "Are repositories added to the Hall of Fame automatically?",
       acceptedAnswer: {
         "@type": "Answer",
@@ -97,7 +105,9 @@ const sections: PolicySection[] = [
         <h3 className="font-sans text-base font-semibold text-text">Why can a review vary?</h3>
         <p>Equivalent evidence can be expressed in different concise ways. Deterministic guidance rotates bounded copy variants without repeating the immediately prior option for the same evidence context. Provider responses are validated against the audit before display.</p>
         <h3 className="font-sans text-base font-semibold text-text">Can I add a badge to my README?</h3>
-        <p>Yes. The completed audit offers shareable badge formats that read the same scoring pipeline. A badge is not an endorsement, certification, warranty, or guarantee; it reflects the available audit data at the time it is generated.</p>
+        <p>Yes. The completed audit offers shareable badge formats that read the same scoring pipeline. A badge is not an endorsement, certification, warranty, or guarantee; it reflects bounded cached audit data rather than a promise of live/current status.</p>
+        <h3 className="font-sans text-base font-semibold text-text">Can I share a dated audit receipt?</h3>
+        <p>Yes. After an explicit request, Share With Purpose can create a signed 21-day public snapshot of limited audit facts. It excludes private Contributor Workspace notes, raw README/source/issue content, AI review content, Hall/Lounge information, browser identity, and credentials. It is not a certification, endorsement, or guarantee of current repository state. Creating a receipt does not post to social media, copy text, add a Hall entry, or send a Lounge message.</p>
       </>
     ),
   },

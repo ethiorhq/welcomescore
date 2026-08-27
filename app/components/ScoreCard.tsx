@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import AlgofoxReviewCard from "@/app/components/AlgofoxReviewCard";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
 import NextUsefulMoveCard from "@/app/components/NextUsefulMoveCard";
+import ShareWithPurposeModal from "@/app/components/ShareWithPurposeModal";
 import {
   CODE_OF_CONDUCT_TEMPLATE,
   CONTRIBUTING_TEMPLATE,
@@ -40,6 +41,7 @@ export default function ScoreCard({
   onRequestRefresh?: () => void;
 }) {
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+  const [isShareWithPurposeOpen, setIsShareWithPurposeOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateFile | null>(
     null,
   );
@@ -191,22 +193,35 @@ export default function ScoreCard({
       />
 
       <div className="mt-9 border-t border-muted/20 pt-6">
-        <h2 className="font-sans text-sm font-semibold text-muted">Share your score</h2>
+        <h2 className="font-sans text-sm font-semibold text-muted">Share a useful contributor signal</h2>
+        <p className="mt-1.5 max-w-2xl font-sans text-sm leading-5 text-muted">
+          Optional public audit context for collaborators and contributors. Nothing is posted, copied, or added anywhere for you.
+        </p>
         <div className="mt-3 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setIsShareWithPurposeOpen(true)}
+            className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+          >
+            Share with purpose
+          </button>
           <button
             type="button"
             onClick={() => setIsBadgeModalOpen(true)}
             className="h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
           >
-            Embed badge
+            Embed README badge
           </button>
-            <Link
-              href={`/lounge?prepareAudit=${encodeURIComponent(result.repo)}`}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
-            >
-              Discuss this audit in Dev Lounge
-            </Link>
+          <Link
+            href={`/lounge?prepareAudit=${encodeURIComponent(result.repo)}`}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+          >
+            Prepare Dev Lounge discussion
+          </Link>
         </div>
+        <p className="mt-3 font-sans text-xs leading-5 text-muted">
+          No automatic posts · no request for stars or forks · no certification claim.
+        </p>
       </div>
 
       {selectedTemplate ? (
@@ -222,6 +237,13 @@ export default function ScoreCard({
           repoPath={result.repo}
           score={result.score}
           onClose={() => setIsBadgeModalOpen(false)}
+        />
+      ) : null}
+
+      {isShareWithPurposeOpen ? (
+        <ShareWithPurposeModal
+          result={result}
+          onClose={() => setIsShareWithPurposeOpen(false)}
         />
       ) : null}
     </section>

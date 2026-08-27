@@ -2,34 +2,35 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
+import { SITE_URL } from "@/lib/site";
 
-const SITE_URL = "https://welcomescore.vercel.app";
-// Bump this whenever badge geometry changes so previews and fresh embeds cannot reuse a prior SVG response.
+// Keep this version and all existing style IDs stable so previous README embeds
+// retain their exact SVG route, cache behavior, and visual geometry.
 const BADGE_RENDER_VERSION = "3";
 
 const BADGE_STYLES = [
   {
     id: "1",
     name: "Minimal",
-    description: "Compact README pill",
+    description: "Compact README badge",
     width: 270,
     height: 32,
   },
   {
     id: "2",
     name: "Rank shield",
-    description: "Rank-forward certification",
+    description: "Legacy shield visual style",
     width: 420,
     height: 92,
   },
   {
     id: "3",
     name: "Metrics",
-    description: "Score, grade, and rank",
+    description: "Legacy score and grade display",
     width: 520,
     height: 54,
   },
@@ -42,77 +43,75 @@ const BADGE_STYLES = [
   },
 ] as const;
 
-type BadgeStyleId = typeof BADGE_STYLES[number]["id"];
+type BadgeStyleId = (typeof BADGE_STYLES)[number]["id"];
 type EmbedFormat = "markdown" | "html";
 
 export default function BadgeShareModal({
   repoPath,
-  score,
   onClose,
 }: {
   repoPath: string;
   score: number;
   onClose: () => void;
 }) {
-  const [feedback, setFeedback] = useState<"embed" | "share" | null>(null);
+  const [feedback, setFeedback] = useState(false);
   const { setAlgofoxState } = useAlgofoxPet();
   const [style, setStyle] = useState<BadgeStyleId>("1");
   const [format, setFormat] = useState<EmbedFormat>("markdown");
   const [owner, repo] = repoPath.split("/");
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const copyTimerRef = useRef<number | null>(null);
 
   const selectedStyle = BADGE_STYLES.find((option) => option.id === style) ?? BADGE_STYLES[0];
   const badgePath = `/api/badge/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}?style=${style}&v=${BADGE_RENDER_VERSION}`;
   const badgeUrl = `${SITE_URL}${badgePath}`;
   const auditUrl = `${SITE_URL}${auditPath(repoPath)}`;
+  const purposeAlt = `Open current WelcomeScore contributor-readiness audit for ${repoPath}`;
   const embed = useMemo(() => {
     if (format === "html") {
-      return `<a href="${auditUrl}"><img src="${badgeUrl}" alt="WelcomeScore rank badge for ${repoPath}" /></a>`;
+      return `<a href="${auditUrl}"><img src="${badgeUrl}" alt="${purposeAlt}" /></a>`;
     }
 
-    return `[![WelcomeScore Rank](${badgeUrl})](${auditUrl})`;
-  }, [auditUrl, badgeUrl, format, repoPath]);
-  const socialText = `We scored ${score}/100 on WelcomeScore! Our open-source contributor health audit is live: ${auditUrl}`;
+    return `[![${purposeAlt}](${badgeUrl})](${auditUrl})`;
+  }, [auditUrl, badgeUrl, format, purposeAlt]);
   const discussionPath = `/lounge?prepareAudit=${encodeURIComponent(repoPath)}`;
 
   useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    const timer = window.setTimeout(() => closeButtonRef.current?.focus(), 0);
+
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        event.preventDefault();
         onClose();
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      window.clearTimeout(timer);
+      if (copyTimerRef.current) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+      window.removeEventListener("keydown", handleKeyDown);
+      previousFocus?.focus();
+    };
   }, [onClose]);
 
-  async function copy(value: string, type: "embed" | "share") {
+  async function copyEmbed() {
     try {
-      await navigator.clipboard.writeText(value);
-      setFeedback(type);
-      if (type === "embed") {
-        setAlgofoxState("jumping", getAlgofoxMessage("badgeCopied"), 4_000);
+      await navigator.clipboard.writeText(embed);
+      setFeedback(true);
+      setAlgofoxState("jumping", getAlgofoxMessage("badgeCopied"), 4_000);
+      if (copyTimerRef.current) {
+        window.clearTimeout(copyTimerRef.current);
       }
-      window.setTimeout(() => setFeedback(null), 1500);
+      copyTimerRef.current = window.setTimeout(() => setFeedback(false), 1_500);
     } catch {
-      setFeedback(null);
+      setFeedback(false);
     }
-  }
-
-  function shareOnX() {
-    window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(socialText)}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
-  }
-
-  async function shareOnLinkedIn() {
-    await copy(socialText, "share");
-    window.open(
-      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(auditUrl)}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
   }
 
   return (
@@ -130,20 +129,21 @@ export default function BadgeShareModal({
         <div className="flex items-start justify-between gap-4 border-b border-muted/20 pb-4">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-accent">
-              Embed your rank badge
+              Embed a contributor-signal badge
             </p>
             <h2 id="badge-share-modal-title" className="mt-2 break-all font-mono text-lg font-bold">
               {repoPath}
             </h2>
             <p className="mt-1.5 max-w-lg font-sans text-sm leading-5 text-muted">
-              Select a live SVG style, then copy a README-ready embed.
+              Select a cached SVG style, then copy a README-ready embed that links to the current public audit.
             </p>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             className="text-link text-xl leading-none"
             onClick={onClose}
-            aria-label="Close badge modal"
+            aria-label="Close contributor-signal badge dialog"
           >
             ×
           </button>
@@ -185,11 +185,11 @@ export default function BadgeShareModal({
           <div className="rounded-md border border-muted/25 bg-base/35 p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">Live preview</p>
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">Cached SVG preview</p>
                 <div className="mt-3">
                   <Image
                     src={badgePath}
-                    alt={`WelcomeScore ${selectedStyle.name} badge preview for ${repoPath}`}
+                    alt={`Preview: ${purposeAlt}`}
                     width={selectedStyle.width}
                     height={selectedStyle.height}
                     unoptimized
@@ -221,46 +221,37 @@ export default function BadgeShareModal({
               </button>
             ))}
           </div>
-          <p className="font-sans text-xs text-muted">Live SVG · cached for fast README loads</p>
+          <p className="font-sans text-xs text-muted">Cached SVG · bounded refresh</p>
         </div>
 
         <pre className="mt-2 max-h-28 overflow-auto rounded-md border border-muted/35 bg-base/40 p-3 font-mono text-xs leading-5 text-text whitespace-pre-wrap">
           {embed}
         </pre>
 
+        <p className="mt-3 font-sans text-xs leading-5 text-muted">
+          This badge displays bounded public contributor-readiness signals. It is not a security review, code-quality certification, Hall listing, or endorsement.
+        </p>
+
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-muted/20 pt-4">
           <button
             type="button"
-            onClick={() => void copy(embed, "embed")}
+            onClick={() => void copyEmbed()}
             className={`h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium transition-colors duration-180 ease-out hover:bg-accent/15 ${
-              feedback === "embed" ? "text-good" : "text-accent"
+              feedback ? "text-good" : "text-accent"
             }`}
           >
-            {feedback === "embed" ? "Copied!" : `Copy ${format === "markdown" ? "Markdown" : "HTML"}`}
+            {feedback ? "Copied" : `Copy ${format === "markdown" ? "Markdown" : "HTML"}`}
           </button>
           <Link
             href={discussionPath}
             className="text-link font-sans text-sm underline underline-offset-4"
           >
-            Start an audit discussion
+            Prepare a Dev Lounge discussion
           </Link>
-          <button
-            type="button"
-            onClick={shareOnX}
-            className="text-link font-sans text-sm underline underline-offset-4"
-          >
-            Share on X
-          </button>
-          <button
-            type="button"
-            onClick={() => void shareOnLinkedIn()}
-            className={`font-sans text-sm underline underline-offset-4 ${
-              feedback === "share" ? "text-good" : "text-link"
-            }`}
-          >
-            {feedback === "share" ? "Post copied" : "Share on LinkedIn"}
-          </button>
         </div>
+        <p role="status" className="mt-3 min-h-5 font-sans text-xs leading-5 text-muted">
+          {feedback ? "Badge embed copied. Nothing has been added to your repository for you." : "Copying is always an explicit action."}
+        </p>
       </section>
     </div>
   );
