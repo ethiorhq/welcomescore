@@ -28,9 +28,9 @@ What simpler approach, existing feature, or documentation change could solve the
 
 ## Acceptance criteria
 
-- [ ] 
-- [ ] 
-- [ ] 
+- [ ] The proposed user outcome is observable and testable.
+- [ ] The change preserves explicit user control and documented privacy boundaries.
+- [ ] The scope and validation plan are clear enough for a contributor to begin.
 
 ## Additional context
 

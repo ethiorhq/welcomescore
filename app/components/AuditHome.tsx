@@ -41,9 +41,13 @@ export default function AuditHome({
     );
 
     try {
-      const response = await fetch(
-        `/api/score?repo=${encodeURIComponent(normalizedRepository)}`,
-      );
+      const query = new URLSearchParams({
+        repo: normalizedRepository,
+        fresh: "1",
+      });
+      const response = await fetch(`/api/score?${query.toString()}`, {
+        cache: "no-store",
+      });
 
       if (!response.ok) {
         const error = (await response.json().catch(() => ({}))) as ScoreError;
@@ -140,7 +144,7 @@ export default function AuditHome({
               disabled={isChecking || isRepositoryEmpty}
               className="h-12 shrink-0 rounded-md bg-accent px-6 font-sans text-sm font-semibold text-base disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted"
             >
-              {isChecking ? "Checking…" : "Check"}
+              {isChecking ? "Checking latest…" : "Check"}
             </button>
           </form>
 

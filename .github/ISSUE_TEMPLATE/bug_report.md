@@ -20,9 +20,9 @@ What happened instead? Include the exact non-sensitive error message if one was 
 
 ## Reproduction steps
 
-1. 
-2. 
-3. 
+1. Describe the first action.
+2. Describe the next action.
+3. Describe the observed result.
 
 ## Environment
 

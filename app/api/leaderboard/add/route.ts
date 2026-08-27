@@ -19,7 +19,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await scoreRepo(repository.owner, repository.repo);
+    const result = await scoreRepo(repository.owner, repository.repo, {
+      fresh: true,
+    });
 
     if (!result.isEligibleForLeaderboard) {
       return NextResponse.json({ error: "not-eligible", result }, { status: 422 });

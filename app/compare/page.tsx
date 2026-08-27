@@ -162,7 +162,7 @@ export default function ComparePage() {
               disabled={!areInputsReady || isComparing}
               className="mt-4 h-12 rounded-md bg-accent px-6 font-sans text-sm font-semibold text-base disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted"
             >
-              {isComparing ? "Checking…" : "Compare"}
+              {isComparing ? "Checking latest…" : "Compare"}
             </button>
           </form>
 
@@ -224,7 +224,10 @@ function ComparisonSide({
 
 async function scoreRepository(repo: string): Promise<ComparisonOutcome> {
   try {
-    const response = await fetch(`/api/score?repo=${encodeURIComponent(repo)}`);
+    const query = new URLSearchParams({ repo, fresh: "1" });
+    const response = await fetch(`/api/score?${query.toString()}`, {
+      cache: "no-store",
+    });
     if (response.ok) {
       return { repo, result: (await response.json()) as ScoreResult, error: null };
     }

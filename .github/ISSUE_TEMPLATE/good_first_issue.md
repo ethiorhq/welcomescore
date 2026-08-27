@@ -18,11 +18,11 @@ Explain why the task is bounded, independently useful, understandable without hi
 
 ### In scope
 
-- 
+- Describe the smallest complete change required.
 
 ### Out of scope
 
-- 
+- Describe related work intentionally excluded from this starter task.
 
 ## Likely files or areas
 

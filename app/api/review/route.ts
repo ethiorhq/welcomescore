@@ -29,7 +29,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await scoreRepo(repository.owner, repository.repo);
+    const result = await scoreRepo(repository.owner, repository.repo, {
+      fresh: true,
+    });
     const context = createTrustedReviewContext(result);
     const contextHash = reviewContextHash(context);
     const cachedEntry = await readReviewCache(contextHash);

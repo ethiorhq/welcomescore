@@ -59,6 +59,11 @@ export type ScoreRepoErrorCode =
   | "rate-limit"
   | "upstream-error";
 
+export type ScoreRepoOptions = {
+  /** Bypass the short GitHub fetch cache for an explicit user recheck. */
+  fresh?: boolean;
+};
+
 export class ScoreRepoError extends Error {
   constructor(
     public readonly code: ScoreRepoErrorCode,
@@ -76,9 +81,13 @@ const repositorySegment = /^[A-Za-z0-9_.-]+$/;
 export async function scoreRepo(
   owner: string,
   repo: string,
+  options: ScoreRepoOptions = {},
 ): Promise<ScoreResult> {
   const apiPath = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
-  const repositoryResponse = await githubFetch(`${GITHUB_API}${apiPath}`);
+  const repositoryResponse = await githubFetch(
+    `${GITHUB_API}${apiPath}`,
+    options.fresh,
+  );
 
   if (repositoryResponse.status === 404) {
     throw new ScoreRepoError("not-found", 404);
@@ -103,9 +112,9 @@ export async function scoreRepo(
   issueSearchUrl.searchParams.set("q", issueQuery);
 
   const [contentsResponse, readmeResponse, issuesResponse] = await Promise.all([
-    githubFetch(`${GITHUB_API}${apiPath}/contents/`),
-    githubFetch(`${GITHUB_API}${apiPath}/readme`),
-    githubFetch(issueSearchUrl.toString()),
+    githubFetch(`${GITHUB_API}${apiPath}/contents/`, options.fresh),
+    githubFetch(`${GITHUB_API}${apiPath}/readme`, options.fresh),
+    githubFetch(issueSearchUrl.toString(), options.fresh),
   ]);
 
   if ([contentsResponse, readmeResponse, issuesResponse].some(isRateLimited)) {
@@ -245,7 +254,7 @@ export function parseRepository(value: string) {
   return null;
 }
 
-function githubFetch(url: string) {
+function githubFetch(url: string, fresh = false) {
   const headers = new Headers({
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
@@ -255,7 +264,7 @@ function githubFetch(url: string) {
     headers.set("Authorization", `Bearer ${process.env.GITHUB_TOKEN}`);
   }
 
-  return fetch(url, { headers, ...CACHE_OPTIONS });
+  return fetch(url, fresh ? { headers, cache: "no-store" } : { headers, ...CACHE_OPTIONS });
 }
 
 function isRateLimited(response: Response) {
