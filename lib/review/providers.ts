@@ -70,14 +70,9 @@ async function generateGroqReview(context: TrustedReviewContext) {
       },
       body: JSON.stringify({
         model,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Generate one safe, evidence-bound Algofox review. Return only a valid JSON object matching the supplied schema.",
-          },
-          { role: "user", content: reviewProviderPrompt(context) },
-        ],
+        // GPT-OSS guidance recommends placing instructions in the user message.
+        // reviewProviderPrompt already requires an evidence-bound JSON object.
+        messages: [{ role: "user", content: reviewProviderPrompt(context) }],
         // GPT-OSS 20B/120B supports strict JSON Schema. This prevents the
         // json_validate_failed response that occurred in JSON Object Mode.
         response_format: {
@@ -89,7 +84,12 @@ async function generateGroqReview(context: TrustedReviewContext) {
           },
         },
         temperature: 0.5,
-        max_tokens: 250,
+        // GPT-OSS completion tokens cover both reasoning and visible JSON. Its
+        // documented default is 1024; 250 exhausted generation before it could
+        // finish and validate the strict JSON object.
+        max_completion_tokens: 1024,
+        reasoning_effort: "low",
+        include_reasoning: false,
       }),
       signal: AbortSignal.timeout(8_000),
     });
