@@ -6,6 +6,8 @@ import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 
 const SITE_URL = "https://welcomescore.vercel.app";
+// Bump this whenever badge geometry changes so previews and fresh embeds cannot reuse a prior SVG response.
+const BADGE_RENDER_VERSION = "3";
 
 const BADGE_STYLES = [
   {
@@ -57,7 +59,7 @@ export default function BadgeShareModal({
   const [owner, repo] = repoPath.split("/");
 
   const selectedStyle = BADGE_STYLES.find((option) => option.id === style) ?? BADGE_STYLES[0];
-  const badgePath = `/api/badge/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}?style=${style}`;
+  const badgePath = `/api/badge/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}?style=${style}&v=${BADGE_RENDER_VERSION}`;
   const badgeUrl = `${SITE_URL}${badgePath}`;
   const auditUrl = `${SITE_URL}${auditPath(repoPath)}`;
   const embed = useMemo(() => {

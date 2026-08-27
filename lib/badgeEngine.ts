@@ -188,10 +188,12 @@ function createGlowBadge(data: BadgeData, rank: RankConfig) {
     <text x="20" y="26" fill="${rank.color}" font-size="10" font-weight="700" letter-spacing="1.5">WELCOMESCORE .JS.ORG</text>
     <text x="20" y="47" class="text" font-size="15" font-weight="700">${escapeXml(repo)}</text>
     <text x="20" y="72" class="muted" font-size="12">${escapeXml(rank.level)} · ${escapeXml(rank.status)}</text>
-    <!-- Reserve an explicit column for the rank emblem so it never collides with a three-digit score. -->
-    ${emblemSvg(rank, 294, 32, 22, rank.color)}
-    <text x="404" y="65" text-anchor="end" fill="${rank.color}" font-size="42" font-weight="700">${data.score}</text>
-    <text x="404" y="85" text-anchor="end" class="muted" font-size="12">${escapeXml(data.grade)} grade / 100</text>
+    <!-- The rank chip and score block occupy separate vertical zones so an emblem never reads as part of a three-digit score. -->
+    <rect x="342" y="14" width="68" height="24" rx="6" fill="${rank.darkColor}" stroke="${rank.color}" stroke-opacity=".65"/>
+    ${emblemSvg(rank, 349, 19, 14, rank.color)}
+    <text x="402" y="29" text-anchor="end" fill="${rank.color}" font-size="9" font-weight="700" letter-spacing=".9">${escapeXml(rank.level.toUpperCase())}</text>
+    <text x="404" y="76" text-anchor="end" fill="${rank.color}" font-size="40" font-weight="700">${data.score}</text>
+    <text x="404" y="93" text-anchor="end" class="muted" font-size="11">${escapeXml(data.grade)} grade / 100</text>
   `);
 }
 
