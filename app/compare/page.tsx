@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import BackButton from "@/app/components/BackButton";
 import ScoreCard from "@/app/components/ScoreCard";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import type { ScoreResult } from "@/lib/scoreRepo";
 
@@ -53,14 +54,14 @@ export default function ComparePage() {
     if (left.toLowerCase() === right.toLowerCase()) {
       setSameRepositoryError(true);
       setOutcomes(null);
-      setAlgofoxState("waving", "Choose two different repositories and I’ll compare their contributor paths.", 4_500);
+      setAlgofoxState("waving", getAlgofoxMessage("compareDuplicate"), 4_500);
       return;
     }
 
     setSameRepositoryError(false);
     setIsComparing(true);
     setOutcomes(null);
-    setAlgofoxState("running", "Comparing two contributor paths: docs, setup, license, and newcomer issues.");
+    setAlgofoxState("running", getAlgofoxMessage("compareRunning"));
 
     try {
       const comparison = await Promise.all([
@@ -72,13 +73,13 @@ export default function ComparePage() {
       const [first, second] = comparison;
       if (first.result && second.result) {
         if (first.result.score === second.result.score) {
-          setAlgofoxState("waving", "It’s a tie. Both repositories show the same contributor-readiness score.", 5_000);
+          setAlgofoxState("waving", getAlgofoxMessage("compareTie"), 5_000);
         } else {
           const winner = first.result.score > second.result.score ? first.result.repo : second.result.repo;
-          setAlgofoxState("jumping", `${winner} takes this contributor-readiness round.`, 5_000);
+          setAlgofoxState("jumping", getAlgofoxMessage("compareWinner", { winner }), 5_000);
         }
       } else {
-        setAlgofoxState("review", "One result is ready. Check the other side’s message and try again if needed.", 5_000);
+        setAlgofoxState("review", getAlgofoxMessage("comparePartial"), 5_000);
       }
 
       const query = new URLSearchParams({ a: left, b: right });
@@ -127,7 +128,7 @@ export default function ComparePage() {
                   setRepoA(event.target.value);
                   setSameRepositoryError(false);
                 }}
-                onFocus={() => setAlgofoxState("review", "Add two public GitHub repositories and I’ll compare the contributor paths.", 4_000)}
+                onFocus={() => setAlgofoxState("review", getAlgofoxMessage("compareFocus"), 4_000)}
                 placeholder="owner/repo"
                 className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-sm text-text outline-none placeholder:text-muted focus:border-accent"
               />

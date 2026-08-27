@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 
@@ -87,7 +88,7 @@ export default function BadgeShareModal({
       await navigator.clipboard.writeText(value);
       setFeedback(type);
       if (type === "embed") {
-        setAlgofoxState("jumping", "Badge copied. Your README is ready for an Algofox-approved signal.", 4_000);
+        setAlgofoxState("jumping", getAlgofoxMessage("badgeCopied"), 4_000);
       }
       window.setTimeout(() => setFeedback(null), 1500);
     } catch {
@@ -159,7 +160,7 @@ export default function BadgeShareModal({
                   type="button"
                   onClick={() => {
                     setStyle(option.id);
-                    setAlgofoxState("review", "Reviewing this live badge style.", 3_000);
+                    setAlgofoxState("review", getAlgofoxMessage("badgeReview"), 3_000);
                   }}
                   className={`rounded-md border px-3 py-2.5 text-left transition-colors duration-180 ease-out ${
                     isSelected

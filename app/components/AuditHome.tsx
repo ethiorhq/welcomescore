@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import BackButton from "@/app/components/BackButton";
 import ScoreCard from "@/app/components/ScoreCard";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import type { ScoreResult } from "@/lib/scoreRepo";
 
@@ -36,7 +37,7 @@ export default function AuditHome({
     setErrorMessage("");
     setAlgofoxState(
       "running",
-      "Scanning contributor signals: docs, setup, license, and newcomer issues.",
+      getAlgofoxMessage("auditRunning"),
     );
 
     try {
@@ -56,22 +57,22 @@ export default function AuditHome({
         } else {
           setErrorMessage("Something went wrong, try again");
         }
-        setAlgofoxState("failed", "I couldn’t finish that audit. Check the repository link and try again.", 5_000);
+        setAlgofoxState("failed", getAlgofoxMessage("auditMissing"), 5_000);
         return;
       }
 
       const scoreResult = (await response.json()) as ScoreResult;
       setResult(scoreResult);
       if (scoreResult.score >= 85) {
-        setAlgofoxState("jumping", "Strong contributor path. Algofox is celebrating!", 5_000);
+        setAlgofoxState("jumping", getAlgofoxMessage("auditCelebration"), 5_000);
       } else if (scoreResult.score >= 75) {
-        setAlgofoxState("review", "Solid foundation. Let’s review the final contributor details.", 5_000);
+        setAlgofoxState("review", getAlgofoxMessage("auditStrong"), 5_000);
       } else {
-        setAlgofoxState("failed", "There is a clear path upward. Let’s improve one contributor signal at a time.", 5_000);
+        setAlgofoxState("failed", getAlgofoxMessage("auditImprove"), 5_000);
       }
     } catch {
       setErrorMessage("Something went wrong, try again");
-      setAlgofoxState("failed", "I couldn’t reach that audit right now. Let’s try again in a moment.", 5_000);
+      setAlgofoxState("failed", getAlgofoxMessage("auditUnavailable"), 5_000);
     } finally {
       setIsChecking(false);
     }
@@ -130,7 +131,7 @@ export default function AuditHome({
               type="text"
               value={repository}
               onChange={(event) => setRepository(event.target.value)}
-              onFocus={() => setAlgofoxState("review", "Drop a GitHub repository here and I’ll inspect the first-contributor path.", 4_000)}
+              onFocus={() => setAlgofoxState("review", getAlgofoxMessage("auditFocus"), 4_000)}
               placeholder="owner/repo — e.g. vercel/next.js"
               className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-sm text-text outline-none placeholder:text-muted focus:border-accent"
             />

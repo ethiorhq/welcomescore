@@ -32,27 +32,44 @@ export async function POST(request: NextRequest) {
     const result = await scoreRepo(repository.owner, repository.repo);
     const context = createTrustedReviewContext(result);
     const contextHash = reviewContextHash(context);
-    const cached = await readReviewCache(contextHash);
-    const cachedReview = validateAlgofoxReview(cached, context);
-
+    const cachedEntry = await readReviewCache(contextHash);
+    const cachedReview = validateAlgofoxReview(cachedEntry?.review, context);
     const hasConfiguredProvider = Boolean(process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY);
     const shouldUpgradeDeterministicCache =
       cachedReview?.provider === "rule-engine" && hasConfiguredProvider;
 
     if (cachedReview && !shouldUpgradeDeterministicCache) {
-      return response({ review: cachedReview, cache: "hit" });
+      // Provider output remains stable for its cache lifetime. Deterministic
+      // reviews rotate their bounded copy variants without extending the TTL.
+      if (cachedReview.provider !== "rule-engine") {
+        return response({ review: cachedReview, cache: "hit" });
+      }
+
+      const deterministic = generateDeterministicReview(context, cachedEntry?.variationHistory);
+      await writeReviewCache(
+        context,
+        contextHash,
+        deterministic.review,
+        deterministic.variationHistory,
+        cachedEntry?.expiresAt,
+      );
+      return response({ review: deterministic.review, cache: "hit" });
     }
 
     const providerReview = await generateProviderReview(context);
-    const review = providerReview ?? cachedReview ?? generateDeterministicReview(context);
-
-    if (providerReview || !cachedReview) {
-      await writeReviewCache(context, contextHash, review);
+    if (providerReview) {
+      await writeReviewCache(context, contextHash, providerReview, cachedEntry?.variationHistory);
+      return response({
+        review: providerReview,
+        cache: cachedReview ? "upgraded" : "miss",
+      });
     }
 
+    const deterministic = generateDeterministicReview(context, cachedEntry?.variationHistory);
+    await writeReviewCache(context, contextHash, deterministic.review, deterministic.variationHistory);
     return response({
-      review,
-      cache: providerReview && cachedReview ? "upgraded" : cachedReview ? "hit" : "miss",
+      review: deterministic.review,
+      cache: cachedReview ? "hit" : "miss",
     });
   } catch (error) {
     if (error instanceof ScoreRepoError) {

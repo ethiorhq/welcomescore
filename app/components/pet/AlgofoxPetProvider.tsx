@@ -1,5 +1,6 @@
 "use client";
 
+import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import {
   createContext,
   useCallback,
@@ -32,7 +33,6 @@ type AlgofoxPetContextValue = {
 };
 
 const AlgofoxPetContext = createContext<AlgofoxPetContextValue | null>(null);
-const IDLE_QUOTE = "Algofox is ready to inspect your contributor path.";
 const DEFAULT_BUBBLE_DURATION_MS = 4_500;
 
 export default function AlgofoxPetProvider({ children }: { children: ReactNode }) {
@@ -66,7 +66,7 @@ export default function AlgofoxPetProvider({ children }: { children: ReactNode }
   );
 
   useEffect(() => {
-    setAlgofoxState("idle", IDLE_QUOTE, DEFAULT_BUBBLE_DURATION_MS);
+    setAlgofoxState("idle", getAlgofoxMessage("idle"), DEFAULT_BUBBLE_DURATION_MS);
   }, [setAlgofoxState]);
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function AlgofoxPetProvider({ children }: { children: ReactNode }
       inactivityTimer = window.setTimeout(() => {
         setAlgofoxState(
           "waiting",
-          "Quiet moment detected. I’ll be here when you are ready.",
+          getAlgofoxMessage("waiting"),
           DEFAULT_BUBBLE_DURATION_MS,
         );
       }, 60_000);

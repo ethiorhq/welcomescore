@@ -5,6 +5,7 @@ import { FormEvent, PointerEvent, Suspense, useCallback, useEffect, useMemo, use
 import { useSearchParams } from "next/navigation";
 import BackButton from "@/app/components/BackButton";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import { createDevAvatar } from "@/lib/devIdentity";
@@ -158,7 +159,7 @@ function DevLoungeContent() {
     setReplyingTo(null);
     setAlgofoxState(
       "waving",
-      attachedScore ? "Score shared. Algofox is cheering for practical contributor progress." : "Message sent. Keep the developer conversation constructive.",
+      getAlgofoxMessage(attachedScore ? "loungeScoreSent" : "loungeMessageSent"),
       4_000,
     );
     scrollToLatest();
@@ -311,7 +312,7 @@ function DevLoungeContent() {
                 id="lounge-message"
                 value={draft}
                 onChange={(event) => setDraft(event.target.value.slice(0, 300))}
-                onFocus={() => setAlgofoxState("waving", "I’m listening. Keep it practical and kind.", 3_500)}
+                onFocus={() => setAlgofoxState("waving", getAlgofoxMessage("loungeFocus"), 3_500)}
                 placeholder="Ask a contributor question or share a small win…"
                 rows={3}
                 disabled={status !== "ready"}

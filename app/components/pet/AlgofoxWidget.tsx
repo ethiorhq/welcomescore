@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 
@@ -130,7 +131,7 @@ export default function AlgofoxWidget() {
       setIsMobileBubbleOpen(true);
       setAlgofoxState(
         gesture.direction === "left" ? "run-left" : "run-right",
-        "Nice route. Algofox is happy to explore your developer workspace.",
+        getAlgofoxMessage("travel"),
         TRAVEL_FEEDBACK_DURATION_MS,
       );
     }
@@ -147,7 +148,7 @@ export default function AlgofoxWidget() {
     }
 
     setIsMobileBubbleOpen(true);
-    setAlgofoxState("waving", "Still here. Let’s make a repository easier to join.", 4_000);
+    setAlgofoxState("waving", getAlgofoxMessage("prompt"), 4_000);
   }
 
   if (!isVisible) {
