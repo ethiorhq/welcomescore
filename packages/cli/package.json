@@ -46,14 +46,14 @@
   },
   "packageManager": "npm@11.6.2",
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "scripts": {
     "build": "tsup src/bin.ts src/index.ts --format esm --dts --sourcemap --clean --platform node --out-dir dist --external react --external ink --external commander --external ora --external chalk",
     "check": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
-    "pack:check": "npm pack --dry-run"
+    "pack:check": "npm pack --dry-run",
+    "prepublishOnly": "npm run check && npm run test && npm run build && npm run pack:check"
   },
   "dependencies": {
     "chalk": "^6.0.0",
