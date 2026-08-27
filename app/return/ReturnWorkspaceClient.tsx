@@ -17,7 +17,7 @@ import {
 export default function ReturnWorkspaceClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const selectedRepo = searchParams.get("repo")?.trim().toLowerCase() ?? null;
+  const selectedRepo = searchParams?.get("repo")?.trim().toLowerCase() ?? null;
   const { entries, isLoaded, isStorageAvailable, reload, clearAll } = useLocalReturnWorkspaceIndex();
   const [workspaces, setWorkspaces] = useState<LocalReturnWorkspace[]>([]);
   const [isConfirmingClearAll, setIsConfirmingClearAll] = useState(false);

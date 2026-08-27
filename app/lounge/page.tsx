@@ -60,9 +60,9 @@ export default function DevLoungePage() {
 
 function DevLoungeContent() {
   const searchParams = useSearchParams();
-  const incomingAuditRepo = validRepository(searchParams.get("prepareAudit") ?? searchParams.get("repo"));
-  const incomingHallRepo = validRepository(searchParams.get("hallRepo"));
-  const incomingFocus = searchParams.get("focus");
+  const incomingAuditRepo = validRepository(searchParams?.get("prepareAudit") ?? searchParams?.get("repo") ?? null);
+  const incomingHallRepo = validRepository(searchParams?.get("hallRepo") ?? null);
+  const incomingFocus = searchParams?.get("focus") ?? null;
   const {
     identity,
     messages,
