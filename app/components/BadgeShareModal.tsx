@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
@@ -71,6 +72,7 @@ export default function BadgeShareModal({
     return `[![WelcomeScore Rank](${badgeUrl})](${auditUrl})`;
   }, [auditUrl, badgeUrl, format, repoPath]);
   const socialText = `We scored ${score}/100 on WelcomeScore! Our open-source contributor health audit is live: ${auditUrl}`;
+  const discussionPath = `/lounge?prepareAudit=${encodeURIComponent(repoPath)}`;
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -236,6 +238,12 @@ export default function BadgeShareModal({
           >
             {feedback === "embed" ? "Copied!" : `Copy ${format === "markdown" ? "Markdown" : "HTML"}`}
           </button>
+          <Link
+            href={discussionPath}
+            className="text-link font-sans text-sm underline underline-offset-4"
+          >
+            Start an audit discussion
+          </Link>
           <button
             type="button"
             onClick={shareOnX}

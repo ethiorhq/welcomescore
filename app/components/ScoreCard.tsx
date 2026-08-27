@@ -200,12 +200,12 @@ export default function ScoreCard({
           >
             Embed badge
           </button>
-          <Link
-            href={`/lounge?repo=${encodeURIComponent(result.repo)}&score=${result.score}&grade=${encodeURIComponent(result.grade)}`}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
-          >
-            Share to Dev Lounge
-          </Link>
+            <Link
+              href={`/lounge?prepareAudit=${encodeURIComponent(result.repo)}`}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+            >
+              Discuss this audit in Dev Lounge
+            </Link>
         </div>
       </div>
 

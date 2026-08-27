@@ -9,6 +9,14 @@ import {
   type DevIdentity,
 } from "@/lib/devIdentity";
 import { getSupabaseBrowserClient } from "@/lib/supabaseBrowser";
+import type {
+  LoungeAnswerMark,
+  LoungeCommunityContext,
+  LoungePreparedContext,
+  LoungeReplySnapshot,
+  LoungeReportReason,
+  LoungeTopic,
+} from "@/lib/loungeTypes";
 
 const MESSAGE_LIMIT = 50;
 const COOLDOWN_MS = 3000;
@@ -28,12 +36,7 @@ export type PetReaction = {
   quote: string;
 };
 
-export type LoungeReply = {
-  id: string;
-  dev_handle: string;
-  content: string;
-  created_at: string;
-};
+export type LoungeReply = LoungeReplySnapshot;
 
 export type LoungeReactionRecord = {
   id: string;
@@ -49,6 +52,9 @@ export type LoungeMessage = {
   dev_handle: string;
   avatar_seed: string;
   content: string;
+  topic: LoungeTopic;
+  parent_message_id: string | null;
+  community_context: LoungeCommunityContext | null;
   score_card: LoungeScoreCard | null;
   pet_reaction: PetReaction | null;
   reply_to: LoungeReply | null;
@@ -57,24 +63,27 @@ export type LoungeMessage = {
 };
 
 type LoungeStatus = "connecting" | "ready" | "unavailable";
+type GatewayState = "checking" | "ready" | "legacy";
 
 export function useDevLounge() {
   const [identity, setIdentity] = useState<DevIdentity | null>(null);
   const [messages, setMessages] = useState<LoungeMessage[]>([]);
   const [reactions, setReactions] = useState<LoungeReactionRecord[]>([]);
+  const [answerMarks, setAnswerMarks] = useState<LoungeAnswerMark[]>([]);
   const [status, setStatus] = useState<LoungeStatus>("connecting");
+  const [gatewayState, setGatewayState] = useState<GatewayState>("checking");
   const [onlineCount, setOnlineCount] = useState(0);
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [now, setNow] = useState(0);
 
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const isVerifiedGateway = gatewayState === "ready";
 
   const appendMessage = useCallback((incoming: LoungeMessage) => {
     setMessages((current) => {
       if (current.some((message) => message.id === incoming.id)) {
         return current;
       }
-
       return [...current, incoming].slice(-MESSAGE_LIMIT);
     });
   }, []);
@@ -84,9 +93,15 @@ export function useDevLounge() {
       if (current.some((reaction) => reaction.id === incoming.id)) {
         return current;
       }
-
       return [...current, incoming];
     });
+  }, []);
+
+  const appendAnswerMark = useCallback((incoming: LoungeAnswerMark) => {
+    setAnswerMarks((current) => [
+      ...current.filter((mark) => mark.question_message_id !== incoming.question_message_id),
+      incoming,
+    ]);
   }, []);
 
   useEffect(() => {
@@ -94,6 +109,27 @@ export function useDevLounge() {
     setNow(Date.now());
     const interval = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    async function checkGateway() {
+      try {
+        const response = await fetch("/api/lounge/health", { cache: "no-store" });
+        const data = await response.json() as { ready?: boolean };
+        if (active) {
+          setGatewayState(data.ready ? "ready" : "legacy");
+        }
+      } catch {
+        if (active) {
+          setGatewayState("legacy");
+        }
+      }
+    }
+    void checkGateway();
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -117,7 +153,6 @@ export function useDevLounge() {
       if (!isMounted) {
         return;
       }
-
       if (error) {
         setStatus("unavailable");
         return;
@@ -127,17 +162,28 @@ export function useDevLounge() {
       setMessages(activeMessages);
 
       if (activeMessages.length > 0) {
-        const { data: reactionData } = await client
-          .from("lounge_reactions")
-          .select("*")
-          .in("message_id", activeMessages.map((message) => message.id))
-          .order("created_at", { ascending: true });
-
+        const messageIds = activeMessages.map((message) => message.id);
+        const [{ data: reactionData }, { data: answerMarkData }] = await Promise.all([
+          client
+            .from("lounge_reactions")
+            .select("*")
+            .in("message_id", messageIds)
+            .order("created_at", { ascending: true }),
+          isVerifiedGateway
+            ? client
+              .from("lounge_answer_marks")
+              .select("*")
+              .in("question_message_id", messageIds)
+              .order("created_at", { ascending: true })
+            : Promise.resolve({ data: [] as LoungeAnswerMark[] }),
+        ]);
         if (isMounted) {
           setReactions((reactionData ?? []) as LoungeReactionRecord[]);
+          setAnswerMarks((answerMarkData ?? []) as LoungeAnswerMark[]);
         }
       } else {
         setReactions([]);
+        setAnswerMarks([]);
       }
 
       if (!isMounted) {
@@ -155,18 +201,35 @@ export function useDevLounge() {
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "lounge_reactions" },
           (payload) => appendReaction(payload.new as LoungeReactionRecord),
-        )
+        );
+
+      if (isVerifiedGateway) {
+        channel
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "lounge_answer_marks" },
+            (payload) => appendAnswerMark(payload.new as LoungeAnswerMark),
+          )
+          .on(
+            "postgres_changes",
+            { event: "DELETE", schema: "public", table: "lounge_answer_marks" },
+            (payload) => {
+              const removed = payload.old as Pick<LoungeAnswerMark, "question_message_id">;
+              setAnswerMarks((current) => current.filter((mark) => mark.question_message_id !== removed.question_message_id));
+            },
+          );
+      }
+
+      channel
         .on("presence", { event: "sync" }, () => {
-          if (!channel) {
-            return;
+          if (channel) {
+            setOnlineCount(countPresence(channel.presenceState()));
           }
-          setOnlineCount(countPresence(channel.presenceState()));
         })
         .subscribe(async (subscriptionStatus) => {
           if (!isMounted) {
             return;
           }
-
           if (subscriptionStatus === "SUBSCRIBED" && channel) {
             await channel.track({ dev_handle: identity!.handle });
             setStatus("ready");
@@ -177,38 +240,76 @@ export function useDevLounge() {
     }
 
     void connect();
-
     return () => {
       isMounted = false;
       if (channel) {
         void client.removeChannel(channel);
       }
     };
-  }, [appendMessage, appendReaction, identity, supabase]);
+  }, [appendAnswerMark, appendMessage, appendReaction, identity, isVerifiedGateway, supabase]);
 
-  const sendMessage = useCallback(
-    async ({
-      content,
-      scoreCard,
-      replyTo,
-    }: {
-      content: string;
-      scoreCard?: LoungeScoreCard;
-      replyTo?: LoungeReply;
-    }) => {
-      if (!supabase || !identity) {
-        return { error: "The lounge is not configured yet." };
+  const prepareAuditDiscussion = useCallback(async ({ repo, focus }: { repo: string; focus?: string }) => {
+    if (!identity || !isVerifiedGateway) {
+      return { error: "Fresh-audit discussions are being connected. No message was posted.", prepared: null };
+    }
+    return prepareContext("/api/lounge/context/audit", {
+      sessionHash: identity.sessionHash,
+      repo,
+      focus,
+    });
+  }, [identity, isVerifiedGateway]);
+
+  const prepareHallDiscussion = useCallback(async ({ repo }: { repo: string }) => {
+    if (!identity || !isVerifiedGateway) {
+      return { error: "Hall-pattern discussions are being connected. No message was posted.", prepared: null };
+    }
+    return prepareContext("/api/lounge/context/hall", {
+      sessionHash: identity.sessionHash,
+      repo,
+    });
+  }, [identity, isVerifiedGateway]);
+
+  const sendMessage = useCallback(async ({
+    content,
+    topic = "general",
+    contextToken,
+    replyTo,
+    scoreCard,
+  }: {
+    content: string;
+    topic?: LoungeTopic;
+    contextToken?: string | null;
+    replyTo?: LoungeReply;
+    scoreCard?: LoungeScoreCard;
+  }) => {
+    if (!supabase || !identity) {
+      return { error: "The Lounge is not configured yet." };
+    }
+    if (Date.now() < cooldownUntil) {
+      return { error: "Please wait a moment before sending another message." };
+    }
+
+    const sanitizedContent = sanitizeLoungeContent(content);
+    if ((!sanitizedContent && !scoreCard) || isBlockedLoungeContent(sanitizedContent)) {
+      return { error: "Please rewrite that message and try again." };
+    }
+
+    if (isVerifiedGateway) {
+      const outcome = await postJson("/api/lounge/messages", {
+        sessionHash: identity.sessionHash,
+        devHandle: identity.handle,
+        avatarSeed: identity.sessionId,
+        content: sanitizedContent,
+        topic,
+        contextToken,
+        replyTo,
+        clientRequestId: crypto.randomUUID(),
+      });
+      if (outcome.error) {
+        return { error: outcome.error };
       }
-
-      if (Date.now() < cooldownUntil) {
-        return { error: "Please wait a moment before sending another message." };
-      }
-
-      const sanitizedContent = sanitizeLoungeContent(content);
-      if ((!sanitizedContent && !scoreCard) || isBlockedLoungeContent(sanitizedContent)) {
-        return { error: "Please rewrite that message and try again." };
-      }
-
+      appendMessage(outcome.data.message as LoungeMessage);
+    } else {
       const messageToInsert = {
         session_hash: identity.sessionHash,
         dev_handle: identity.handle,
@@ -218,62 +319,155 @@ export function useDevLounge() {
         pet_reaction: scoreCard ? getPetReaction(scoreCard.score) : null,
         ...(replyTo ? { reply_to: replyTo } : {}),
       };
-
       const { error } = await supabase.from("lounge_messages").insert(messageToInsert);
-
       if (error) {
         return { error: "Unable to send the message right now." };
       }
+    }
 
-      setCooldownUntil(Date.now() + COOLDOWN_MS);
-      return { error: null };
-    },
-    [cooldownUntil, identity, supabase],
-  );
+    setCooldownUntil(Date.now() + COOLDOWN_MS);
+    return { error: null };
+  }, [appendMessage, cooldownUntil, identity, isVerifiedGateway, supabase]);
 
-  const addReaction = useCallback(
-    async ({ messageId, reaction }: { messageId: string; reaction: LoungeReaction }) => {
-      if (!supabase || !identity) {
-        return { error: "The lounge is not configured yet." };
+  const addReaction = useCallback(async ({ messageId, reaction }: { messageId: string; reaction: LoungeReaction }) => {
+    if (!supabase || !identity) {
+      return { error: "The Lounge is not configured yet." };
+    }
+    const existingReaction = reactions.find((record) => record.message_id === messageId && record.session_hash === identity.sessionHash);
+    if (existingReaction) {
+      return { error: "You have already reacted to this message." };
+    }
+
+    if (isVerifiedGateway) {
+      const outcome = await postJson("/api/lounge/reactions", {
+        sessionHash: identity.sessionHash,
+        messageId,
+        reaction,
+      });
+      if (outcome.error) {
+        return { error: outcome.error };
       }
-
-      const existingReaction = reactions.find(
-        (record) => record.message_id === messageId && record.session_hash === identity.sessionHash,
-      );
-      if (existingReaction) {
-        return { error: "You have already reacted to this message." };
+      if (outcome.data.reaction) {
+        appendReaction(outcome.data.reaction as LoungeReactionRecord);
       }
-
+    } else {
       const { data, error } = await supabase
         .from("lounge_reactions")
         .insert({ message_id: messageId, session_hash: identity.sessionHash, reaction })
         .select()
         .single();
-
       if (error) {
-        return {
-          error: error.code === "23505"
-            ? "You have already reacted to this message."
-            : "Unable to add that reaction right now.",
-        };
+        return { error: error.code === "23505" ? "You have already reacted to this message." : "Unable to add that reaction right now." };
       }
-
       appendReaction(data as LoungeReactionRecord);
-      return { error: null };
-    },
-    [appendReaction, identity, reactions, supabase],
-  );
+    }
+
+    return { error: null };
+  }, [appendReaction, identity, isVerifiedGateway, reactions, supabase]);
+
+  const markAnswer = useCallback(async ({ questionMessageId, answerMessageId }: { questionMessageId: string; answerMessageId: string }) => {
+    if (!identity || !isVerifiedGateway) {
+      return { error: "Useful-answer marking is being connected." };
+    }
+    const outcome = await postJson("/api/lounge/answers", {
+      sessionHash: identity.sessionHash,
+      questionMessageId,
+      answerMessageId,
+    });
+    if (outcome.error) {
+      return { error: outcome.error };
+    }
+    appendAnswerMark(outcome.data.answerMark as LoungeAnswerMark);
+    return { error: null };
+  }, [appendAnswerMark, identity, isVerifiedGateway]);
+
+  const clearAnswerMark = useCallback(async ({ questionMessageId }: { questionMessageId: string }) => {
+    if (!identity || !isVerifiedGateway) {
+      return { error: "Useful-answer marking is being connected." };
+    }
+    const outcome = await deleteJson("/api/lounge/answers", {
+      sessionHash: identity.sessionHash,
+      questionMessageId,
+    });
+    if (outcome.error) {
+      return { error: outcome.error };
+    }
+    setAnswerMarks((current) => current.filter((mark) => mark.question_message_id !== questionMessageId));
+    return { error: null };
+  }, [identity, isVerifiedGateway]);
+
+  const reportMessage = useCallback(async ({ messageId, reason, detail }: { messageId: string; reason: LoungeReportReason; detail?: string }) => {
+    if (!identity || !isVerifiedGateway) {
+      return { error: "Private reporting is being connected." };
+    }
+    const outcome = await postJson("/api/lounge/reports", {
+      sessionHash: identity.sessionHash,
+      messageId,
+      reason,
+      detail,
+    });
+    return { error: outcome.error };
+  }, [identity, isVerifiedGateway]);
 
   return {
     identity,
     messages,
     reactions,
+    answerMarks,
     onlineCount,
     status,
+    gatewayState,
+    isVerifiedGateway,
     cooldownRemaining: Math.max(0, Math.ceil((cooldownUntil - now) / 1000)),
     sendMessage,
     addReaction,
+    markAnswer,
+    clearAnswerMark,
+    reportMessage,
+    prepareAuditDiscussion,
+    prepareHallDiscussion,
   };
+}
+
+async function prepareContext(path: string, body: Record<string, unknown>) {
+  const outcome = await postJson(path, body);
+  if (outcome.error) {
+    return { error: outcome.error, prepared: null };
+  }
+  return { error: null, prepared: outcome.data as LoungePreparedContext };
+}
+
+async function postJson(path: string, body: Record<string, unknown>) {
+  try {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    const data = response.status === 204 ? {} : await response.json() as Record<string, unknown>;
+    return { error: response.ok ? null : typeof data.error === "string" ? data.error : "Unable to complete that Lounge action right now.", data };
+  } catch {
+    return { error: "Unable to complete that Lounge action right now.", data: {} as Record<string, unknown> };
+  }
+}
+
+async function deleteJson(path: string, body: Record<string, unknown>) {
+  try {
+    const response = await fetch(path, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    if (response.ok) {
+      return { error: null };
+    }
+    const data = await response.json() as { error?: string };
+    return { error: data.error ?? "Unable to complete that Lounge action right now." };
+  } catch {
+    return { error: "Unable to complete that Lounge action right now." };
+  }
 }
 
 function countPresence(state: Record<string, unknown[]>) {
@@ -287,13 +481,11 @@ function getPetReaction(score: number): PetReaction | null {
       quote: "The contributor path needs attention. Start with the clearest missing check and build upward.",
     };
   }
-
   if (score > 85) {
     return {
       pet: "algofox",
       quote: "High contributor readiness detected. Recommendation: keep the welcome path well maintained.",
     };
   }
-
   return null;
 }

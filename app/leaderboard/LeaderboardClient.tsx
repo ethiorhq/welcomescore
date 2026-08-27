@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BackButton from "@/app/components/BackButton";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
@@ -33,7 +33,6 @@ export default function LeaderboardClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [badgeEntry, setBadgeEntry] = useState<LeaderboardEntry | null>(null);
-  const refreshedRepositories = useRef(new Set<string>());
 
   const loadLeaderboard = useCallback(async () => {
     try {
@@ -54,29 +53,6 @@ export default function LeaderboardClient() {
   useEffect(() => {
     void loadLeaderboard();
   }, [loadLeaderboard]);
-
-  useEffect(() => {
-    const candidates = entries
-      .filter((entry) => entry.freshness !== "fresh")
-      .filter((entry) => !refreshedRepositories.current.has(entry.repoPath))
-      .slice(0, 3);
-
-    if (candidates.length === 0) {
-      return;
-    }
-
-    candidates.forEach((entry) => refreshedRepositories.current.add(entry.repoPath));
-
-    void Promise.all(
-      candidates.map((entry) =>
-        fetch(`/api/leaderboard/refresh?repo=${encodeURIComponent(entry.repoPath)}`, {
-          method: "POST",
-        }),
-      ),
-    ).then(() => {
-      window.setTimeout(() => void loadLeaderboard(), 800);
-    });
-  }, [entries, loadLeaderboard]);
 
   const podium = entries.slice(0, 3);
   const tableEntries = entries.slice(3);
@@ -117,8 +93,7 @@ export default function LeaderboardClient() {
 
         <section className="mt-6 rounded-lg border border-accent/25 bg-surface px-5 py-4 sm:flex sm:items-center sm:justify-between sm:gap-6">
           <p className="font-sans text-sm leading-6 text-text">
-            Is your project listed here? Grab your dynamic SVG badge to maintain
-            your score position.
+            Hall listings are dated contributor-signal snapshots. View the audit, study a public pattern, or use a badge only where it is genuinely useful.
           </p>
           <Link
             href="/"
@@ -247,14 +222,19 @@ function PodiumCard({
       {rank === 1 && entry.roastText ? (
         <p className="mt-7 font-sans text-sm leading-6 text-muted">{entry.roastText}</p>
       ) : null}
-      <div className="mt-7 flex flex-wrap gap-x-4 gap-y-2 font-sans text-sm">
-        <Link className="text-link underline underline-offset-4" href={auditPath(entry)}>
-          View full audit
-        </Link>
-        <button type="button" onClick={onBadge} className="text-link underline underline-offset-4">
-          Get README badge
-        </button>
-      </div>
+        <div className="mt-7 flex flex-wrap gap-x-4 gap-y-2 font-sans text-sm">
+          <Link className="text-link underline underline-offset-4" href={auditPath(entry)}>
+            View full audit
+          </Link>
+          {entry.freshness !== "expired" ? (
+            <Link className="text-link underline underline-offset-4" href={`/lounge?hallRepo=${encodeURIComponent(entry.repoPath)}`}>
+              Discuss contributor pattern
+            </Link>
+          ) : null}
+          <button type="button" onClick={onBadge} className="text-link underline underline-offset-4">
+            Get README badge
+          </button>
+        </div>
     </article>
   );
 }
@@ -275,16 +255,21 @@ function RankingRow({
         <Link className="text-link font-mono underline underline-offset-4" href={auditPath(entry)}>
           {entry.repoPath}
         </Link>
-        <p className="mt-1 font-mono text-xs text-muted">★ {formatCount(entry.starsCount)} · ⑂ {formatCount(entry.forksCount)}</p>
+        <p className="mt-1 font-mono text-xs text-muted">★ {formatCount(entry.starsCount)} · ⑂ {formatCount(entry.forksCount)} · {freshnessLabel(entry.freshness)}</p>
       </td>
       <td className="px-5 py-4 text-muted">{entry.primaryLanguage}</td>
       <td className="px-5 py-4"><ScoreBadge entry={entry} /></td>
       <td className="px-5 py-4 text-muted">{formatDate(entry.updatedAt)}</td>
       <td className="px-5 py-4">
-        <div className="flex gap-3 whitespace-nowrap">
+        <div className="flex flex-wrap gap-3 whitespace-nowrap">
           <Link className="text-link underline underline-offset-4" href={auditPath(entry)}>
             View audit
           </Link>
+          {entry.freshness !== "expired" ? (
+            <Link className="text-link underline underline-offset-4" href={`/lounge?hallRepo=${encodeURIComponent(entry.repoPath)}`}>
+              Discuss pattern
+            </Link>
+          ) : null}
           <button type="button" onClick={onBadge} className="text-link underline underline-offset-4">
             Badge
           </button>
@@ -332,6 +317,16 @@ function ErrorState() {
       <p className="mt-3 font-sans text-sm text-muted">Please check again shortly.</p>
     </section>
   );
+}
+
+function freshnessLabel(freshness: EvaluationFreshness) {
+  if (freshness === "fresh") {
+    return "updated recently";
+  }
+  if (freshness === "stale") {
+    return "snapshot may have changed";
+  }
+  return "needs a current audit";
 }
 
 function auditPath(entry: LeaderboardEntry) {
