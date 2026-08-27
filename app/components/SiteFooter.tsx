@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ETHIOR_URL, SITE_DISPLAY_NAME, SITE_URL, SOURCE_REPOSITORY_URL } from "@/lib/site";
+import LocalWorkspaceFooterLink from "@/app/components/LocalWorkspaceFooterLink";
 
 const FOOTER_LINKS = [
   { href: "/how-it-works", label: "How it works" },
@@ -19,6 +20,7 @@ export default function SiteFooter() {
             {label}
           </Link>
         ))}
+        <LocalWorkspaceFooterLink />
       </nav>
       <p className="mt-4 leading-6">
         Built by{" "}

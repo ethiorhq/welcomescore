@@ -40,6 +40,7 @@ const sections: PolicySection[] = [
           <tr><td className="px-4 py-3 font-mono text-text">Review rate limit</td><td className="px-4 py-3">When enabled, a salted hash derived from a network identifier and a short request-count window. The raw IP address is not stored in the review-rate-limit record.</td><td className="px-4 py-3">To protect the opt-in review endpoint from excessive use.</td></tr>
           <tr><td className="px-4 py-3 font-mono text-text">Hall of Fame</td><td className="px-4 py-3">An eligible public repository’s audit information when a visitor explicitly chooses to add it.</td><td className="px-4 py-3">To display a public, eligibility-based ranking record.</td></tr>
           <tr><td className="px-4 py-3 font-mono text-text">Dev Lounge</td><td className="px-4 py-3">The anonymous message, quoted-reply snapshot, optional score card, reaction choice, temporary browser-generated developer handle/avatar, and session-scoped identifiers needed for the chat and one-reaction rule.</td><td className="px-4 py-3">To provide a lightweight 24-hour community discussion experience.</td></tr>
+          <tr><td className="px-4 py-3 font-mono text-text">My Contributor Workspace</td><td className="px-4 py-3">A repository path, chosen contributor action, optional private note, local work state, return preference, and a small public-audit snapshot when you explicitly save a plan. This feature stores the information only in your current browser.</td><td className="px-4 py-3">To let you resume a private contributor plan and choose when to request a fresh public audit.</td></tr>
         </tbody>
       </PolicyTable>
     ),
@@ -51,6 +52,7 @@ const sections: PolicySection[] = [
       <>
         <p>Public GitHub scoring data is cached briefly to reduce repeated upstream requests. Private review-cache entries store a normalized context hash and a validated review result. Deterministic review entries are retained for up to 24 hours; validated provider-review entries are retained for up to seven days. Cache retention can be shorter if an entry expires or is cleared through normal operations.</p>
         <p>Dev Lounge messages and related temporary chat records are designed to expire after 24 hours. Quoted-reply snapshots may remain only for the same limited retention period. Browser-local identity details are stored in your browser and can generally be removed by clearing the site’s local storage or browser data.</p>
+        <p>My Contributor Workspace plans, including optional private notes and saved audit snapshots, remain only in the browser where you saved them. WelcomeScore does not receive, sync, sell, profile, or publish those workspace records. You can clear an individual plan, clear all plans from the workspace, or clear site storage through your browser.</p>
         <p>Public Hall of Fame records may remain available while they satisfy the service’s documented freshness and eligibility rules. Because they relate to public repositories, removal and correction requests should be made through the canonical project repository with enough public context to locate the record.</p>
       </>
     ),
@@ -71,7 +73,7 @@ const sections: PolicySection[] = [
     title: "Your choices and responsibilities",
     content: (
       <>
-        <p>You may choose not to submit a repository, request an optional review, add an eligible Hall entry, post in the Lounge, attach a score card, react, or follow an external link. Do not use the Lounge for private conversations, personal information, credentials, transactions, recruiting, legal advice, security reports, or sensitive content.</p>
+        <p>You may choose not to submit a repository, request an optional review, save a private contributor plan, request a fresh audit, add an eligible Hall entry, post in the Lounge, attach a score card, react, or follow an external link. My Contributor Workspace does not set reminders or run checks on its own; you choose when to resume work or clear local plans. Do not use the Lounge for private conversations, personal information, credentials, transactions, recruiting, legal advice, security reports, or sensitive content.</p>
         <p>You are responsible for ensuring that you have permission to submit any repository path, message, score card, or other content. If you believe public content in a project-controlled feature is inaccurate, unlawful, infringing, or harmful, use the conduct and support routes described below. Do not post sensitive reports publicly.</p>
       </>
     ),

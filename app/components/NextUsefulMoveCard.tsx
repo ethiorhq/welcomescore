@@ -13,9 +13,10 @@ import {
 } from "@/lib/nextUsefulMove";
 import type { ScoreResult } from "@/lib/scoreRepo";
 import {
-  useLocalActionReflection,
-  type LocalActionStatus,
-} from "@/lib/useLocalActionReflection";
+  buildAuditSignalSnapshot,
+  type PrivateWorkState,
+} from "@/lib/returnWithPurpose";
+import { useLocalReturnWorkspace } from "@/lib/useLocalReturnWorkspace";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 
@@ -24,10 +25,10 @@ type NextUsefulMoveCardProps = {
   onRequestRefresh?: () => void;
 };
 
-const localStatusCopy: Record<LocalActionStatus, string> = {
+const localStatusCopy: Record<PrivateWorkState, string> = {
   planned: "Saved as your next action on this device.",
   "in-progress": "Marked in progress on this device.",
-  "ready-to-recheck": "Saved on this device. The next audit will use current public GitHub signals.",
+  "ready-for-fresh-audit": "Saved on this device. Start a fresh audit whenever you choose.",
 };
 
 export default function NextUsefulMoveCard({
@@ -36,13 +37,13 @@ export default function NextUsefulMoveCard({
 }: NextUsefulMoveCardProps) {
   const plan = useMemo(() => resolveNextUsefulMove(result), [result]);
   const {
-    reflection,
+    workspace,
     isLoaded,
     isStorageAvailable,
     maxNoteLength,
-    saveReflection,
-    clearReflection,
-  } = useLocalActionReflection(result.repo);
+    saveWorkspace,
+    clearWorkspace,
+  } = useLocalReturnWorkspace(result.repo);
   const [isSecondaryOpen, setIsSecondaryOpen] = useState(false);
   const [selectedArtifactId, setSelectedArtifactId] = useState<ActionArtifactId | null>(null);
   const [note, setNote] = useState("");
@@ -52,9 +53,9 @@ export default function NextUsefulMoveCard({
   const lastFocusedElement = useRef<HTMLElement | null>(null);
   const { setAlgofoxState } = useAlgofoxPet();
 
-  const activeReflection = reflection?.activeMoveId === plan.primary.id ? reflection : null;
+  const activeReflection = workspace?.activeMoveId === plan.primary.id ? workspace : null;
   const previousMoveIsNowVerified = Boolean(
-    reflection && !plan.applicableMoveIds.includes(reflection.activeMoveId),
+    workspace && !plan.applicableMoveIds.includes(workspace.activeMoveId),
   );
 
   useEffect(() => {
@@ -68,11 +69,13 @@ export default function NextUsefulMoveCard({
     setStatusTone("good");
   }, [result.repo]);
 
-  function setLocalStatus(status: LocalActionStatus) {
-    const saved = saveReflection({
+  function setLocalStatus(status: PrivateWorkState) {
+    const saved = saveWorkspace({
       moveId: plan.primary.id,
-      status,
+      workState: status,
       note,
+      lastKnownAudit: buildAuditSignalSnapshot(result, plan),
+      savedMove: plan.primary,
     });
 
     if (!saved) {
@@ -105,21 +108,21 @@ export default function NextUsefulMoveCard({
       return;
     }
 
-    setLocalStatus("ready-to-recheck");
+    setLocalStatus("ready-for-fresh-audit");
     setAlgofoxState("running", getAlgofoxMessage("nextMoveRecheck"));
     onRequestRefresh();
   }
 
   function handleSaveNote() {
-    const status = activeReflection?.status ?? "planned";
+    const status = activeReflection?.workState ?? "planned";
     setLocalStatus(status);
   }
 
   function handleClearReflection() {
-    if (clearReflection()) {
+    if (clearWorkspace()) {
       setNote("");
       setStatusTone("good");
-      setStatusMessage("Private action note cleared from this device.");
+      setStatusMessage("Private plan cleared from this device.");
     } else {
       setStatusTone("muted");
       setStatusMessage("Private action saving is unavailable in this browser.");
@@ -217,7 +220,7 @@ export default function NextUsefulMoveCard({
           </p>
         </div>
 
-        {previousMoveIsNowVerified && reflection ? (
+        {previousMoveIsNowVerified && workspace ? (
           <div className="mt-4 rounded-md border border-good/35 bg-good/10 p-3" role="status" aria-atomic="true">
             <p className="font-sans text-sm leading-5 text-good">
               The latest audit no longer shows the action you saved on this device. Review the current evidence before treating the change as complete.
@@ -244,7 +247,7 @@ export default function NextUsefulMoveCard({
                   Mark as my next action
                 </button>
               ) : null}
-              {activeReflection?.status === "planned" ? (
+              {activeReflection?.workState === "planned" ? (
                 <button
                   type="button"
                   onClick={handleWorkAction}
@@ -253,18 +256,24 @@ export default function NextUsefulMoveCard({
                   I&apos;m working on it
                 </button>
               ) : null}
-              {activeReflection?.status === "in-progress" || activeReflection?.status === "ready-to-recheck" ? (
+              {activeReflection?.workState === "in-progress" || activeReflection?.workState === "ready-for-fresh-audit" ? (
                 <button
                   type="button"
                   onClick={handleRecheck}
                   className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
                 >
-                  {activeReflection.status === "ready-to-recheck"
+                  {activeReflection.workState === "ready-for-fresh-audit"
                     ? "Re-check latest public signals"
                     : "I made a change — Re-check"}
                 </button>
               ) : null}
             </div>
+
+            {workspace ? (
+              <Link href={`/return?repo=${encodeURIComponent(result.repo)}`} className="mt-3 inline-block font-sans text-xs text-link underline underline-offset-4">
+                Open my contributor workspace
+              </Link>
+            ) : null}
 
             {activeReflection ? (
               <div className="mt-3">
