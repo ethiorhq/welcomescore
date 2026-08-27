@@ -4,6 +4,20 @@
 
 **WelcomeScore** gives a public GitHub repository a practical readiness score for first-time contributors. It checks the small signals that make a project easier to join: contributor documentation, a code of conduct, setup guidance, a license, beginner-friendly open issues, and recent activity.
 
+> WelcomeScore is source-available under the project’s custom [Source-Available Attribution License](LICENSE), not an OSI-approved open-source license. Public derivatives must preserve the license, notices, and original-project attribution described in [ATTRIBUTION.md](ATTRIBUTION.md).
+
+## Governance, community, and policies
+
+| Resource | Purpose |
+| --- | --- |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Reproducible local setup, standards, labels, validation, and pull requests. |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Expected community behavior, reporting, and enforcement process. |
+| [SECURITY.md](SECURITY.md) | Private, responsible vulnerability-reporting guidance. |
+| [SUPPORT.md](SUPPORT.md) | The correct route for product and contributor questions. |
+| [GOVERNANCE.md](GOVERNANCE.md) and [MAINTAINERS.md](MAINTAINERS.md) | Stewardship, decision principles, and maintainer duties. |
+| [NOTICE](NOTICE), [ATTRIBUTION.md](ATTRIBUTION.md), and [TRADEMARKS.md](TRADEMARKS.md) | Copyright, permitted use, required original-project credit, and brand-use boundaries. |
+| [How It Works](https://welcomescore.vercel.app/how-it-works), [FAQ](https://welcomescore.vercel.app/faq), [Privacy Policy](https://welcomescore.vercel.app/privacy), [Terms](https://welcomescore.vercel.app/terms), and [Dev Lounge Policy](https://welcomescore.vercel.app/dev-lounge-policy) | Public product, privacy, community-chat, and service-boundary information. |
+
 ## Run locally
 
 Install the project dependencies and start the development server:
@@ -129,7 +143,7 @@ The endpoint always works in **deterministic mode** with concise, evidence-bound
 ```bash
 # Optional; never expose these values through NEXT_PUBLIC_ variables.
 GROQ_API_KEY=your_key
-GROQ_REVIEW_MODEL=openai/gpt-oss-20b
+GROQ_REVIEW_MODEL=openai/gpt-oss-120b
 GEMINI_API_KEY=your_key
 GEMINI_REVIEW_MODEL=gemini-3.7-flash
 
@@ -141,7 +155,7 @@ Gemini provider reviews use the [Gemini Interactions API](https://ai.google.dev/
 
 Run `supabase/migrations/20260826_algofox_review_engine.sql` once in the Supabase SQL Editor to enable the private review cache and server-side rate-limit accounting. The migration creates separate `review_cache` and `review_rate_limits` tables with RLS enabled and no browser grants; it does **not** modify `repo_evaluations`, Hall of Fame behavior, or Dev Lounge data. A valid provider review caches for seven days, and a deterministic review caches for 24 hours. Until the migration is applied, reviews continue to work safely without cache persistence.
 
-The review interface defaults to constructive **Guidance**. The compact technical roast remains opt-in through its own tab, and none of these interactions can automatically share, publish, add a Hall entry, or send a Dev Lounge message.
+The review summary presents constructive, evidence-bound guidance once. A separate **Technical roast** section provides the concise implementation-focused observation without duplicating the guidance. None of these interactions can automatically share, publish, add a Hall entry, or send a Dev Lounge message.
 
 ## Required Supabase migrations
 

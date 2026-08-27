@@ -133,7 +133,15 @@ export async function scoreRepo(
   const hasCodeOfConduct = fileNames.has("code_of_conduct.md");
   const hasReadme = fileNames.has("readme.md");
   const hasReadmeSetup = readme ? readmeHasSetupSection(readme) : false;
-  const hasLicense = repository.license !== null;
+  // GitHub may return null for a valid custom or source-available license that
+  // does not map to its SPDX catalog. The root listing is already fetched for
+  // contributor-document checks, so recognize a published conventional license
+  // filename without adding another GitHub API request.
+  const hasLicense =
+    repository.license !== null ||
+    ["license", "license.md", "license.txt", "copying", "copying.md"].some((name) =>
+      fileNames.has(name),
+    );
   const starsCount = Math.max(0, repository.stargazers_count ?? 0);
   const forksCount = Math.max(0, repository.forks_count ?? 0);
   const primaryLanguage = repository.language ?? "Unknown";

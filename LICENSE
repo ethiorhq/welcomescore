@@ -1,0 +1,76 @@
+# WelcomeScore Source-Available Attribution License 1.0
+
+Copyright (c) 2026 ETHIOR. All rights reserved.
+
+> **Plain-language summary.** You may inspect, run, and adapt this source code under the terms below, but it is not an OSI-approved open-source license. If you distribute, host, or publicly demonstrate a derivative, you must retain the required notices and give visible attribution to the original WelcomeScore project. This summary is not part of the legal terms.
+
+## 1. Definitions
+
+**“Software”** means the WelcomeScore source code, documentation, assets, configuration, and related materials made available in this repository.
+
+**“Licensor”** means ETHIOR, the copyright owner.
+
+**“You”** means the individual or legal entity exercising permissions under this license.
+
+**“Derivative”** means a modified, adapted, combined, translated, or otherwise derivative version of the Software.
+
+**“Public Deployment”** means making the Software or a Derivative available to users outside Your own internal development or evaluation environment, including through a website, hosted service, application marketplace, downloadable product, demo, or public repository.
+
+**“Required Attribution”** means a prominent, legible credit substantially in the following form, with functional links where links are supported:
+
+> Original project: [WelcomeScore.js.org](https://welcomescore.vercel.app) · Source: [github.com/ethiorhq/welcomescore](https://github.com/ethiorhq/welcomescore)
+
+## 2. Grant of Rights
+
+Subject to Your continuous compliance with this license, the Licensor grants You a limited, non-exclusive, non-transferable, worldwide, royalty-free license to:
+
+1. access, inspect, and run the Software;
+2. copy and modify the Software for internal use, evaluation, education, research, or permitted deployment; and
+3. distribute a Derivative only with the required notices, attribution, and other conditions in this license.
+
+No right is granted to use the Software in a manner that implies endorsement by ETHIOR or the original project.
+
+## 3. Conditions for Redistribution and Public Deployment
+
+If You redistribute the Software or a Derivative, or make it available through a Public Deployment, You must:
+
+1. retain this LICENSE file, the NOTICE file, copyright notices, and all attribution notices included with the Software;
+2. include a clear notice that You modified the Software, if applicable;
+3. preserve the Required Attribution in a visible, reasonably discoverable location. For web applications, this means a visible footer or an equivalent clearly linked credits/about location available from each public page;
+4. preserve the functional source-repository link and live-project link where the relevant medium supports links;
+5. not remove, obscure, falsify, or replace original-project attribution with a claim that You created the unmodified Software; and
+6. ensure any additional terms You apply do not prevent recipients from seeing the notices required by this license.
+
+You may add Your own branding and may identify Your own modifications, provided that doing so does not misrepresent the origin of the Software or remove the Required Attribution.
+
+## 4. Commercial Use and Separate Agreements
+
+This license does not grant rights to sell, sublicense, white-label, commercialize, or provide the Software or a Derivative as a paid service, paid product, or commercial hosted offering, except with the Licensor’s prior written permission. Contact ETHIOR through the canonical project repository to discuss a commercial license.
+
+## 5. Contributions
+
+By submitting a pull request, patch, issue attachment, or other contribution intended for inclusion in the Software, You represent that You have the right to submit it. You grant ETHIOR a perpetual, worldwide, non-exclusive, royalty-free, sublicensable right to use, reproduce, modify, distribute, publicly display, and publicly perform that contribution as part of the Software under this license and any future license for the Software.
+
+## 6. Trademark and Brand Rights
+
+“ETHIOR,” “WelcomeScore,” “WelcomeScore.js.org,” and associated names, logos, and visual identifiers may be trademarks or brand identifiers of the Licensor. This license grants no trademark rights except the limited right to use the Required Attribution accurately. You may not use those identifiers in a manner that suggests sponsorship, affiliation, certification, or endorsement without prior written permission.
+
+## 7. No Warranty
+
+THE SOFTWARE IS PROVIDED “AS IS” AND “AS AVAILABLE,” WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE. TO THE MAXIMUM EXTENT PERMITTED BY LAW, ETHIOR DISCLAIMS ALL WARRANTIES, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, ACCURACY, AVAILABILITY, SECURITY, AND ERROR-FREE OPERATION.
+
+## 8. Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, ETHIOR, ITS AFFILIATES, AUTHORS, MAINTAINERS, CONTRIBUTORS, AND LICENSORS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOST PROFITS, REVENUE, DATA, GOODWILL, OR BUSINESS INTERRUPTION, ARISING FROM OR RELATED TO THE SOFTWARE, ITS USE, OR THE INABILITY TO USE IT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+## 9. Termination
+
+This license terminates automatically if You materially breach its terms, including by removing or materially obscuring Required Attribution in a redistribution or Public Deployment. Upon termination, You must stop the activity that is not authorized by this license and, where applicable, cease distributing or publicly deploying the non-compliant copy. Sections that by their nature should survive termination, including Sections 3, 5, 6, 7, 8, and 9, survive.
+
+## 10. General
+
+If any provision is unenforceable, it will be enforced to the maximum extent permitted and the remaining provisions will remain in effect. No waiver is effective unless made in writing by the Licensor. This license does not create an employment, agency, partnership, joint venture, or fiduciary relationship.
+
+## 11. Review Notice
+
+This custom license is a working draft for the project. ETHIOR should obtain qualified legal review, including the governing-law, jurisdiction, commercial-use, and enforceability provisions, before relying on it for commercial enforcement.

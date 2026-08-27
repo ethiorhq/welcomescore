@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability report
+    url: https://github.com/ethiorhq/welcomescore/security/advisories/new
+    about: Do not report vulnerabilities publicly. Use private reporting when it is enabled; otherwise ask maintainers for a private channel without including sensitive details.
+  - name: Support and FAQ
+    url: https://welcomescore.vercel.app/faq
+    about: Read product guidance and common questions before opening an issue.
+  - name: Code of Conduct
+    url: https://github.com/ethiorhq/welcomescore/blob/main/CODE_OF_CONDUCT.md
+    about: Read community expectations and reporting guidance.
