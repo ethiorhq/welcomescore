@@ -17,6 +17,9 @@
 | [GOVERNANCE.md](GOVERNANCE.md) and [MAINTAINERS.md](MAINTAINERS.md) | Stewardship, decision principles, and maintainer duties. |
 | [NOTICE](NOTICE), [ATTRIBUTION.md](ATTRIBUTION.md), and [TRADEMARKS.md](TRADEMARKS.md) | Copyright, permitted use, required original-project credit, and brand-use boundaries. |
 | [How It Works](https://welcomescore.vercel.app/how-it-works), [FAQ](https://welcomescore.vercel.app/faq), [Privacy Policy](https://welcomescore.vercel.app/privacy), [Terms](https://welcomescore.vercel.app/terms), and [Dev Lounge Policy](https://welcomescore.vercel.app/dev-lounge-policy) | Public product, privacy, community-chat, and service-boundary information. |
+| [Developer Guides](https://welcomescore.vercel.app/guides) | Original, practical tutorials for contributors and maintainers on onboarding, documentation, starter issues, audits, and community safety. |
+| [Search Discovery Launch Checklist](docs/SEARCH_CONSOLE_LAUNCH_CHECKLIST.md) | A manual production checklist for Search Console, crawl assets, structured data, share previews, and honest measurement. |
+| [robots.txt](https://welcomescore.vercel.app/robots.txt), [sitemap.xml](https://welcomescore.vercel.app/sitemap.xml), [Guide RSS](https://welcomescore.vercel.app/guides/rss.xml), and [llms.txt](https://welcomescore.vercel.app/llms.txt) | Canonical public-discovery assets. `llms.txt` is a truthful interoperability overview, not a Google ranking requirement. |
 
 ## Quick start and setup
 
@@ -58,7 +61,7 @@ The score ranges from 0 to 100 and uses these checks:
 | Beginner-friendly open issues | 25 |
 | Activity within the last three months | 15 |
 
-WelcomeScore returns a grade from **A** through **F** alongside the individual checks. Results use GitHub data cached for five minutes to reduce repeated API calls.
+WelcomeScore returns a grade from **A** through **F** alongside the individual checks. A deliberate homepage or comparison audit requests current public GitHub data. Shareable PNG and SVG badge routes retain a short bounded GitHub-data cache so README embeds remain reliable.
 
 ## API routes
 

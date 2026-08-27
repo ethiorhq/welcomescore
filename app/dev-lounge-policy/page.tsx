@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PolicyPage, { PolicyCallout, PolicyTable, type PolicySection } from "@/app/components/PolicyPage";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "WelcomeScore Dev Lounge Policy",
-  description: "Community rules, privacy boundaries, retention, and reporting guidance for WelcomeScore’s anonymous Dev Lounge.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "WelcomeScore Dev Lounge Policy: Safe Community Participation",
+  description: "Community rules, privacy boundaries, temporary retention, and reporting guidance for WelcomeScore’s anonymous Dev Lounge.",
+  path: "/dev-lounge-policy",
+  imagePath: "/opengraph-image",
+  imageAlt: "WelcomeScore Dev Lounge community safety policy",
+});
 
 const sections: PolicySection[] = [
   {

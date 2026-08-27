@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PolicyPage, { PolicyCallout, PolicyTable, type PolicySection } from "@/app/components/PolicyPage";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "How WelcomeScore works",
-  description: "A transparent explanation of WelcomeScore’s public contributor-readiness audit, reviews, Hall of Fame, and Dev Lounge.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "How WelcomeScore Measures Contributor Readiness",
+  description: "A transparent explanation of WelcomeScore’s public contributor-readiness audit, optional reviews, Hall of Fame, Dev Lounge, and product limits.",
+  path: "/how-it-works",
+  imagePath: "/opengraph-image",
+  imageAlt: "How WelcomeScore measures public GitHub contributor readiness",
+});
 
 const sections: PolicySection[] = [
   {

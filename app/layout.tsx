@@ -3,6 +3,8 @@ import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import SiteFooter from "@/app/components/SiteFooter";
 import AlgofoxPetProvider from "@/app/components/pet/AlgofoxPetProvider";
 import AlgofoxWidget from "@/app/components/pet/AlgofoxWidget";
+import { homepageMetadata } from "@/lib/seo";
+import { ETHIOR_URL, SITE_DESCRIPTION, SITE_DISPLAY_NAME, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -19,34 +21,44 @@ const ibmPlexSans = IBM_Plex_Sans({
   display: "swap",
 });
 
-const title = "WelcomeScore — Is your repo ready for first-time contributors?";
-const description =
-  "WelcomeScore checks the contributor-friendliness of a public GitHub repository and returns a practical readiness score.";
-const defaultBadgeImage = "/api/badge?repo=vercel/next.js";
-
 export const metadata: Metadata = {
-  metadataBase: new URL("https://welcomescore.vercel.app"),
-  title,
-  description,
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    images: [
-      {
-        url: defaultBadgeImage,
-        width: 600,
-        height: 315,
-        alt: "WelcomeScore preview for vercel/next.js",
-      },
-    ],
+  ...homepageMetadata,
+  metadataBase: new URL(SITE_URL),
+  applicationName: SITE_DISPLAY_NAME,
+  category: "Developer tools",
+  keywords: [
+    "open source contributor onboarding",
+    "GitHub repository readiness",
+    "good first issue",
+    "CONTRIBUTING.md",
+    "developer community",
+  ],
+};
+
+function jsonLd(value: object) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_DISPLAY_NAME,
+  alternateName: SITE_NAME,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  publisher: {
+    "@type": "Organization",
+    name: "ETHIOR",
+    url: ETHIOR_URL,
   },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-    images: [defaultBadgeImage],
-  },
+};
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "ETHIOR",
+  url: ETHIOR_URL,
+  sameAs: ["https://github.com/ethiorhq/welcomescore"],
 };
 
 export default function RootLayout({
@@ -57,6 +69,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} bg-base text-text`}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(websiteSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(organizationSchema) }} />
         <AlgofoxPetProvider>
           <div className="flex min-h-screen flex-col">
             {children}

@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PolicyPage, { PolicyCallout, type PolicySection } from "@/app/components/PolicyPage";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "WelcomeScore Terms & Conditions",
-  description: "The terms governing use of WelcomeScore audits, badges, Hall of Fame, Dev Lounge, and related project materials.",
-};
+  description: "The terms governing use of WelcomeScore audits, badges, optional reviews, Hall of Fame, Dev Lounge, and related project materials.",
+  path: "/terms",
+  imagePath: "/opengraph-image",
+  imageAlt: "WelcomeScore Terms and Conditions",
+});
 
 const sections: PolicySection[] = [
   {

@@ -1,12 +1,9 @@
 import Link from "next/link";
-
-const COMPANY_NAME = "ETHIOR";
-const COMPANY_URL = "https://ethior.com";
-const ORIGINAL_PROJECT_URL = "https://github.com/ethiorhq/welcomescore";
-const LIVE_PRODUCT_URL = "https://welcomescore.vercel.app";
+import { ETHIOR_URL, SITE_DISPLAY_NAME, SITE_URL, SOURCE_REPOSITORY_URL } from "@/lib/site";
 
 const FOOTER_LINKS = [
   { href: "/how-it-works", label: "How it works" },
+  { href: "/guides", label: "Developer guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/privacy", label: "Privacy Policy" },
   { href: "/terms", label: "Terms & Conditions" },
@@ -25,17 +22,21 @@ export default function SiteFooter() {
       </nav>
       <p className="mt-4 leading-6">
         Built by{" "}
-        <a className="text-link underline underline-offset-4" href={COMPANY_URL}>
-          {COMPANY_NAME}
+        <a className="text-link underline underline-offset-4" href={ETHIOR_URL}>
+          ETHIOR
         </a>
         <span aria-hidden="true"> · </span>
         Original project:{" "}
-        <a className="text-link underline underline-offset-4" href={LIVE_PRODUCT_URL}>
-          WelcomeScore.js.org
+        <a className="text-link underline underline-offset-4" href={SITE_URL}>
+          {SITE_DISPLAY_NAME}
         </a>
         <span aria-hidden="true"> · </span>
-        <a className="text-link underline underline-offset-4" href={ORIGINAL_PROJECT_URL}>
+        <a className="text-link underline underline-offset-4" href={SOURCE_REPOSITORY_URL}>
           Source on GitHub
+        </a>
+        <span aria-hidden="true"> · </span>
+        <a className="text-link underline underline-offset-4" href="/guides/rss.xml">
+          Guide RSS
         </a>
       </p>
     </footer>

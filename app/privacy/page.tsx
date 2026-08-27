@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PolicyPage, { PolicyCallout, PolicyTable, type PolicySection } from "@/app/components/PolicyPage";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "WelcomeScore Privacy Policy",
-  description: "A transparent summary of the public repository, review, Hall of Fame, and Dev Lounge data processed by WelcomeScore.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "WelcomeScore Privacy Policy: Public Audits and Community Data",
+  description: "A transparent summary of public repository, review, Hall of Fame, and Dev Lounge data processed by WelcomeScore, including retention and user controls.",
+  path: "/privacy",
+  imagePath: "/opengraph-image",
+  imageAlt: "WelcomeScore Privacy Policy for public repository audits and Dev Lounge data",
+});
 
 const sections: PolicySection[] = [
   {

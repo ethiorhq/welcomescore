@@ -1,0 +1,37 @@
+# WelcomeScore.js.org
+
+> WelcomeScore helps maintainers and first-time contributors review visible public GitHub contributor-readiness signals and find practical next steps. It is an ETHIOR project.
+
+## Canonical product
+
+- Product: https://welcomescore.vercel.app/
+- Source repository: https://github.com/ethiorhq/welcomescore
+- How it works: https://welcomescore.vercel.app/how-it-works
+- FAQ: https://welcomescore.vercel.app/faq
+- Privacy Policy: https://welcomescore.vercel.app/privacy
+- Terms & Conditions: https://welcomescore.vercel.app/terms
+- Dev Lounge Policy: https://welcomescore.vercel.app/dev-lounge-policy
+
+## What WelcomeScore does
+
+WelcomeScore reads public GitHub repository signals for six documented checks: contribution guidance, a code of conduct, README setup guidance, a published license, open good-first-issue labels, and recent repository activity. It returns a contributor-readiness score with the visible underlying checks.
+
+The optional Algofox review provides short, evidence-bound guidance based only on the completed audit. It is not a legal, security, financial, employment, hiring, or quality certification. Hall of Fame addition is always an explicit user action and follows separately documented eligibility rules. Dev Lounge is a temporary, anonymous public conversation feature and not private messaging or a marketplace.
+
+## Developer guides
+
+- Contributor onboarding checklist: https://welcomescore.vercel.app/guides/open-source-contributor-onboarding-checklist
+- Writing a useful CONTRIBUTING.md: https://welcomescore.vercel.app/guides/write-contributing-guide-developers-use
+- Honest good-first issues: https://welcomescore.vercel.app/guides/honest-good-first-issues
+- README setup guidance: https://welcomescore.vercel.app/guides/readme-setup-new-contributor
+- Improving a repository with WelcomeScore: https://welcomescore.vercel.app/guides/improve-repository-welcomescore
+- Safe developer community chat: https://welcomescore.vercel.app/guides/safe-open-source-dev-lounge
+- Make developer documentation discoverable: https://welcomescore.vercel.app/guides/make-developer-docs-discoverable-without-gaming-search
+
+## Content and usage boundaries
+
+Use the canonical product and linked public policies for current information. Do not infer a repository’s security, quality, contributor responsiveness, licensing sufficiency, or suitability from a score alone. Do not treat temporary Dev Lounge handles, messages, score cards, or external links as verified identities, services, offers, or endorsements. Do not request or publish secrets, credentials, private keys, payment information, personal data, vulnerability details, or private repository material.
+
+## Attribution
+
+WelcomeScore is copyrighted by ETHIOR. The source repository includes license, notice, attribution, and brand-use documentation. Independent deployments and forks may differ from the canonical product.

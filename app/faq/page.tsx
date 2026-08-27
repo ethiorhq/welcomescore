@@ -1,10 +1,61 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PolicyPage, { PolicyCallout, type PolicySection } from "@/app/components/PolicyPage";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "WelcomeScore FAQ",
-  description: "Answers to practical questions about WelcomeScore audits, badges, Algofox reviews, privacy, Hall of Fame, and Dev Lounge.",
+export const metadata: Metadata = pageMetadata({
+  title: "WelcomeScore FAQ: Audits, Badges, Reviews, and Privacy",
+  description: "Clear answers to practical questions about WelcomeScore audits, badges, Algofox reviews, privacy, Hall of Fame, Dev Lounge, and product limits.",
+  path: "/faq",
+  imagePath: "/opengraph-image",
+  imageAlt: "WelcomeScore frequently asked questions for public GitHub repository audits",
+});
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What does a WelcomeScore measure?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "It measures six visible public contributor-readiness signals: a contribution guide, code of conduct, setup information, license, good-first-issue labels, and recent repository activity.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Does a high score mean a repository is safe or guaranteed to be welcoming?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "No. A score is a limited snapshot of documented public signals. It does not assess source-code quality, supply-chain risk, maintainers, response times, workplace conditions, commercial legitimacy, legal compliance, or whether a contribution will be accepted.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What does Ask Algofox for a review do?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "It creates a concise technical review using only the audit’s allowed contributor signals. The action is opt-in. It does not publish a message, add a Hall entry, access raw source code, or assess people.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Are repositories added to the Hall of Fame automatically?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "No. A qualifying result shows an explicit add action. Someone must deliberately choose that action before an eligible repository is written to the Hall of Fame.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Is the Dev Lounge private?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "No. It is an anonymous but public-in-context 24-hour discussion feature. Do not share credentials, personal data, financial information, private repository content, or security details.",
+      },
+    },
+  ],
 };
 
 const sections: PolicySection[] = [
@@ -95,12 +146,18 @@ const sections: PolicySection[] = [
 
 export default function FaqPage() {
   return (
-    <PolicyPage
-      eyebrow="Developer reference"
-      title="Frequently asked questions"
-      description="Practical answers about repository audits, contribution signals, optional reviews, community features, and the boundaries of the service."
-      effectiveDate="August 27, 2026"
-      sections={sections}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema).replace(/</g, "\\u003c") }}
+      />
+      <PolicyPage
+        eyebrow="Developer reference"
+        title="Frequently asked questions"
+        description="Practical answers about repository audits, contribution signals, optional reviews, community features, and the boundaries of the service."
+        effectiveDate="August 27, 2026"
+        sections={sections}
+      />
+    </>
   );
 }
