@@ -46,7 +46,7 @@ export default async function ReceiptOpenGraphImage({ params }: ReceiptImageProp
               width: 600,
             }}
           />
-          <div style={{ alignItems: "center", display: "flex", gap: 16, zIndex: 1 }}>
+          <div style={{ alignItems: "center", display: "flex", gap: 16 }}>
             <div style={{ color: "#E8A23D", display: "flex", fontFamily: "monospace", fontSize: 30, fontWeight: 700, letterSpacing: -1 }}>
               WelcomeScore
             </div>
@@ -67,7 +67,7 @@ export default async function ReceiptOpenGraphImage({ params }: ReceiptImageProp
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", zIndex: 1 }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ color: "#8B8F9E", display: "flex", fontFamily: "monospace", fontSize: 20, letterSpacing: 1.2, textTransform: "uppercase" }}>
               Dated contributor context
             </div>
@@ -84,7 +84,7 @@ export default async function ReceiptOpenGraphImage({ params }: ReceiptImageProp
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", zIndex: 1 }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ color: "#C6C8D2", display: "flex", fontFamily: "sans-serif", fontSize: 24 }}>
               Public snapshot issued {formatReceiptDate(receipt.issuedAt)} · expires {formatReceiptDate(receipt.expiresAt)}
             </div>
