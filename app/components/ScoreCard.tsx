@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import AlgofoxReviewCard from "@/app/components/AlgofoxReviewCard";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
+import NextUsefulMoveCard from "@/app/components/NextUsefulMoveCard";
 import {
   CODE_OF_CONDUCT_TEMPLATE,
   CONTRIBUTING_TEMPLATE,
@@ -32,9 +33,11 @@ type HallOfFameStatus =
 export default function ScoreCard({
   result,
   highlightScore = true,
+  onRequestRefresh,
 }: {
   result: ScoreResult;
   highlightScore?: boolean;
+  onRequestRefresh?: () => void;
 }) {
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateFile | null>(
@@ -136,6 +139,8 @@ export default function ScoreCard({
           />
         ))}
       </div>
+
+      <NextUsefulMoveCard result={result} onRequestRefresh={onRequestRefresh} />
 
       {result.goodFirstIssues.length > 0 ? (
         <section

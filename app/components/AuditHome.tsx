@@ -164,7 +164,12 @@ export default function AuditHome({
 
         {result ? (
           <div className="mt-8 w-full max-w-2xl sm:mt-10">
-            <ScoreCard result={result} />
+            <ScoreCard
+              result={result}
+              onRequestRefresh={() => {
+                void runCheck(result.repo);
+              }}
+            />
           </div>
         ) : null}
       </div>

@@ -90,6 +90,26 @@ const messages = {
     "Enter two owner/repo paths to compare their first-contributor experience.",
     "Choose two public repositories and Algofox will place their welcome signals side by side.",
   ],
+  nextMovePlanned: [
+    "A practical next step is saved here on this device.",
+    "Good plan. One honest improvement can make the path clearer.",
+    "Small, real contributor work beats score chasing every time.",
+  ],
+  nextMoveWorking: [
+    "Take the time you need. Clear contributor paths are built carefully.",
+    "Nice. Keep the change focused and grounded in what the project actually does.",
+    "A calm, well-scoped improvement is an excellent next move.",
+  ],
+  nextMoveCopied: [
+    "Outline copied. Make every placeholder match the real project before publishing.",
+    "Starter copied. Edit it to fit the project’s actual workflow.",
+    "Copy secured. Verified project details make the artifact useful.",
+  ],
+  nextMoveRecheck: [
+    "Checking the current public contributor signals when you are ready.",
+    "Let’s look at the live repository evidence again.",
+    "Fresh audit coming up. The public path gets the final say.",
+  ],
   badgeCopied: [
     "Badge copied. Your README is ready for an Algofox-approved signal.",
     "Embed copied. Your contributor-health badge is ready to travel.",
