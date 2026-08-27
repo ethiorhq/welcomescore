@@ -18,7 +18,7 @@ const sections: PolicySection[] = [
     content: (
       <>
         <p>The Dev Lounge is a lightweight, anonymous, 24-hour space for practical first-contributor questions, contributor encouragement, and score-card discussion. It is a community feature of WelcomeScore, not a private chat service.</p>
-        <p>This policy applies to messages, reply snapshots, score-card attachments, reactions, visible developer handles and avatars, and related behavior in the Dev Lounge. It works alongside the project <Link className="text-link underline underline-offset-4" href="https://github.com/ethiorhq/welcomescore/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</Link>, <Link className="text-link underline underline-offset-4" href="/terms">Terms & Conditions</Link>, and <Link className="text-link underline underline-offset-4" href="/privacy">Privacy Policy</Link>.</p>
+        <p>This policy applies to messages, reply snapshots, score-card attachments, reactions, visible developer handles and avatars, private reports, safety verification, and related behavior in the Dev Lounge. Reply previews may link to the temporary source message while it remains available. A reply mention is plain display text; it does not identify, notify, verify, or create a relationship with another participant. This policy works alongside the project <Link className="text-link underline underline-offset-4" href="https://github.com/ethiorhq/welcomescore/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</Link>, <Link className="text-link underline underline-offset-4" href="/terms">Terms & Conditions</Link>, and <Link className="text-link underline underline-offset-4" href="/privacy">Privacy Policy</Link>.</p>
       </>
     ),
   },
@@ -57,7 +57,7 @@ const sections: PolicySection[] = [
     content: (
       <>
         <p>The Lounge uses a temporary browser-generated developer handle and avatar rather than a traditional user account. This does not make a message private, confidential, or anonymous against every possible technical or legal process. Do not publish information that you would not want visible to other Lounge participants.</p>
-        <p>Messages and related chat records are designed to disappear after 24 hours. Reactions and reply snapshots are used to support the Lounge feature during its limited lifetime. Temporary technical records may be retained for security, rate limiting, abuse prevention, debugging, or legal obligations as described in the <Link className="text-link underline underline-offset-4" href="/privacy">Privacy Policy</Link>.</p>
+        <p>Messages and related chat records are designed to disappear after 24 hours. Reactions and reply snapshots are used to support the Lounge feature during its limited lifetime. Private report and moderation-decision records are designed to expire after 30 days. Short-lived hashed rate-limit records and verification proofs are used only to protect the Lounge against abuse; WelcomeScore does not retain a raw IP address or a public browser fingerprint in these records. A configured visitor-verification provider may process its own challenge token under its own policy. See the <Link className="text-link underline underline-offset-4" href="/privacy">Privacy Policy</Link> for the service-level data boundary.</p>
       </>
     ),
   },
@@ -67,7 +67,8 @@ const sections: PolicySection[] = [
     content: (
       <>
         <p>WelcomeScore may apply technical controls, remove content, limit interaction, suspend participation, preserve information needed for an investigation, or report conduct to a platform provider or relevant authority when reasonably necessary for safety, security, legal compliance, or enforcement of published policies.</p>
-        <p>Moderation may be delayed, incomplete, or unavailable. The existence of the Lounge does not create a duty to monitor every message or guarantee that harmful, false, inappropriate, or unlawful content will be detected or removed. Do not rely on moderation as a substitute for your own judgment or safety precautions.</p>
+        <p>When a participant sends a private report, WelcomeScore may use a configured server-side AI provider to classify only the reported public message and report category against these published rules. The provider does not receive reporter identity, raw network data, credentials, unrelated Lounge history, or private account data. The result is a constrained safety signal, not a statement of fact, a legal conclusion, or a guarantee about a person.</p>
+        <p>A report never automatically removes a message by itself. Automated hiding is limited to a clear, high-confidence serious violation such as exposed credentials, a deceptive or malicious link, a scam, or severe harassment or threat. Ambiguous, unavailable, or lower-confidence outcomes remain visible and are recorded privately for owner review. WelcomeScore may later correct, restore, remove, or restrict content after review. The existence of the Lounge does not create a duty to monitor every message or guarantee that harmful, false, inappropriate, or unlawful content will be detected or removed. Do not rely on moderation as a substitute for your own judgment or safety precautions.</p>
       </>
     ),
   },
@@ -76,7 +77,7 @@ const sections: PolicySection[] = [
     title: "Reporting concerns",
     content: (
       <>
-        <p>For harmful, abusive, fraudulent, or policy-violating content, preserve only the minimum necessary details and use the private reporting route on the canonical <Link className="text-link underline underline-offset-4" href="https://github.com/ethiorhq/welcomescore">WelcomeScore repository</Link>. Do not repost harmful material publicly or use the Lounge to report a security vulnerability.</p>
+        <p>For harmful, abusive, fraudulent, or policy-violating content, use the Lounge’s private <strong>Report privately</strong> control and provide only the minimum necessary detail. Do not repost harmful material publicly or use the Lounge to report a security vulnerability. If you believe moderation action was mistaken, use the project <Link className="text-link underline underline-offset-4" href="https://github.com/ethiorhq/welcomescore/blob/main/CODE_OF_CONDUCT.md">Code of Conduct process</Link> and include the minimum public context needed for review.</p>
         <p>For a suspected security issue, follow <Link className="text-link underline underline-offset-4" href="https://github.com/ethiorhq/welcomescore/blob/main/SECURITY.md">SECURITY.md</Link>. For imminent danger, credible threats, or a crime in progress, contact the relevant local emergency service or platform safety channel first. WelcomeScore is not an emergency service.</p>
       </>
     ),
@@ -96,7 +97,7 @@ export default function DevLoungePolicyPage() {
       eyebrow="Community safety"
       title="Dev Lounge Policy"
       description="Clear, developer-friendly rules for using the temporary community chat safely, respectfully, and without private-deal risk."
-      effectiveDate="August 27, 2026"
+      effectiveDate="August 28, 2026"
       sections={sections}
     />
   );

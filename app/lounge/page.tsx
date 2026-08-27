@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, PointerEvent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import BackButton from "@/app/components/BackButton";
+import LoungeTurnstile from "@/app/components/LoungeTurnstile";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
@@ -72,6 +73,8 @@ function DevLoungeContent() {
     status,
     gatewayState,
     isVerifiedGateway,
+    verification,
+    refreshVerification,
     cooldownRemaining,
     sendMessage,
     addReaction,
@@ -92,15 +95,23 @@ function DevLoungeContent() {
   const [reactionPickerMessageId, setReactionPickerMessageId] = useState<string | null>(null);
   const [hiddenMessageIds, setHiddenMessageIds] = useState<Set<string>>(() => new Set());
   const [reportingMessage, setReportingMessage] = useState<LoungeMessage | null>(null);
+  const [pendingReplyJumpId, setPendingReplyJumpId] = useState<string | null>(null);
+  const [jumpedMessageId, setJumpedMessageId] = useState<string | null>(null);
+  const [jumpAnnouncement, setJumpAnnouncement] = useState("");
   const [filter, setFilter] = useState<LoungeFilter>("all");
   const [isPreparingContext, setIsPreparingContext] = useState(false);
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
+  const [messageTurnstileToken, setMessageTurnstileToken] = useState<string | null>(null);
+  const [messageHoneypot, setMessageHoneypot] = useState("");
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const chatViewportRef = useRef<HTMLDivElement>(null);
   const hasInitializedScrollRef = useRef(false);
   const wasNearBottomRef = useRef(true);
   const knownMessageIdsRef = useRef<Set<string>>(new Set());
+  const messageElementsRef = useRef(new Map<string, HTMLElement>());
+  const jumpReturnFocusRef = useRef<HTMLButtonElement | null>(null);
+  const jumpHighlightTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -118,6 +129,12 @@ function DevLoungeContent() {
       messageInputRef.current?.focus();
     }
   }, [replyingTo]);
+
+  useEffect(() => () => {
+    if (jumpHighlightTimerRef.current !== null) {
+      window.clearTimeout(jumpHighlightTimerRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     if (gatewayState === "legacy" && !isVerifiedGateway && requiresPreparedContext(topic)) {
@@ -179,12 +196,47 @@ function DevLoungeContent() {
     if (hiddenMessageIds.has(message.id)) {
       return false;
     }
-    if (filter === "all") {
-      return true;
-    }
-    const parent = message.parent_message_id ? messagesById.get(message.parent_message_id) : null;
-    return message.topic === filter || parent?.topic === filter;
+    return matchesLoungeFilter(message, filter, messagesById);
   }), [filter, hiddenMessageIds, messages, messagesById]);
+
+  const registerMessageElement = useCallback((messageId: string, element: HTMLElement | null) => {
+    if (element) {
+      messageElementsRef.current.set(messageId, element);
+    } else {
+      messageElementsRef.current.delete(messageId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!pendingReplyJumpId) {
+      return;
+    }
+    const frame = window.requestAnimationFrame(() => {
+      const target = messageElementsRef.current.get(pendingReplyJumpId);
+      if (!target) {
+        setActionError("The original message is no longer available in this temporary Lounge view.");
+        setJumpAnnouncement("The original message is no longer available.");
+        setPendingReplyJumpId(null);
+        return;
+      }
+
+      target.scrollIntoView({ block: "center", behavior: preferredScrollBehavior() });
+      target.focus({ preventScroll: true });
+      setJumpedMessageId(pendingReplyJumpId);
+      setJumpAnnouncement("Moved to the original message.");
+      setPendingReplyJumpId(null);
+      if (jumpHighlightTimerRef.current !== null) {
+        window.clearTimeout(jumpHighlightTimerRef.current);
+      }
+      jumpHighlightTimerRef.current = window.setTimeout(() => {
+        setJumpedMessageId(null);
+        jumpReturnFocusRef.current?.focus();
+        jumpReturnFocusRef.current = null;
+        jumpHighlightTimerRef.current = null;
+      }, 2_200);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [pendingReplyJumpId, visibleMessages]);
 
   const statusLabel = useMemo(() => {
     if (status === "ready") {
@@ -205,9 +257,12 @@ function DevLoungeContent() {
     || (topic === "audit_discussion" && preparedContext?.context.kind === "audit")
     || (topic === "hall_pattern" && preparedContext?.context.kind === "hall");
   const canSend = status === "ready"
+    && gatewayState !== "upgrade_required"
     && cooldownRemaining === 0
     && draft.trim().length > 0
-    && (!needsContext || contextKindMatches);
+    && (!needsContext || contextKindMatches)
+    && (!isVerifiedGateway || Boolean(verification?.proof))
+    && (!verification?.turnstile.enabled || Boolean(messageTurnstileToken));
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -218,6 +273,8 @@ function DevLoungeContent() {
       topic,
       contextToken: preparedContext?.token,
       replyTo: replyingTo ?? undefined,
+      turnstileToken: messageTurnstileToken,
+      website: messageHoneypot,
     });
     if (outcome.error) {
       setError(outcome.error);
@@ -227,13 +284,43 @@ function DevLoungeContent() {
     setDraft("");
     setReplyingTo(null);
     setPreparedContext(null);
+    setMessageTurnstileToken(null);
+    void refreshVerification();
     setAlgofoxState("waving", getAlgofoxMessage("loungeMessageSent"), 4_000);
     scrollToLatest();
   }
 
   function selectReply(message: LoungeMessage) {
+    const mention = `@${message.dev_handle} `;
     setReplyingTo(replySnapshotFromMessage(message));
+    setDraft((current) => {
+      const previousReplyMention = current.match(/^@[A-Za-z][A-Za-z0-9_]+\s+/)?.[0] ?? "";
+      const remaining = previousReplyMention ? current.slice(previousReplyMention.length) : current;
+      return `${mention}${remaining}`.slice(0, 300);
+    });
     setError("");
+  }
+
+  function jumpToReplySource(reply: LoungeReply, trigger: HTMLButtonElement) {
+    const source = messagesById.get(reply.id);
+    setActionError("");
+    jumpReturnFocusRef.current = trigger;
+
+    if (!source) {
+      setActionError("The original message has expired or is no longer available in this temporary Lounge.");
+      setJumpAnnouncement("The original message is no longer available.");
+      return;
+    }
+    if (hiddenMessageIds.has(source.id)) {
+      setActionError("The original message is hidden on this device. Show it again from a fresh Lounge session to open it.");
+      setJumpAnnouncement("The original message is hidden on this device.");
+      return;
+    }
+    if (!matchesLoungeFilter(source, filter, messagesById)) {
+      setFilter("all");
+      setJumpAnnouncement("Showing all conversations to open the original message.");
+    }
+    setPendingReplyJumpId(source.id);
   }
 
   async function handlePrepareContext() {
@@ -340,7 +427,9 @@ function DevLoungeContent() {
                 })}
               </div>
               {isVerifiedGateway ? (
-                <p className="mt-2 font-sans text-xs text-muted">Verified context and private safety reports are active. Every message is still your explicit choice.</p>
+                <p className="mt-2 font-sans text-xs text-muted">Verified context, private safety reports, and visitor protections are active. Every message is still your explicit choice.</p>
+              ) : gatewayState === "upgrade_required" ? (
+                <p className="mt-2 font-sans text-xs text-muted">Safety upgrade pending: messages, reactions, and reports will resume after the owner applies the published database migration.</p>
               ) : gatewayState === "checking" ? (
                 <p className="mt-2 font-sans text-xs text-muted">Preparing the verified Lounge workspace…</p>
               ) : (
@@ -352,6 +441,7 @@ function DevLoungeContent() {
               <p className="sr-only" role="status">
                 {unreadMessageCount > 0 ? `${unreadMessageCount} new ${unreadMessageCount === 1 ? "message" : "messages"}. Use the jump button to read them.` : ""}
               </p>
+              <p className="sr-only" role="status">{jumpAnnouncement}</p>
               <div ref={chatViewportRef} onScroll={handleChatScroll} className="min-h-[380px] max-h-[58vh] overflow-y-auto px-5 py-5" aria-live="off">
                 {status === "unavailable" ? <SetupState /> : null}
                 {status !== "unavailable" && visibleMessages.length === 0 ? <EmptyLoungeState filter={filter} /> : null}
@@ -368,6 +458,9 @@ function DevLoungeContent() {
                           onOpenScore={setSelectedScore}
                           onReply={selectReply}
                           isReplyTarget={replyingTo?.id === message.id}
+                          isJumpTarget={jumpedMessageId === message.id}
+                          registerMessageElement={registerMessageElement}
+                          onJumpToReplySource={jumpToReplySource}
                           reactions={reactionsByMessage.get(message.id) ?? []}
                           ownReaction={reactions.find((reaction) => reaction.message_id === message.id && reaction.session_hash === identity?.sessionHash)?.reaction ?? null}
                           isReactionPickerOpen={reactionPickerMessageId === message.id}
@@ -422,12 +515,13 @@ function DevLoungeContent() {
                 <div className="mt-3 flex items-start justify-between gap-3 rounded-md border border-accent/35 border-l-2 bg-accent/10 px-3 py-2.5">
                   <div className="min-w-0">
                     <p className="font-mono text-xs font-semibold text-accent">Replying to {replyingTo.dev_handle}</p>
-                    <p className="mt-1 truncate font-sans text-xs text-muted">{replyingTo.content}</p>
+                    <p className="mt-1 truncate font-sans text-xs text-muted">Mention ready: @{replyingTo.dev_handle} · {replyingTo.content}</p>
                   </div>
                   <button type="button" onClick={() => setReplyingTo(null)} className="text-link shrink-0 font-mono text-lg leading-none" aria-label="Cancel reply">×</button>
                 </div>
               ) : null}
 
+              <input tabIndex={-1} aria-hidden="true" autoComplete="off" value={messageHoneypot} onChange={(event) => setMessageHoneypot(event.target.value)} className="sr-only" name="website" />
               <textarea
                 ref={messageInputRef}
                 id="lounge-message"
@@ -468,6 +562,8 @@ function DevLoungeContent() {
                 </section>
               ) : null}
 
+              {verification?.turnstile.enabled && verification.turnstile.siteKey ? <LoungeTurnstile action="lounge_message" siteKey={verification.turnstile.siteKey} onTokenChange={setMessageTurnstileToken} /> : null}
+
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-mono text-xs text-muted">{draft.length}/300</p>
@@ -475,7 +571,7 @@ function DevLoungeContent() {
                   {actionError ? <p className="mt-1 font-sans text-xs text-muted" role="status">{actionError}</p> : null}
                 </div>
                 <button type="submit" disabled={!canSend} className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 disabled:cursor-not-allowed disabled:border-muted/30 disabled:bg-base/30 disabled:text-muted">
-                  {cooldownRemaining > 0 ? `Send in ${cooldownRemaining}s` : needsContext && !contextKindMatches ? "Prepare context first" : "Send message"}
+                  {gatewayState === "upgrade_required" ? "Safety upgrade required" : cooldownRemaining > 0 ? `Send in ${cooldownRemaining}s` : needsContext && !contextKindMatches ? "Prepare context first" : isVerifiedGateway && !verification?.proof ? "Preparing safety check" : verification?.turnstile.enabled && !messageTurnstileToken ? "Complete safety check" : "Send message"}
                 </button>
               </div>
             </form>
@@ -510,7 +606,7 @@ function DevLoungeContent() {
       </div>
 
       {selectedScore ? <ScorePreview scoreCard={selectedScore} onClose={() => setSelectedScore(null)} /> : null}
-      {reportingMessage ? <ReportDialog message={reportingMessage} onClose={() => setReportingMessage(null)} onSubmit={reportMessage} /> : null}
+      {reportingMessage ? <ReportDialog message={reportingMessage} onClose={() => setReportingMessage(null)} onSubmit={reportMessage} turnstile={verification?.turnstile ?? null} onVerificationUsed={refreshVerification} /> : null}
     </main>
   );
 }
@@ -521,6 +617,9 @@ function MessageItem({
   onOpenScore,
   onReply,
   isReplyTarget,
+  isJumpTarget,
+  registerMessageElement,
+  onJumpToReplySource,
   reactions,
   ownReaction,
   isReactionPickerOpen,
@@ -537,6 +636,9 @@ function MessageItem({
   onOpenScore: (scoreCard: LoungeScoreCard) => void;
   onReply: (message: LoungeMessage) => void;
   isReplyTarget: boolean;
+  isJumpTarget: boolean;
+  registerMessageElement: (messageId: string, element: HTMLElement | null) => void;
+  onJumpToReplySource: (reply: LoungeReply, trigger: HTMLButtonElement) => void;
   reactions: LoungeReactionRecord[];
   ownReaction: LoungeReaction | null;
   isReactionPickerOpen: boolean;
@@ -596,7 +698,7 @@ function MessageItem({
   }
 
   return (
-    <article className={`group -mx-2 flex gap-3 rounded-md px-2 py-2 transition-colors duration-180 ease-out ${parent ? "ml-2 border-l border-accent/30 pl-3 sm:ml-6" : ""} ${isReplyTarget ? "bg-accent/[0.07]" : "hover:bg-base/30"}`} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={() => { pointerStart.current = null; clearReplyGesture(); }}>
+    <article ref={(element) => registerMessageElement(message.id, element)} tabIndex={-1} className={`group -mx-2 flex gap-3 rounded-md px-2 py-2 outline-none transition-colors duration-180 ease-out ${parent ? "ml-2 border-l border-accent/30 pl-3 sm:ml-6" : ""} ${isJumpTarget ? "bg-accent/15 ring-1 ring-accent/45" : isReplyTarget ? "bg-accent/[0.07]" : "hover:bg-base/30"}`} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={() => { pointerStart.current = null; clearReplyGesture(); }}>
       <img src={createDevAvatar(message.avatar_seed)} alt="" className="h-9 w-9 shrink-0 rounded-full border border-muted/30 bg-base" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -604,7 +706,7 @@ function MessageItem({
           <span className="rounded-md border border-muted/25 bg-base/25 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-muted">{topicLabel}</span>
           <time className="font-sans text-xs text-muted" dateTime={message.created_at}>{formatMessageTime(message.created_at)}</time>
         </div>
-        {message.reply_to ? <div className="mt-2 rounded-md border border-muted/30 border-l-2 border-l-accent/60 bg-base/35 px-3 py-2"><p className="font-mono text-xs font-semibold text-accent">Replying to {message.reply_to.dev_handle}</p><p className="mt-1 max-h-10 overflow-hidden break-words font-sans text-xs leading-5 text-muted">{message.reply_to.content}</p></div> : null}
+        {message.reply_to ? <button type="button" onClick={(event) => onJumpToReplySource(message.reply_to!, event.currentTarget)} onPointerDown={(event) => event.stopPropagation()} onPointerUp={(event) => event.stopPropagation()} className="mt-2 block w-full rounded-md border border-muted/30 border-l-2 border-l-accent/60 bg-base/35 px-3 py-2 text-left transition-colors duration-180 ease-out hover:border-accent/45 hover:bg-accent/10 focus:border-accent/45 focus:bg-accent/10"><p className="font-mono text-xs font-semibold text-accent">Replying to {message.reply_to.dev_handle}</p><p className="mt-1 max-h-10 overflow-hidden break-words font-sans text-xs leading-5 text-muted">{message.reply_to.content}</p><span className="mt-2 block font-mono text-[10px] uppercase tracking-[0.12em] text-muted">Open original message</span></button> : null}
         {message.content ? <p className="mt-1 break-words font-sans text-sm leading-6 text-text">{message.content}</p> : null}
         {message.community_context ? <CommunityContextCard context={message.community_context} /> : null}
         {message.score_card ? <button type="button" onClick={() => onOpenScore(message.score_card!)} className="mt-3 block w-full rounded-md border border-accent/35 bg-accent/10 p-3 text-left transition-colors duration-180 ease-out hover:bg-accent/15"><span className="font-mono text-xs uppercase tracking-[0.15em] text-accent">Shared WelcomeScore</span><span className="mt-2 flex items-end justify-between gap-3"><span className="min-w-0"><span className="block truncate font-mono text-sm font-semibold text-text">{message.score_card.repo}</span><span className="mt-1 block font-sans text-xs text-muted">{message.score_card.summary}</span></span><span className="shrink-0 font-mono text-2xl font-bold text-accent">{message.score_card.score}</span></span></button> : null}
@@ -636,11 +738,13 @@ function ContextStatus({ context, onRemove }: { context: LoungeCommunityContext;
   return <div className="flex max-w-full items-center gap-2 rounded-md border border-accent/35 bg-accent/10 px-2.5 py-2"><span className="max-w-[180px] truncate font-mono text-xs text-accent">{context.kind === "audit" ? "Fresh audit" : "Hall context"}: {context.repo}</span><button type="button" onClick={onRemove} className="text-link font-mono text-base leading-none" aria-label="Remove prepared public context">×</button></div>;
 }
 
-function ReportDialog({ message, onClose, onSubmit }: { message: LoungeMessage; onClose: () => void; onSubmit: (input: { messageId: string; reason: LoungeReportReason; detail?: string }) => Promise<{ error: string | null }> }) {
+function ReportDialog({ message, onClose, onSubmit, turnstile, onVerificationUsed }: { message: LoungeMessage; onClose: () => void; onSubmit: (input: { messageId: string; reason: LoungeReportReason; detail?: string; turnstileToken?: string | null; website?: string }) => Promise<{ error: string | null; autoHidden?: boolean; reviewState?: string | null }>; turnstile: { enabled: boolean; siteKey: string | null } | null; onVerificationUsed: () => Promise<void> }) {
   const [reason, setReason] = useState<LoungeReportReason>("spam");
   const [detail, setDetail] = useState("");
   const [feedback, setFeedback] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [website, setWebsite] = useState("");
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
@@ -652,15 +756,18 @@ function ReportDialog({ message, onClose, onSubmit }: { message: LoungeMessage; 
     event.preventDefault();
     setFeedback("");
     setIsSending(true);
-    const outcome = await onSubmit({ messageId: message.id, reason, detail });
+    const outcome = await onSubmit({ messageId: message.id, reason, detail, turnstileToken, website });
     setIsSending(false);
     if (outcome.error) { setFeedback(outcome.error); return; }
-    setFeedback("Private report sent. No public change was made.");
+    setTurnstileToken(null);
+    void onVerificationUsed();
+    setFeedback(outcome.autoHidden ? "Private report saved. A clear high-severity policy violation was temporarily hidden for safety." : outcome.reviewState === "needs_review" ? "Private report saved for owner review. No public change was made." : "Private report saved. No public change was made.");
   }
 
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 p-4" onMouseDown={onClose}><section role="dialog" aria-modal="true" aria-labelledby="lounge-report-title" className="w-full max-w-md rounded-lg border border-muted/25 bg-surface p-5 shadow-2xl" onMouseDown={(event) => event.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><p className="font-mono text-xs uppercase tracking-[0.16em] text-accent">Private report</p><h2 id="lounge-report-title" className="mt-2 font-mono text-lg font-bold">Report this message</h2></div><button type="button" className="text-link text-xl leading-none" onClick={onClose} aria-label="Close report dialog">×</button></div><p className="mt-3 font-sans text-sm leading-6 text-muted">Choose a reason. Do not paste credentials, private links, personal data, or vulnerability details. Reporting does not automatically remove a public message.</p><form className="mt-4" onSubmit={submit}><fieldset><legend className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-muted">Reason</legend><div className="mt-2 grid gap-2 sm:grid-cols-2">{LOUNGE_REPORT_REASONS.map((option) => <label key={option} className={`rounded-md border px-3 py-2 font-sans text-sm ${reason === option ? "border-accent/45 bg-accent/10 text-text" : "border-muted/25 bg-base/25 text-muted"}`}><input type="radio" className="mr-2 accent-[#E8A23D]" checked={reason === option} onChange={() => setReason(option)} name="lounge-report-reason" />{reportReasonLabel(option)}</label>)}</div></fieldset><label className="mt-4 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-muted" htmlFor="lounge-report-detail">Optional private detail</label><textarea id="lounge-report-detail" value={detail} onChange={(event) => setDetail(event.target.value.slice(0, 240))} rows={3} className="mt-2 w-full resize-none rounded-md border border-muted/35 bg-base/40 px-3 py-2 font-sans text-sm text-text outline-none placeholder:text-muted focus:border-accent" placeholder="Briefly describe the concern without repeating sensitive content." /><div className="mt-3 flex items-center justify-between gap-3"><p className="font-mono text-xs text-muted">{detail.length}/240</p><button type="submit" disabled={isSending} className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 disabled:cursor-not-allowed disabled:border-muted/30 disabled:bg-base/30 disabled:text-muted">{isSending ? "Sending…" : "Send private report"}</button></div>{feedback ? <p className="mt-3 font-sans text-xs text-muted" role="status">{feedback}</p> : null}</form></section></div>;
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 p-4" onMouseDown={onClose}><section role="dialog" aria-modal="true" aria-labelledby="lounge-report-title" className="w-full max-w-md rounded-lg border border-muted/25 bg-surface p-5 shadow-2xl" onMouseDown={(event) => event.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><p className="font-mono text-xs uppercase tracking-[0.16em] text-accent">Private report</p><h2 id="lounge-report-title" className="mt-2 font-mono text-lg font-bold">Report this message</h2></div><button type="button" className="text-link text-xl leading-none" onClick={onClose} aria-label="Close report dialog">×</button></div><p className="mt-3 font-sans text-sm leading-6 text-muted">Choose a reason. Do not paste credentials, private links, personal data, or vulnerability details. Reporting opens a private safety review; clear high-severity violations may be temporarily hidden.</p><form className="mt-4" onSubmit={submit}><fieldset><legend className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-muted">Reason</legend><div className="mt-2 grid gap-2 sm:grid-cols-2">{LOUNGE_REPORT_REASONS.map((option) => <label key={option} className={`rounded-md border px-3 py-2 font-sans text-sm ${reason === option ? "border-accent/45 bg-accent/10 text-text" : "border-muted/25 bg-base/25 text-muted"}`}><input type="radio" className="mr-2 accent-[#E8A23D]" checked={reason === option} onChange={() => setReason(option)} name="lounge-report-reason" />{reportReasonLabel(option)}</label>)}</div></fieldset><label className="mt-4 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-muted" htmlFor="lounge-report-detail">Optional private detail</label><textarea id="lounge-report-detail" value={detail} onChange={(event) => setDetail(event.target.value.slice(0, 240))} rows={3} className="mt-2 w-full resize-none rounded-md border border-muted/35 bg-base/40 px-3 py-2 font-sans text-sm text-text outline-none placeholder:text-muted focus:border-accent" placeholder="Briefly describe the concern without repeating sensitive content." /><input tabIndex={-1} aria-hidden="true" autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} className="sr-only" name="website" />{turnstile?.enabled && turnstile.siteKey ? <LoungeTurnstile action="lounge_report" siteKey={turnstile.siteKey} onTokenChange={setTurnstileToken} /> : null}<div className="mt-3 flex items-center justify-between gap-3"><p className="font-mono text-xs text-muted">{detail.length}/240</p><button type="submit" disabled={isSending || Boolean(turnstile?.enabled && !turnstileToken)} className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 disabled:cursor-not-allowed disabled:border-muted/30 disabled:bg-base/30 disabled:text-muted">{isSending ? "Sending…" : turnstile?.enabled && !turnstileToken ? "Complete safety check" : "Send private report"}</button></div>{feedback ? <p className="mt-3 font-sans text-xs text-muted" role="status">{feedback}</p> : null}</form></section></div>;
 }
 
+function matchesLoungeFilter(message: LoungeMessage, filter: LoungeFilter, messagesById: Map<string, LoungeMessage>) { if (filter === "all") { return true; } const parent = message.parent_message_id ? messagesById.get(message.parent_message_id) : null; return message.topic === filter || parent?.topic === filter; }
 function groupReactionsByMessage(reactions: LoungeReactionRecord[]) { const grouped = new Map<string, LoungeReactionRecord[]>(); reactions.forEach((reaction) => { const messageReactions = grouped.get(reaction.message_id) ?? []; messageReactions.push(reaction); grouped.set(reaction.message_id, messageReactions); }); return grouped; }
 function summarizeReactions(reactions: LoungeReactionRecord[]) { return Object.keys(REACTION_OPTIONS).map((reaction) => { const typedReaction = reaction as LoungeReaction; return { reaction: typedReaction, count: reactions.filter((entry) => entry.reaction === typedReaction).length }; }).filter(({ count }) => count > 0); }
 function isNearChatBottom(viewport: HTMLElement) { return viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= FOLLOW_THRESHOLD_PX; }

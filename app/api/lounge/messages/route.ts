@@ -16,6 +16,10 @@ export async function POST(request: Request) {
       clientRequestId: body.clientRequestId,
       contextToken: body.contextToken,
       replyTo: body.replyTo,
+      verificationProof: body.verificationProof,
+      turnstileToken: body.turnstileToken,
+      website: body.website,
+      request,
     });
     return NextResponse.json({ message }, {
       status: 201,

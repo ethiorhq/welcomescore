@@ -21,8 +21,12 @@ export async function GET() {
       "Content-Type": "application/json",
     };
     const baseUrl = `${url.replace(/\/$/, "")}/rest/v1`;
-    const [columnsResponse, rateFunctionResponse] = await Promise.all([
+    const [columnsResponse, moderationResponse, rateFunctionResponse] = await Promise.all([
       fetch(`${baseUrl}/lounge_messages?select=topic,community_context,visibility_state&limit=1`, {
+        headers,
+        cache: "no-store",
+      }),
+      fetch(`${baseUrl}/lounge_moderation_events?select=decision,category,confidence,action_taken&limit=1`, {
         headers,
         cache: "no-store",
       }),
@@ -31,18 +35,22 @@ export async function GET() {
         headers,
         body: JSON.stringify({
           p_session_hash: "health-probe",
-          p_action: "context",
+          p_action: "network-context",
           p_limit: 0,
           p_window_seconds: 0,
         }),
         cache: "no-store",
       }),
     ]);
+    const ready = columnsResponse.ok && moderationResponse.ok && rateFunctionResponse.ok;
     return NextResponse.json(
-      { ready: columnsResponse.ok && rateFunctionResponse.ok },
+      { ready, ...(ready ? {} : { reason: "safety_migration_required" }) },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch {
-    return NextResponse.json({ ready: false }, { headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json(
+      { ready: false, reason: "safety_migration_required" },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   }
 }
