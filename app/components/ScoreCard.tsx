@@ -237,25 +237,171 @@ function HallOfFamePanel({
   idPrefix: string;
 }) {
   const isComplete = status === "already-listed" || status === "added";
+  const issueSearchUrl = `https://github.com/${result.repo}/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22`;
 
   if (!result.isEligibleForLeaderboard) {
-    const nextSteps = hallOfFameNextSteps(result);
+    const foundationChecks = [
+      {
+        label: "Contributor-readiness score",
+        detail: `${result.score} / 100 · ${result.score >= 75 ? "meets the 75-point threshold" : `${75 - result.score} more point${75 - result.score === 1 ? "" : "s"} needed`}`,
+        complete: result.score >= 75,
+      },
+      {
+        label: "Repository README",
+        detail: result.hasReadme ? "published" : "still needed",
+        complete: result.hasReadme,
+      },
+      {
+        label: "Published license",
+        detail: result.hasLicense ? "published" : "still needed",
+        complete: result.hasLicense,
+      },
+    ];
+    const foundationComplete = foundationChecks.every((check) => check.complete);
+    const starProgress = Math.min((result.starsCount / 5) * 100, 100);
+    const forkProgress = Math.min((result.forksCount / 2) * 100, 100);
+    const repositoryUrl = `https://github.com/${result.repo}`;
+    const communityProfileUrl = `${repositoryUrl}/community`;
 
     return (
-      <section className="mt-9 border-t border-muted/20 pt-6" aria-labelledby={`${idPrefix}-hall-progress-title`}>
-        <h2 id={`${idPrefix}-hall-progress-title`} className="font-sans text-sm font-semibold text-muted">
-          On your way to the Hall of Fame
-        </h2>
-        <p className="mt-2 max-w-xl font-sans text-sm leading-6 text-muted">
-          Every contributor-friendly improvement counts. Clear the next milestone, run another audit, and the Hall of Fame option will unlock automatically.
+      <section
+        className="mt-9 border-t border-muted/20 pt-6"
+        aria-labelledby={`${idPrefix}-hall-progress-title`}
+      >
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+          <div>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+              Hall readiness
+            </p>
+            <h2
+              id={`${idPrefix}-hall-progress-title`}
+              className="mt-1 font-sans text-base font-semibold text-text"
+            >
+              {foundationComplete
+                ? "Contributor-ready. Building community proof."
+                : "Build the contributor foundation first."}
+            </h2>
+          </div>
+          <span
+            className={
+              foundationComplete
+                ? "rounded-md border border-good/45 bg-good/15 px-2.5 py-1 font-mono text-xs font-semibold text-good"
+                : "rounded-md border border-muted/30 bg-base/25 px-2.5 py-1 font-mono text-xs font-semibold text-muted"
+            }
+          >
+            {foundationComplete ? "FOUNDATION COMPLETE" : "FOUNDATION IN PROGRESS"}
+          </span>
+        </div>
+
+        <p className="mt-3 max-w-2xl font-sans text-sm leading-6 text-muted">
+          Hall entries need a contributor-ready repository and one real community-adoption milestone: five GitHub stars or two forks. The final Hall submission always remains your explicit choice.
         </p>
-        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Next Hall of Fame milestones">
-          {nextSteps.map((step) => (
-            <li key={step} className="rounded-md border border-muted/30 bg-base/25 px-3 py-2 font-sans text-sm text-muted">
-              {step}
+
+        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+          <section
+            className="rounded-md border border-muted/25 bg-base/25 p-4"
+            aria-labelledby={`${idPrefix}-foundation-title`}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <h3
+                id={`${idPrefix}-foundation-title`}
+                className="font-sans text-sm font-semibold text-text"
+              >
+                Contributor foundation
+              </h3>
+              <span className="font-mono text-xs text-muted">
+                {foundationChecks.filter((check) => check.complete).length}/{foundationChecks.length}
+              </span>
+            </div>
+            <ul className="mt-3 space-y-2.5" aria-label="Contributor foundation progress">
+              {foundationChecks.map((check) => (
+                <li key={check.label} className="flex gap-2.5 text-sm">
+                  <span
+                    className={
+                      check.complete
+                        ? "mt-0.5 font-mono font-bold text-good"
+                        : "mt-0.5 font-mono font-bold text-muted"
+                    }
+                    aria-hidden="true"
+                  >
+                    {check.complete ? "✓" : "–"}
+                  </span>
+                  <span>
+                    <span className={check.complete ? "font-medium text-text" : "font-medium text-muted"}>
+                      {check.label}
+                    </span>
+                    <span className="text-muted"> · {check.detail}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section
+            className="rounded-md border border-accent/25 bg-accent/5 p-4"
+            aria-labelledby={`${idPrefix}-community-title`}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <h3
+                id={`${idPrefix}-community-title`}
+                className="font-sans text-sm font-semibold text-text"
+              >
+                Community proof
+              </h3>
+              <span className="font-mono text-xs text-accent">REACH EITHER</span>
+            </div>
+            <p className="mt-2 font-sans text-xs leading-5 text-muted">
+              These are public adoption signals, not a quality certification. Earn them by making the project useful and easy to evaluate—not through exchanges or artificial activity.
+            </p>
+            <div className="mt-4 space-y-3" aria-label="Community adoption progress">
+              <CommunityProgress
+                label="GitHub stars"
+                current={result.starsCount}
+                target={5}
+                value={starProgress}
+                id={`${idPrefix}-stars-progress`}
+              />
+              <CommunityProgress
+                label="GitHub forks"
+                current={result.forksCount}
+                target={2}
+                value={forkProgress}
+                id={`${idPrefix}-forks-progress`}
+              />
+            </div>
+          </section>
+        </div>
+
+        <section className="mt-4 rounded-md border border-muted/25 bg-surface/60 p-4" aria-labelledby={`${idPrefix}-next-actions-title`}>
+          <h3 id={`${idPrefix}-next-actions-title`} className="font-sans text-sm font-semibold text-text">
+            Earn attention by being useful
+          </h3>
+          <p className="mt-1 font-sans text-sm leading-6 text-muted">
+            Give potential users and contributors a clear reason to explore the work. These resources do not change your score or promise stars or forks.
+          </p>
+          <ul className="mt-3 grid gap-2 font-sans text-sm sm:grid-cols-2">
+            <li>
+              <a className="text-link underline underline-offset-4" href={repositoryUrl} target="_blank" rel="noreferrer">
+                Review the project README on GitHub
+              </a>
             </li>
-          ))}
-        </ul>
+            <li>
+              <Link className="text-link underline underline-offset-4" href="/guides/open-source-contributor-onboarding-checklist">
+                Strengthen the first-contribution path
+              </Link>
+            </li>
+            <li>
+              <a className="text-link underline underline-offset-4" href={issueSearchUrl} target="_blank" rel="noreferrer">
+                Keep starter issues accurate and current
+              </a>
+            </li>
+            <li>
+              <a className="text-link underline underline-offset-4" href={communityProfileUrl} target="_blank" rel="noreferrer">
+                Review GitHub Community Profile
+              </a>
+            </li>
+          </ul>
+        </section>
       </section>
     );
   }
@@ -305,24 +451,44 @@ function HallOfFamePanel({
   );
 }
 
-function hallOfFameNextSteps(result: ScoreResult) {
-  const steps: string[] = [];
-
-  if (result.score < 75) {
-    const pointsNeeded = 75 - result.score;
-    steps.push(`Earn ${pointsNeeded} more point${pointsNeeded === 1 ? "" : "s"} to reach 75`);
-  }
-  if (!result.hasReadme) {
-    steps.push("Add a clear README");
-  }
-  if (!result.hasLicense) {
-    steps.push("Add an open-source license");
-  }
-  if (result.starsCount < 5 && result.forksCount < 2) {
-    steps.push("Build community proof with stars or forks");
-  }
-
-  return steps.length > 0 ? steps : ["Keep strengthening the contributor journey"];
+function CommunityProgress({
+  label,
+  current,
+  target,
+  value,
+  id,
+}: {
+  label: string;
+  current: number;
+  target: number;
+  value: number;
+  id: string;
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="font-sans text-sm text-text">{label}</span>
+        <span className="font-mono text-xs text-muted">
+          {current} / {target}
+        </span>
+      </div>
+      <div
+        id={id}
+        className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-base/80"
+        role="progressbar"
+        aria-label={`${label} progress`}
+        aria-valuemin={0}
+        aria-valuemax={target}
+        aria-valuenow={Math.min(current, target)}
+        aria-valuetext={`${current} of ${target} ${label.toLowerCase()}`}
+      >
+        <span
+          className="block h-full rounded-full bg-accent transition-[width] duration-300 ease-out"
+          style={{ width: `${value}%` }}
+        />
+      </div>
+    </div>
+  );
 }
 
 function CheckPill({
