@@ -63,7 +63,12 @@ export type LoungeMessage = {
 };
 
 type LoungeStatus = "connecting" | "ready" | "unavailable";
-type GatewayState = "checking" | "ready" | "legacy";
+type GatewayState = "checking" | "ready" | "legacy" | "upgrade_required";
+
+type LoungeVerification = {
+  proof: string;
+  turnstile: { enabled: boolean; siteKey: string | null };
+};
 
 export function useDevLounge() {
   const [identity, setIdentity] = useState<DevIdentity | null>(null);
@@ -75,6 +80,7 @@ export function useDevLounge() {
   const [onlineCount, setOnlineCount] = useState(0);
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [now, setNow] = useState(0);
+  const [verification, setVerification] = useState<LoungeVerification | null>(null);
 
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const isVerifiedGateway = gatewayState === "ready";
@@ -116,9 +122,9 @@ export function useDevLounge() {
     async function checkGateway() {
       try {
         const response = await fetch("/api/lounge/health", { cache: "no-store" });
-        const data = await response.json() as { ready?: boolean };
+        const data = await response.json() as { ready?: boolean; reason?: unknown };
         if (active) {
-          setGatewayState(data.ready ? "ready" : "legacy");
+          setGatewayState(data.ready ? "ready" : data.reason === "safety_migration_required" ? "upgrade_required" : "legacy");
         }
       } catch {
         if (active) {
@@ -131,6 +137,30 @@ export function useDevLounge() {
       active = false;
     };
   }, []);
+
+  const refreshVerification = useCallback(async () => {
+    if (!identity || !isVerifiedGateway) {
+      setVerification(null);
+      return;
+    }
+    const outcome = await postJson("/api/lounge/verification", { sessionHash: identity.sessionHash });
+    if (outcome.error || typeof outcome.data.proof !== "string") {
+      setVerification(null);
+      return;
+    }
+    const turnstile = outcome.data.turnstile as { enabled?: unknown; siteKey?: unknown } | undefined;
+    setVerification({
+      proof: outcome.data.proof,
+      turnstile: {
+        enabled: turnstile?.enabled === true,
+        siteKey: typeof turnstile?.siteKey === "string" ? turnstile.siteKey : null,
+      },
+    });
+  }, [identity, isVerifiedGateway]);
+
+  useEffect(() => {
+    void refreshVerification();
+  }, [refreshVerification]);
 
   useEffect(() => {
     if (!supabase || !identity) {
@@ -196,6 +226,18 @@ export function useDevLounge() {
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "lounge_messages" },
           (payload) => appendMessage(payload.new as LoungeMessage),
+        )
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "lounge_messages" },
+          (payload) => {
+            const updated = payload.new as LoungeMessage & { visibility_state?: string };
+            if (updated.visibility_state === "hidden_by_moderator") {
+              setMessages((current) => current.filter((message) => message.id !== updated.id));
+              setReactions((current) => current.filter((reaction) => reaction.message_id !== updated.id));
+              setAnswerMarks((current) => current.filter((mark) => mark.question_message_id !== updated.id && mark.answer_message_id !== updated.id));
+            }
+          },
         )
         .on(
           "postgres_changes",
@@ -275,12 +317,16 @@ export function useDevLounge() {
     contextToken,
     replyTo,
     scoreCard,
+    turnstileToken,
+    website,
   }: {
     content: string;
     topic?: LoungeTopic;
     contextToken?: string | null;
     replyTo?: LoungeReply;
     scoreCard?: LoungeScoreCard;
+    turnstileToken?: string | null;
+    website?: string;
   }) => {
     if (!supabase || !identity) {
       return { error: "The Lounge is not configured yet." };
@@ -295,6 +341,12 @@ export function useDevLounge() {
     }
 
     if (isVerifiedGateway) {
+      if (!verification?.proof) {
+        return { error: "Visitor verification is preparing. Please wait a moment and try again." };
+      }
+      if (verification.turnstile.enabled && !turnstileToken) {
+        return { error: "Complete visitor verification before sending." };
+      }
       const outcome = await postJson("/api/lounge/messages", {
         sessionHash: identity.sessionHash,
         devHandle: identity.handle,
@@ -304,12 +356,15 @@ export function useDevLounge() {
         contextToken,
         replyTo,
         clientRequestId: crypto.randomUUID(),
+        verificationProof: verification.proof,
+        turnstileToken,
+        website,
       });
       if (outcome.error) {
         return { error: outcome.error };
       }
       appendMessage(outcome.data.message as LoungeMessage);
-    } else {
+    } else if (gatewayState === "legacy") {
       const messageToInsert = {
         session_hash: identity.sessionHash,
         dev_handle: identity.handle,
@@ -323,11 +378,13 @@ export function useDevLounge() {
       if (error) {
         return { error: "Unable to send the message right now." };
       }
+    } else {
+      return { error: "The Dev Lounge safety upgrade needs its database migration before new messages can be sent." };
     }
 
     setCooldownUntil(Date.now() + COOLDOWN_MS);
     return { error: null };
-  }, [appendMessage, cooldownUntil, identity, isVerifiedGateway, supabase]);
+  }, [appendMessage, cooldownUntil, gatewayState, identity, isVerifiedGateway, supabase, verification]);
 
   const addReaction = useCallback(async ({ messageId, reaction }: { messageId: string; reaction: LoungeReaction }) => {
     if (!supabase || !identity) {
@@ -350,7 +407,7 @@ export function useDevLounge() {
       if (outcome.data.reaction) {
         appendReaction(outcome.data.reaction as LoungeReactionRecord);
       }
-    } else {
+    } else if (gatewayState === "legacy") {
       const { data, error } = await supabase
         .from("lounge_reactions")
         .insert({ message_id: messageId, session_hash: identity.sessionHash, reaction })
@@ -360,10 +417,12 @@ export function useDevLounge() {
         return { error: error.code === "23505" ? "You have already reacted to this message." : "Unable to add that reaction right now." };
       }
       appendReaction(data as LoungeReactionRecord);
+    } else {
+      return { error: "The Dev Lounge safety upgrade needs its database migration before reactions can be added." };
     }
 
     return { error: null };
-  }, [appendReaction, identity, isVerifiedGateway, reactions, supabase]);
+  }, [appendReaction, gatewayState, identity, isVerifiedGateway, reactions, supabase]);
 
   const markAnswer = useCallback(async ({ questionMessageId, answerMessageId }: { questionMessageId: string; answerMessageId: string }) => {
     if (!identity || !isVerifiedGateway) {
@@ -396,18 +455,31 @@ export function useDevLounge() {
     return { error: null };
   }, [identity, isVerifiedGateway]);
 
-  const reportMessage = useCallback(async ({ messageId, reason, detail }: { messageId: string; reason: LoungeReportReason; detail?: string }) => {
+  const reportMessage = useCallback(async ({ messageId, reason, detail, turnstileToken, website }: { messageId: string; reason: LoungeReportReason; detail?: string; turnstileToken?: string | null; website?: string }) => {
     if (!identity || !isVerifiedGateway) {
-      return { error: "Private reporting is being connected." };
+      return { error: gatewayState === "upgrade_required" ? "The Dev Lounge safety upgrade needs its database migration before private reports can be sent." : "Private reporting is being connected." };
+    }
+    if (!verification?.proof) {
+      return { error: "Visitor verification is preparing. Please wait a moment and try again." };
+    }
+    if (verification.turnstile.enabled && !turnstileToken) {
+      return { error: "Complete visitor verification before sending." };
     }
     const outcome = await postJson("/api/lounge/reports", {
       sessionHash: identity.sessionHash,
       messageId,
       reason,
       detail,
+      verificationProof: verification.proof,
+      turnstileToken,
+      website,
     });
-    return { error: outcome.error };
-  }, [identity, isVerifiedGateway]);
+    return {
+      error: outcome.error,
+      autoHidden: outcome.data.autoHidden === true,
+      reviewState: typeof outcome.data.reviewState === "string" ? outcome.data.reviewState : null,
+    };
+  }, [gatewayState, identity, isVerifiedGateway, verification]);
 
   return {
     identity,
@@ -418,6 +490,8 @@ export function useDevLounge() {
     status,
     gatewayState,
     isVerifiedGateway,
+    verification,
+    refreshVerification,
     cooldownRemaining: Math.max(0, Math.ceil((cooldownUntil - now) / 1000)),
     sendMessage,
     addReaction,

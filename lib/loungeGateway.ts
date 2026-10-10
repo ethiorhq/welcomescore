@@ -4,6 +4,16 @@ import { createPreparedContext, readPreparedContext } from "@/lib/loungeCommunit
 import { getLeaderboardEntry } from "@/lib/leaderboard";
 import { scoreRepo } from "@/lib/scoreRepo";
 import {
+  assessLoungeReport,
+  fallbackModerationAssessment,
+  shouldAutoHide,
+} from "@/lib/loungeModeration";
+import {
+  deriveLoungeNetworkBucket,
+  verifyLoungeHumanProof,
+  verifyTurnstileToken,
+} from "@/lib/loungeVerification";
+import {
   isLoungeFocus,
   isLoungeReportReason,
   isLoungeTopic,
@@ -36,6 +46,11 @@ const RATE_RULES = {
   reaction: { limit: 15, windowSeconds: 600 },
   context: { limit: 3, windowSeconds: 600 },
   report: { limit: 5, windowSeconds: 86400 },
+  "network-root-post": { limit: 8, windowSeconds: 600 },
+  "network-reply": { limit: 12, windowSeconds: 600 },
+  "network-reaction": { limit: 30, windowSeconds: 600 },
+  "network-context": { limit: 6, windowSeconds: 600 },
+  "network-report": { limit: 8, windowSeconds: 86400 },
 } as const;
 
 type RateAction = keyof typeof RATE_RULES;
@@ -150,6 +165,10 @@ export async function createLoungeMessage(input: {
   clientRequestId: unknown;
   contextToken?: unknown;
   replyTo?: unknown;
+  verificationProof?: unknown;
+  turnstileToken?: unknown;
+  website?: unknown;
+  request: Request;
 }): Promise<LoungeMessageRow> {
   const sessionHash = requireSessionHash(input.sessionHash);
   const devHandle = requireDevHandle(input.devHandle);
@@ -159,6 +178,9 @@ export async function createLoungeMessage(input: {
   const content = validateContent(input.content);
   const replyTo = input.replyTo ? requireReplySnapshot(input.replyTo) : null;
   const preparedContext = input.contextToken ? readPreparedContext(input.contextToken) : null;
+  assertEmptyHoneypot(input.website);
+  assertHumanProof(input.verificationProof, sessionHash);
+  await assertTurnstile(input.turnstileToken, "lounge_message", input.request);
 
   if (requiresPreparedContext(topic) && !preparedContext) {
     throw new LoungeGatewayError(422, "Prepare the required public context before sending. No message was posted.");
@@ -186,7 +208,7 @@ export async function createLoungeMessage(input: {
     parentMessageId = parent.id;
   }
 
-  await consumeRate(sessionHash, replyTo ? "reply" : "root-post");
+  await consumeRatePair(sessionHash, deriveLoungeNetworkBucket(input.request), replyTo ? "reply" : "root-post");
 
   const response = await loungeRequest(`/${LOUNGE_TABLE}`, {
     method: "POST",
@@ -310,6 +332,10 @@ export async function createLoungeReport(input: {
   messageId: unknown;
   reason: unknown;
   detail?: unknown;
+  verificationProof?: unknown;
+  turnstileToken?: unknown;
+  website?: unknown;
+  request: Request;
 }) {
   const sessionHash = requireSessionHash(input.sessionHash);
   const messageId = requireUuid(input.messageId, "Choose an active message before reporting.");
@@ -318,15 +344,18 @@ export async function createLoungeReport(input: {
   }
 
   const detail = validateReportDetail(input.detail);
+  assertEmptyHoneypot(input.website);
+  assertHumanProof(input.verificationProof, sessionHash);
+  await assertTurnstile(input.turnstileToken, "lounge_report", input.request);
   const message = await getActiveMessage(messageId);
   if (!message) {
     throw new LoungeGatewayError(404, "That message is no longer available to report.");
   }
 
-  await consumeRate(sessionHash, "report");
+  await consumeRatePair(sessionHash, deriveLoungeNetworkBucket(input.request), "report");
   const response = await loungeRequest("/lounge_reports", {
     method: "POST",
-    headers: { Prefer: "return=minimal" },
+    headers: { Prefer: "return=representation" },
     body: JSON.stringify({
       message_id: messageId,
       reporter_session_hash: sessionHash,
@@ -342,6 +371,52 @@ export async function createLoungeReport(input: {
   if (!response.ok) {
     throw new LoungeGatewayError(503, "Unable to send that private report right now.");
   }
+
+  const reportRows = await response.json() as Array<{ id?: string }>;
+  const reportId = reportRows[0]?.id;
+  if (!reportId) {
+    throw new LoungeGatewayError(503, "Unable to confirm the private report right now.");
+  }
+
+  const assessment = await assessLoungeReport({
+    messageContent: message.content,
+    reportReason: input.reason as LoungeReportReason,
+  }) ?? fallbackModerationAssessment();
+  let actionTaken: "none" | "hidden" = "none";
+
+  if (shouldAutoHide(assessment)) {
+    const hideResponse = await loungeRequest(`/${LOUNGE_TABLE}?id=eq.${encodeURIComponent(messageId)}&visibility_state=eq.visible`, {
+      method: "PATCH",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({ visibility_state: "hidden_by_moderator" }),
+    });
+    if (hideResponse.ok) {
+      actionTaken = "hidden";
+    } else {
+      console.warn("Lounge moderation hide action could not complete", { messageId, reportId, status: hideResponse.status });
+    }
+  }
+
+  const moderationResponse = await loungeRequest("/lounge_moderation_events", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({
+      report_id: reportId,
+      message_id: messageId,
+      decision: assessment.decision,
+      category: assessment.category,
+      confidence: assessment.confidence,
+      rationale: assessment.rationale,
+      provider: assessment.provider,
+      model: assessment.model,
+      action_taken: actionTaken,
+    }),
+  });
+  if (!moderationResponse.ok) {
+    console.warn("Lounge moderation audit write could not complete", { messageId, reportId, status: moderationResponse.status });
+  }
+
+  return { autoHidden: actionTaken === "hidden", reviewState: assessment.decision };
 }
 
 function requireSessionHash(value: unknown) {
@@ -487,6 +562,11 @@ async function findMessageByRequest(sessionHash: string, clientRequestId: string
   return rows[0] ?? null;
 }
 
+async function consumeRatePair(sessionHash: string, networkBucket: string, action: Exclude<RateAction, `network-${string}`>) {
+  await consumeRate(sessionHash, action);
+  await consumeRate(networkBucket, `network-${action}` as RateAction);
+}
+
 async function consumeRate(sessionHash: string, action: RateAction) {
   ensureGatewayConfigured();
   const rule = RATE_RULES[action];
@@ -506,6 +586,25 @@ async function consumeRate(sessionHash: string, action: RateAction) {
 
   if ((await response.json()) !== true) {
     throw new LoungeGatewayError(429, "Please wait a little before trying that Lounge action again.");
+  }
+}
+
+function assertEmptyHoneypot(value: unknown) {
+  if (typeof value === "string" && value.trim().length > 0) {
+    throw new LoungeGatewayError(400, "Unable to verify this Lounge request. Please try again.");
+  }
+}
+
+function assertHumanProof(value: unknown, sessionHash: string) {
+  if (!verifyLoungeHumanProof(value, sessionHash)) {
+    throw new LoungeGatewayError(403, "Visitor verification expired. Please wait a moment and try again.");
+  }
+}
+
+async function assertTurnstile(value: unknown, action: "lounge_message" | "lounge_report", request: Request) {
+  const result = await verifyTurnstileToken({ token: value, action, request });
+  if (!result.valid) {
+    throw new LoungeGatewayError(result.reason === "unavailable" ? 503 : 403, result.reason === "unavailable" ? "Visitor verification is temporarily unavailable. Please try again shortly." : "Complete visitor verification before sending.");
   }
 }
 

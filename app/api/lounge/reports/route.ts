@@ -7,14 +7,21 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   try {
     const body = await readJson(request);
-    await createLoungeReport({
+    const outcome = await createLoungeReport({
       sessionHash: body.sessionHash,
       messageId: body.messageId,
       reason: body.reason,
       detail: body.detail,
+      verificationProof: body.verificationProof,
+      turnstileToken: body.turnstileToken,
+      website: body.website,
+      request,
     });
-    return new NextResponse(null, {
-      status: 204,
+    return NextResponse.json({
+      autoHidden: outcome.autoHidden,
+      reviewState: outcome.reviewState,
+    }, {
+      status: 201,
       headers: { "Cache-Control": "no-store" },
     });
   } catch (error) {
