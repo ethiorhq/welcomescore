@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import SiteFooter from "@/app/components/SiteFooter";
 import AlgofoxPetProvider from "@/app/components/pet/AlgofoxPetProvider";
 import AlgofoxWidget from "@/app/components/pet/AlgofoxWidget";
+import PwaRegister from "@/app/components/PwaRegister";
 import { homepageMetadata } from "@/lib/seo";
-import { ETHIOR_URL, SITE_DESCRIPTION, SITE_DISPLAY_NAME, SITE_NAME, SITE_URL } from "@/lib/site";
+import { ETHIOR_URL, SITE_DESCRIPTION, SITE_DISPLAY_NAME, SITE_NAME, SITE_URL, THEME_COLOR } from "@/lib/site";
 import "./globals.css";
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -21,10 +22,27 @@ const ibmPlexSans = IBM_Plex_Sans({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: THEME_COLOR,
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   ...homepageMetadata,
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_DISPLAY_NAME,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: SITE_NAME,
+  },
+  formatDetection: {
+    telephone: false,
+  },
   category: "Developer tools",
   keywords: [
     "open source contributor onboarding",
@@ -71,6 +89,7 @@ export default function RootLayout({
       <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} bg-base text-text`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(websiteSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(organizationSchema) }} />
+        <PwaRegister />
         <AlgofoxPetProvider>
           <div className="flex min-h-screen flex-col">
             {children}

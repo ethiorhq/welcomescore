@@ -18,7 +18,7 @@ export default function BackButton({ fallbackHref = "/" }: { fallbackHref?: stri
     <button
       type="button"
       onClick={handleBack}
-      className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+      className="inline-flex h-11 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent active:scale-[0.98] sm:h-10"
     >
       ← Back
     </button>

@@ -110,7 +110,7 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
             <a
               href={`https://github.com/${receipt.repo}`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
             >
               Open repository on GitHub ↗

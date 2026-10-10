@@ -1,3 +1,4 @@
+import "server-only";
 import { ScoreResult } from "@/lib/scoreRepo";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;

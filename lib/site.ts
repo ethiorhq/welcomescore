@@ -1,10 +1,13 @@
 export const SITE_NAME = "WelcomeScore";
-export const SITE_DISPLAY_NAME = "WelcomeScore.js.org";
-export const SITE_URL = "https://welcomescore.vercel.app";
+export const SITE_DISPLAY_NAME = "WelcomeScore";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://welcomescore.vercel.app";
 export const SOURCE_REPOSITORY_URL = "https://github.com/ethiorhq/welcomescore";
 export const ETHIOR_URL = "https://ethior.com";
 export const SITE_DESCRIPTION =
-  "Check how ready a public GitHub repository is for first-time contributors, then improve its onboarding with practical, evidence-bound guidance.";
+  "Evaluate how ready a public GitHub repository is for first-time contributors with evidence-bound guidance.";
+
+export const THEME_COLOR = "#12141C";
+export const BACKGROUND_COLOR = "#12141C";
 
 export const PUBLIC_ROUTE_PATHS = [
   "/",

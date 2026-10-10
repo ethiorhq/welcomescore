@@ -1,3 +1,4 @@
+import "server-only";
 import type { AlgofoxReview, TrustedReviewContext } from "@/lib/review/types";
 import type { VariantHistory } from "@/lib/variation";
 

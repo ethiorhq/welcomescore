@@ -1,0 +1,24 @@
+# PWA Release Checklist: WelcomeScore
+
+- [x] **Manifest Validated:** `app/manifest.ts` includes name, description, standalone display, and explicit `/` scope.
+- [x] **Icons Resolved:** Dynamic icon generator (`app/icon.tsx`) provides 192x192, 512x512, and maskable icons.
+- [x] **Apple Touch Icon:** `app/apple-icon.tsx` provides the required 180x180 PNG.
+- [x] **Install UI:** `InstallAppButton.tsx` implemented with `beforeinstallprompt` support and non-intrusive "Tip" for unsupported browsers.
+- [x] **Standalone Detection:** Standalone mode detected via CSS media query and `window.navigator.standalone`.
+- [x] **Service Worker:** `sw.js` (v2) implemented with Network-First strategy; strictly excludes `/api/` and external AI/DB endpoints.
+- [x] **Offline Boundary Documentation:** `docs/PWA_CACHING_AND_OFFLINE_BOUNDARY.md` created.
+- [x] **Mobile UX Verification:** 
+    - [x] No horizontal overflow at 320px.
+    - [x] 44px tap targets for primary actions.
+    - [x] Safe-area support via `env(safe-area-inset-*)`.
+- [x] **Security Review:** 
+    - [x] `server-only` package used for secret isolation.
+    - [x] No sensitive API data cached.
+    - [x] CSRF/Rate-limiting preserved.
+- [x] **Build & Test:**
+    - [x] `npm run build` passes with zero errors.
+    - [x] `npm run lint` passes (all warnings resolved).
+    - [x] `npm run test` passes (28/28 tests).
+- [x] **Production Domain:** Canonical URL remains `https://welcomescore.vercel.app`.
+- [x] **Domain Migration:** `docs/JSORG_DOMAIN_CUTOVER_RUNBOOK.md` ready for JS.ORG transition.
+- [x] **No Fake APK:** PWA is clearly presented as a web-based installation, not a native binary.

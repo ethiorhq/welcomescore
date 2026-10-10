@@ -1,3 +1,4 @@
+import "server-only";
 import { parseRepository, ScoreRepoError } from "@/lib/scoreRepo";
 import type { JsHealthSnapshot } from "./types";
 

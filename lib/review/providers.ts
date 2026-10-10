@@ -1,3 +1,4 @@
+import "server-only";
 import { reviewProviderPrompt } from "@/lib/review/context";
 import {
   ALGOFOX_REVIEW_SCHEMA_VERSION,

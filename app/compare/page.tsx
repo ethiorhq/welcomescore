@@ -84,6 +84,8 @@ export default function ComparePage() {
 
       const query = new URLSearchParams({ a: left, b: right });
       window.history.replaceState(null, "", `/compare?${query.toString()}`);
+    } catch {
+      // Handled by scoreRepository returning error objects, but catch for safety
     } finally {
       setIsComparing(false);
     }
@@ -91,6 +93,7 @@ export default function ComparePage() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isComparing) return;
     void compareRepositories(repoA, repoB);
   }
 
@@ -130,7 +133,7 @@ export default function ComparePage() {
                 }}
                 onFocus={() => setAlgofoxState("review", getAlgofoxMessage("compareFocus"), 4_000)}
                 placeholder="owner/repo"
-                className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-sm text-text outline-none placeholder:text-muted focus:border-accent"
+                className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-base text-text outline-none placeholder:text-muted focus:border-accent md:text-sm"
               />
               <span className="font-mono text-sm font-semibold text-muted" aria-hidden="true">
                 VS
@@ -147,7 +150,7 @@ export default function ComparePage() {
                   setSameRepositoryError(false);
                 }}
                 placeholder="owner/repo"
-                className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-sm text-text outline-none placeholder:text-muted focus:border-accent"
+                className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-base text-text outline-none placeholder:text-muted focus:border-accent md:text-sm"
               />
             </div>
 

@@ -41,21 +41,6 @@ export default function OpenGraphImage() {
           <div style={{ color: "#E8A23D", display: "flex", fontFamily: "monospace", fontSize: 30, fontWeight: 700, letterSpacing: -1 }}>
             WelcomeScore
           </div>
-          <div
-            style={{
-              background: "rgba(232, 162, 61, 0.10)",
-              border: "1px solid rgba(232, 162, 61, 0.40)",
-              borderRadius: 8,
-              color: "#E8A23D",
-              display: "flex",
-              fontFamily: "monospace",
-              fontSize: 17,
-              fontWeight: 700,
-              padding: "7px 10px",
-            }}
-          >
-            .js.org
-          </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 930, zIndex: 1 }}>
@@ -72,7 +57,7 @@ export default function OpenGraphImage() {
 
         <div style={{ alignItems: "center", display: "flex", justifyContent: "space-between", zIndex: 1 }}>
           <div style={{ color: "#8B8F9E", display: "flex", fontFamily: "monospace", fontSize: 20 }}>
-            welcomescore.vercel.app
+            welcomescore.js.org
           </div>
           <div
             style={{

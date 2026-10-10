@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, PointerEvent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -237,6 +238,7 @@ function DevLoungeContent() {
   }
 
   async function handlePrepareContext() {
+    if (isPreparingContext) return;
     setError("");
     setIsPreparingContext(true);
     const outcome = topic === "hall_pattern"
@@ -323,7 +325,7 @@ function DevLoungeContent() {
             </div>
 
             <div className="border-b border-muted/20 px-4 py-3 sm:px-5">
-              <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filter Lounge conversations">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" role="group" aria-label="Filter Lounge conversations">
                 {FILTERS.map((option) => {
                   const selected = filter === option.key;
                   return (
@@ -331,7 +333,7 @@ function DevLoungeContent() {
                       key={option.key}
                       type="button"
                       onClick={() => setFilter(option.key)}
-                      className={`shrink-0 rounded-md border px-3 py-1.5 font-mono text-xs font-semibold transition-colors duration-180 ease-out ${selected ? "border-accent/45 bg-accent/10 text-accent" : "border-muted/25 bg-base/25 text-muted hover:border-muted/45 hover:text-text"}`}
+                      className={`shrink-0 rounded-md border px-3 py-2 font-mono text-xs font-semibold transition-colors duration-180 ease-out active:scale-[0.98] sm:py-1.5 ${selected ? "border-accent/45 bg-accent/10 text-accent" : "border-muted/25 bg-base/25 text-muted hover:border-muted/45 hover:text-text"}`}
                       aria-pressed={selected}
                     >
                       {option.label}
@@ -438,7 +440,7 @@ function DevLoungeContent() {
                 rows={3}
                 disabled={status !== "ready"}
                 aria-describedby="lounge-topic-help"
-                className="mt-3 w-full resize-none rounded-md border border-muted/35 bg-base/40 px-3 py-3 font-sans text-sm text-text outline-none placeholder:text-muted focus:border-accent disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-3 w-full resize-none rounded-md border border-muted/35 bg-base/40 px-3 py-3 font-sans text-base text-text outline-none placeholder:text-muted focus:border-accent disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
               />
 
               {isVerifiedGateway ? (
@@ -474,7 +476,7 @@ function DevLoungeContent() {
                   {error ? <p className="mt-1 font-sans text-xs text-muted" role="status">{error}</p> : null}
                   {actionError ? <p className="mt-1 font-sans text-xs text-muted" role="status">{actionError}</p> : null}
                 </div>
-                <button type="submit" disabled={!canSend} className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 disabled:cursor-not-allowed disabled:border-muted/30 disabled:bg-base/30 disabled:text-muted">
+                <button type="submit" disabled={!canSend} className="h-11 rounded-md border border-accent/45 bg-accent/10 px-6 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-muted/30 disabled:bg-base/30 disabled:text-muted sm:h-10 sm:px-4">
                   {cooldownRemaining > 0 ? `Send in ${cooldownRemaining}s` : needsContext && !contextKindMatches ? "Prepare context first" : "Send message"}
                 </button>
               </div>
@@ -486,7 +488,7 @@ function DevLoungeContent() {
               <h2 className="font-mono text-sm font-bold">Your temporary handle</h2>
               {identity ? (
                 <div className="mt-4 flex items-center gap-3">
-                  <img src={identity.avatarDataUri} alt="Your generated developer avatar" className="h-12 w-12 rounded-full border border-muted/30 bg-base" />
+                  <Image src={identity.avatarDataUri} alt="Your generated developer avatar" width={48} height={48} className="h-12 w-12 rounded-full border border-muted/30 bg-base" unoptimized />
                   <div className="min-w-0">
                     <p className="truncate font-mono text-sm font-semibold text-accent">{identity.handle}</p>
                     <p className="mt-1 font-sans text-xs leading-5 text-muted">Stored only in this browser until you clear site data.</p>
@@ -597,7 +599,7 @@ function MessageItem({
 
   return (
     <article className={`group -mx-2 flex gap-3 rounded-md px-2 py-2 transition-colors duration-180 ease-out ${parent ? "ml-2 border-l border-accent/30 pl-3 sm:ml-6" : ""} ${isReplyTarget ? "bg-accent/[0.07]" : "hover:bg-base/30"}`} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={() => { pointerStart.current = null; clearReplyGesture(); }}>
-      <img src={createDevAvatar(message.avatar_seed)} alt="" className="h-9 w-9 shrink-0 rounded-full border border-muted/30 bg-base" />
+      <Image src={createDevAvatar(message.avatar_seed)} alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full border border-muted/30 bg-base" unoptimized />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <p className="font-mono text-xs font-semibold text-accent">{message.dev_handle}</p>
@@ -615,11 +617,13 @@ function MessageItem({
           {ownReaction ? <span className="font-sans text-xs text-muted">Reaction added</span> : <button type="button" onClick={onToggleReactionPicker} onPointerDown={(event) => event.stopPropagation()} onPointerUp={(event) => event.stopPropagation()} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-muted/30 bg-base/25 font-mono text-sm text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:bg-accent/10 hover:text-accent focus:border-accent/45 focus:bg-accent/10 focus:text-accent" aria-label={`Add a reaction to ${message.dev_handle}'s message`} aria-expanded={isReactionPickerOpen}>+</button>}
         </div>
         {isReactionPickerOpen ? <div className="mt-2 flex flex-wrap items-center gap-1.5 rounded-md border border-muted/25 bg-base/35 p-2" role="group" aria-label="Choose one reaction">{Object.entries(REACTION_OPTIONS).map(([reaction, option]) => <button key={reaction} type="button" onClick={() => void onReact(message.id, reaction as LoungeReaction)} onPointerDown={(event) => event.stopPropagation()} onPointerUp={(event) => event.stopPropagation()} className="inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-muted/25 bg-surface px-2 text-base transition-colors duration-180 ease-out hover:border-accent/45 hover:bg-accent/10 focus:border-accent/45 focus:bg-accent/10" aria-label={option.label} title={option.label}>{option.icon}</button>)}</div> : null}
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <button type="button" onClick={() => onReply(message)} onPointerDown={(event) => event.stopPropagation()} onPointerUp={(event) => event.stopPropagation()} className="inline-flex h-7 items-center rounded-md px-2 font-mono text-xs text-muted transition-colors duration-180 ease-out hover:bg-accent/10 hover:text-accent focus:bg-accent/10 focus:text-accent sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100" aria-label={`Reply to ${message.dev_handle}`}>Reply</button>
-          {canManageAnswer && parent ? <button type="button" onClick={() => void onAnswerMark(parent.id, message.id, isMarkedAnswer)} className="text-link font-mono text-xs underline underline-offset-4">{isMarkedAnswer ? "Clear useful mark" : "Mark useful"}</button> : null}
-          <button type="button" onClick={() => onHide(message.id)} className="text-link font-mono text-xs underline underline-offset-4">Hide on this device</button>
-          <button type="button" onClick={() => onReport(message)} className="text-link font-mono text-xs underline underline-offset-4">Report privately</button>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <button type="button" onClick={() => onReply(message)} onPointerDown={(event) => event.stopPropagation()} onPointerUp={(event) => event.stopPropagation()} className="inline-flex h-9 items-center rounded-md px-3 font-mono text-xs text-muted transition-colors duration-180 ease-out active:bg-accent/10 active:text-accent sm:h-7 sm:px-2 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100" aria-label={`Reply to ${message.dev_handle}`}>Reply</button>
+          {canManageAnswer && parent ? <button type="button" onClick={() => void onAnswerMark(parent.id, message.id, isMarkedAnswer)} className="h-9 font-mono text-xs text-link underline underline-offset-4 active:text-accent sm:h-auto">
+            {isMarkedAnswer ? "Clear useful mark" : "Mark useful"}
+          </button> : null}
+          <button type="button" onClick={() => onHide(message.id)} className="h-9 font-mono text-xs text-link underline underline-offset-4 active:text-accent sm:h-auto">Hide on this device</button>
+          <button type="button" onClick={() => onReport(message)} className="h-9 font-mono text-xs text-link underline underline-offset-4 active:text-accent sm:h-auto">Report privately</button>
         </div>
       </div>
     </article>

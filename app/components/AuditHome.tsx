@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import BackButton from "@/app/components/BackButton";
+import InstallAppButton from "@/app/components/InstallAppButton";
 import ScoreCard from "@/app/components/ScoreCard";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import type { ScoreResult } from "@/lib/scoreRepo";
+import { useCallback } from "react";
 
 type ScoreError = {
   error?: string;
@@ -26,7 +28,7 @@ export default function AuditHome({
   const isRepositoryEmpty = repository.trim().length === 0;
   const { setAlgofoxState } = useAlgofoxPet();
 
-  async function runCheck(requestedRepository: string) {
+  const runCheck = useCallback(async (requestedRepository: string) => {
     const normalizedRepository = requestedRepository.trim();
     if (!normalizedRepository) {
       return;
@@ -80,10 +82,11 @@ export default function AuditHome({
     } finally {
       setIsChecking(false);
     }
-  }
+  }, [setAlgofoxState]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isChecking) return;
     void runCheck(repository);
   }
 
@@ -93,7 +96,7 @@ export default function AuditHome({
       setRepository(initialRepository);
       void runCheck(initialRepository);
     }
-  }, [initialRepository]);
+  }, [initialRepository, runCheck]);
 
   return (
     <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-20">
@@ -110,19 +113,19 @@ export default function AuditHome({
 
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link
-              className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent sm:h-10"
               href="/leaderboard"
             >
               Explore the Hall of Fame
             </Link>
             <Link
-              className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 sm:h-10"
               href="/lounge"
             >
               Open Dev Lounge
             </Link>
             <Link
-              className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent sm:h-10"
               href="/js"
             >
               JavaScript Health
@@ -130,7 +133,7 @@ export default function AuditHome({
           </div>
 
           <form
-            className="mx-auto mt-5 flex w-full max-w-2xl flex-col gap-3 sm:flex-row"
+            className="mx-auto mt-6 flex w-full max-w-2xl flex-col gap-3 sm:flex-row"
             onSubmit={handleSubmit}
           >
             <label className="sr-only" htmlFor="repository">
@@ -143,12 +146,12 @@ export default function AuditHome({
               onChange={(event) => setRepository(event.target.value)}
               onFocus={() => setAlgofoxState("review", getAlgofoxMessage("auditFocus"), 4_000)}
               placeholder="owner/repo — e.g. vercel/next.js"
-              className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-sm text-text outline-none placeholder:text-muted focus:border-accent"
+              className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-base text-text outline-none placeholder:text-muted focus:border-accent sm:text-sm"
             />
             <button
               type="submit"
               disabled={isChecking || isRepositoryEmpty}
-              className="h-12 shrink-0 rounded-md bg-accent px-6 font-sans text-sm font-semibold text-base disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted"
+              className="h-12 shrink-0 rounded-md bg-accent px-6 font-sans text-sm font-semibold text-base active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted"
             >
               {isChecking ? "Checking latest…" : "Check"}
             </button>
@@ -160,6 +163,8 @@ export default function AuditHome({
           >
             Compare two repos instead →
           </Link>
+
+          <InstallAppButton />
 
           {errorMessage ? (
             <p className="mt-3 font-sans text-sm text-muted" role="status">

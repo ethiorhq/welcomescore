@@ -1,3 +1,4 @@
+import "server-only";
 import type { ScoreResult } from "@/lib/scoreRepo";
 import { parseRepository } from "@/lib/scoreRepo";
 import {

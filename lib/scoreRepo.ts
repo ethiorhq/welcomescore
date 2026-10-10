@@ -1,3 +1,4 @@
+import "server-only";
 export type Check = {
   label: string;
   passed: boolean;

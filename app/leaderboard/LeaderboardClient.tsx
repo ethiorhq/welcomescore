@@ -78,13 +78,13 @@ export default function LeaderboardClient() {
             <BackButton />
             <Link
               href="/"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98] sm:h-10"
             >
               Check a repository
             </Link>
             <Link
               href="/lounge"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent active:scale-[0.98] sm:h-10"
             >
               Dev Lounge
             </Link>
@@ -222,16 +222,16 @@ function PodiumCard({
       {rank === 1 && entry.roastText ? (
         <p className="mt-7 font-sans text-sm leading-6 text-muted">{entry.roastText}</p>
       ) : null}
-        <div className="mt-7 flex flex-wrap gap-x-4 gap-y-2 font-sans text-sm">
-          <Link className="text-link underline underline-offset-4" href={auditPath(entry)}>
+        <div className="mt-7 flex flex-wrap gap-x-4 gap-y-3 font-sans text-sm">
+          <Link className="min-h-[44px] flex items-center text-link underline underline-offset-4" href={auditPath(entry)}>
             View full audit
           </Link>
           {entry.freshness !== "expired" ? (
-            <Link className="text-link underline underline-offset-4" href={`/lounge?hallRepo=${encodeURIComponent(entry.repoPath)}`}>
-              Discuss contributor pattern
+            <Link className="min-h-[44px] flex items-center text-link underline underline-offset-4" href={`/lounge?hallRepo=${encodeURIComponent(entry.repoPath)}`}>
+              Discuss pattern
             </Link>
           ) : null}
-          <button type="button" onClick={onBadge} className="text-link underline underline-offset-4">
+          <button type="button" onClick={onBadge} className="min-h-[44px] flex items-center text-link underline underline-offset-4">
             Get README badge
           </button>
         </div>

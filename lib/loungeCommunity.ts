@@ -1,3 +1,4 @@
+import "server-only";
 import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 import { isLoungeFocus } from "@/lib/loungeTypes";
 import type { LoungeCommunityContext, LoungePreparedContext } from "@/lib/loungeTypes";

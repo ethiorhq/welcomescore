@@ -43,9 +43,14 @@ export default function ShareWithPurposeModal({
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<ReceiptError | null>(null);
   const [copied, setCopied] = useState(false);
+  const [canShare, setCanShare] = useState(false);
   const modalRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const copiedTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setCanShare(typeof navigator !== "undefined" && !!navigator.share);
+  }, []);
 
   const shareableChecks = useMemo(
     () =>
@@ -169,6 +174,22 @@ export default function ShareWithPurposeModal({
       copiedTimeoutRef.current = window.setTimeout(() => setCopied(false), 1_500);
     } catch {
       setCopied(false);
+    }
+  }
+
+  async function shareReceipt() {
+    if (!receipt || !isAllowedShareCaption(caption)) {
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: `${receipt.payload.repo} — WelcomeScore Audit`,
+        text: caption,
+        url: receipt.url,
+      });
+    } catch {
+      // User cancelled or share failed — no action needed for PWA ergonomics
     }
   }
 
@@ -388,13 +409,23 @@ export default function ShareWithPurposeModal({
               />
             </label>
             <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-muted/20 pt-4">
+              {canShare ? (
+                <button
+                  type="button"
+                  disabled={!isCaptionAllowed}
+                  onClick={() => void shareReceipt()}
+                  className="h-10 rounded-md border border-accent/45 bg-accent px-4 font-sans text-sm font-semibold text-base transition-colors duration-180 ease-out hover:bg-accent/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-muted/25 disabled:bg-base/25 disabled:text-muted"
+                >
+                  Share via app
+                </button>
+              ) : null}
               <button
                 type="button"
                 disabled={!isCaptionAllowed}
                 onClick={() => void copyCaption()}
-                className={`h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium transition-colors duration-180 ease-out hover:bg-accent/15 disabled:cursor-not-allowed disabled:border-muted/25 disabled:bg-base/25 disabled:text-muted ${copied ? "text-good" : "text-accent"}`}
+                className={`h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-muted/25 disabled:bg-base/25 disabled:text-muted ${copied ? "text-good" : "text-accent"}`}
               >
-                {copied ? "Copied" : "Copy caption and receipt link"}
+                {copied ? "Copied" : "Copy caption and link"}
               </button>
               <button
                 type="button"

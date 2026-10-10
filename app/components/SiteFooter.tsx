@@ -13,16 +13,16 @@ const FOOTER_LINKS = [
 
 export default function SiteFooter() {
   return (
-    <footer className="mx-auto mt-10 w-full max-w-6xl border-t border-muted/20 px-4 pt-6 text-center font-sans text-xs text-muted sm:px-6">
-      <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+    <footer className="mx-auto mt-10 w-full max-w-6xl border-t border-muted/20 px-4 pt-6 pb-8 text-center font-sans text-xs text-muted safe-bottom sm:px-6">
+      <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-x-4 gap-y-3">
         {FOOTER_LINKS.map(({ href, label }) => (
-          <Link key={href} className="text-link underline underline-offset-4" href={href}>
+          <Link key={href} className="inline-block h-6 min-w-[44px] text-link underline underline-offset-4" href={href}>
             {label}
           </Link>
         ))}
         <LocalWorkspaceFooterLink />
       </nav>
-      <p className="mt-4 leading-6">
+      <p className="mt-5 leading-6">
         Built by{" "}
         <a className="text-link underline underline-offset-4" href={ETHIOR_URL}>
           ETHIOR

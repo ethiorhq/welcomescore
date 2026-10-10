@@ -186,7 +186,7 @@ export default function NextUsefulMoveCard({
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Link
             href={plan.primary.guide.href}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+            className="inline-flex h-11 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98] sm:h-10"
           >
             {plan.primary.guide.label}
           </Link>
@@ -195,7 +195,7 @@ export default function NextUsefulMoveCard({
               ref={artifactTriggerRef}
               type="button"
               onClick={(event) => handleOpenArtifact(plan.primary.artifact!.artifactId, event.currentTarget)}
-              className="h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+              className="h-11 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent active:scale-[0.98] sm:h-10"
             >
               {plan.primary.artifact.label}
             </button>
@@ -204,8 +204,8 @@ export default function NextUsefulMoveCard({
             <a
               href={plan.primary.externalAction.href}
               target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-10 items-center justify-center rounded-md px-2 font-sans text-sm text-link underline underline-offset-4"
+              rel="noopener noreferrer"
+              className="inline-flex h-11 items-center justify-center rounded-md px-2 font-sans text-sm text-link underline underline-offset-4 sm:h-10"
             >
               {plan.primary.externalAction.label}
             </a>
@@ -242,7 +242,7 @@ export default function NextUsefulMoveCard({
                 <button
                   type="button"
                   onClick={handlePlanAction}
-                  className="h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+                  className="h-11 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent active:scale-[0.98] sm:h-10"
                 >
                   Mark as my next action
                 </button>
@@ -251,7 +251,7 @@ export default function NextUsefulMoveCard({
                 <button
                   type="button"
                   onClick={handleWorkAction}
-                  className="h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+                  className="h-11 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent active:scale-[0.98] sm:h-10"
                 >
                   I&apos;m working on it
                 </button>
@@ -260,7 +260,7 @@ export default function NextUsefulMoveCard({
                 <button
                   type="button"
                   onClick={handleRecheck}
-                  className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+                  className="h-11 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98] sm:h-10"
                 >
                   {activeReflection.workState === "ready-for-fresh-audit"
                     ? "Re-check latest public signals"
@@ -292,7 +292,7 @@ export default function NextUsefulMoveCard({
                   maxLength={maxNoteLength}
                   rows={2}
                   placeholder="For example: verify the clean setup path before publishing."
-                  className="mt-1.5 w-full resize-y rounded-md border border-muted/35 bg-base/30 px-3 py-2 font-sans text-sm leading-5 text-text outline-none placeholder:text-muted focus:border-accent"
+                  className="mt-1.5 w-full resize-y rounded-md border border-muted/35 bg-base/30 px-3 py-2 font-sans text-base leading-5 text-text outline-none placeholder:text-muted focus:border-accent md:text-sm"
                 />
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
                   <button

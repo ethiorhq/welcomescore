@@ -82,6 +82,7 @@ export default function ScoreCard({
   }, [result.isEligibleForLeaderboard, result.repo]);
 
   async function handleAddToLeaderboard() {
+    if (isAddingToLeaderboard) return;
     setIsAddingToLeaderboard(true);
 
     try {
@@ -162,7 +163,7 @@ export default function ScoreCard({
                   className="text-link underline underline-offset-4"
                   href={issue.url}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                 >
                   {issue.title}
                 </a>
@@ -174,7 +175,7 @@ export default function ScoreCard({
               className="mt-3 inline-block font-sans text-sm text-link underline underline-offset-4"
               href={issueSearchUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               See all {issueCount} on GitHub
             </a>
@@ -201,20 +202,20 @@ export default function ScoreCard({
           <button
             type="button"
             onClick={() => setIsShareWithPurposeOpen(true)}
-            className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+            className="h-11 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98] sm:h-10"
           >
             Share with purpose
           </button>
           <button
             type="button"
             onClick={() => setIsBadgeModalOpen(true)}
-            className="h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+            className="h-11 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent active:scale-[0.98] sm:h-10"
           >
             Embed README badge
           </button>
           <Link
             href={`/lounge?prepareAudit=${encodeURIComponent(result.repo)}`}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+            className="inline-flex h-11 items-center justify-center rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent active:scale-[0.98] sm:h-10"
           >
             Prepare Dev Lounge discussion
           </Link>
@@ -408,7 +409,7 @@ function HallOfFamePanel({
           </p>
           <ul className="mt-3 grid gap-2 font-sans text-sm sm:grid-cols-2">
             <li>
-              <a className="text-link underline underline-offset-4" href={repositoryUrl} target="_blank" rel="noreferrer">
+              <a className="text-link underline underline-offset-4" href={repositoryUrl} target="_blank" rel="noopener noreferrer">
                 Review the project README on GitHub
               </a>
             </li>
@@ -418,12 +419,12 @@ function HallOfFamePanel({
               </Link>
             </li>
             <li>
-              <a className="text-link underline underline-offset-4" href={issueSearchUrl} target="_blank" rel="noreferrer">
+              <a className="text-link underline underline-offset-4" href={issueSearchUrl} target="_blank" rel="noopener noreferrer">
                 Keep starter issues accurate and current
               </a>
             </li>
             <li>
-              <a className="text-link underline underline-offset-4" href={communityProfileUrl} target="_blank" rel="noreferrer">
+              <a className="text-link underline underline-offset-4" href={communityProfileUrl} target="_blank" rel="noopener noreferrer">
                 Review GitHub Community Profile
               </a>
             </li>
@@ -448,7 +449,7 @@ function HallOfFamePanel({
       <p className="mt-2 max-w-xl font-sans text-sm leading-6 text-muted">{description}</p>
       <div className="mt-3 flex flex-wrap items-center gap-3">
         {isComplete ? (
-          <span className="inline-flex h-10 items-center rounded-md border border-good/45 bg-good/15 px-4 font-sans text-sm font-medium text-good">
+          <span className="inline-flex h-11 items-center rounded-md border border-good/45 bg-good/15 px-4 font-sans text-sm font-medium text-good sm:h-10">
             {status === "already-listed" ? "Already in Hall of Fame" : "Added to Hall of Fame"}
           </span>
         ) : (
@@ -456,7 +457,7 @@ function HallOfFamePanel({
             type="button"
             onClick={onAdd}
             disabled={isAdding || status === "checking"}
-            className="h-10 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent disabled:cursor-not-allowed disabled:border-muted/25 disabled:bg-base/30 disabled:text-muted"
+            className="h-11 rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent active:scale-[0.98] disabled:cursor-not-allowed disabled:border-muted/25 disabled:bg-base/30 disabled:text-muted sm:h-10"
           >
             {status === "checking"
               ? "Checking Hall of Fame…"
@@ -571,7 +572,7 @@ function CheckPill({
               className="text-link underline underline-offset-2"
               href={createFileUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               Create on GitHub
             </a>
@@ -643,7 +644,7 @@ function TemplateModal({
         <button
           type="button"
           onClick={handleCopyTemplate}
-          className={`mt-5 h-10 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium ${
+          className={`mt-5 h-11 rounded-md border border-muted/35 bg-base/30 px-4 font-sans text-sm font-medium active:scale-[0.98] sm:h-10 ${
             isCopied ? "text-good" : "text-muted"
           }`}
         >
