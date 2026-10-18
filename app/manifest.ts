@@ -3,18 +3,15 @@ import { BACKGROUND_COLOR, SITE_DESCRIPTION, SITE_NAME, THEME_COLOR } from "@/li
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    id: "welcomescore-pwa",
+    id: "/",
     name: SITE_NAME,
-    short_name: SITE_NAME,
+    short_name: "WelcomeScore",
     description: SITE_DESCRIPTION,
     start_url: "/",
     scope: "/",
     display: "standalone",
-    display_override: ["standalone", "minimal-ui", "window-controls-overlay"],
     background_color: BACKGROUND_COLOR,
     theme_color: THEME_COLOR,
-    lang: "en",
-    dir: "ltr",
     icons: [
       {
         src: "/icon/medium",
@@ -35,19 +32,16 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
-    categories: ["development", "productivity", "education"],
+    categories: ["development", "productivity"],
     orientation: "portrait-primary",
     prefer_related_applications: false,
-    shortcuts: [
+    screenshots: [
       {
-        name: "Hall of Fame",
-        url: "/leaderboard",
-        icons: [{ src: "/icon/small", sizes: "32x32" }]
-      },
-      {
-        name: "Dev Lounge",
-        url: "/lounge",
-        icons: [{ src: "/icon/small", sizes: "32x32" }]
+        src: "/opengraph-image",
+        sizes: "1200x630",
+        type: "image/png",
+        form_factor: "wide",
+        label: "WelcomeScore Dashboard"
       }
     ]
   };
