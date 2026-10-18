@@ -33,10 +33,18 @@ export default function InstallAppButton() {
 
     setPlatform({ isIOS, isAndroid, isSafari, isChrome, isEdge });
 
-    if (
-      window.matchMedia("(display-mode: standalone)").matches ||
-      ("standalone" in window.navigator && (window.navigator as Navigator & { standalone?: boolean }).standalone === true)
-    ) {
+    const checkStandalone = () => {
+      const isPwaParam = window.location.search.includes("mode=pwa");
+      const isStandaloneMedia = window.matchMedia("(display-mode: standalone)").matches;
+      const isMinimalUiMedia = window.matchMedia("(display-mode: minimal-ui)").matches;
+      const isFullscreenMedia = window.matchMedia("(display-mode: fullscreen)").matches;
+      const isSafariStandalone = (window.navigator as any).standalone === true;
+      const isTwa = document.referrer.includes("android-app://");
+
+      return isPwaParam || isStandaloneMedia || isMinimalUiMedia || isFullscreenMedia || isSafariStandalone || isTwa;
+    };
+
+    if (checkStandalone()) {
       setIsStandalone(true);
     }
 

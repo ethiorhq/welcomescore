@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: SITE_NAME,
     short_name: "WelcomeScore",
     description: SITE_DESCRIPTION,
-    start_url: "/",
+    start_url: "/?mode=pwa",
     scope: "/",
     display: "standalone",
     background_color: BACKGROUND_COLOR,
