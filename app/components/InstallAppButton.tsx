@@ -45,7 +45,6 @@ export default function InstallAppButton() {
 
     setPlatform({ isIOS, isAndroid, isSafari, isMac, isWindows, isChrome, isEdge });
 
-    // Check if already in standalone mode
     if (
       window.matchMedia("(display-mode: standalone)").matches ||
       ("standalone" in window.navigator && (window.navigator as Navigator & { standalone?: boolean }).standalone === true)
@@ -61,7 +60,6 @@ export default function InstallAppButton() {
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
-      console.log("PWA was installed");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -75,10 +73,8 @@ export default function InstallAppButton() {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-
     if (outcome === "accepted") {
       setDeferredPrompt(null);
     }
@@ -91,66 +87,55 @@ export default function InstallAppButton() {
   if (!deferredPrompt) {
     let tip = "";
     if (platform.isIOS) {
-      tip = "Tap the Share button (square with arrow) and select \"Add to Home Screen\"";
+      tip = "Tap Share and 'Add to Home Screen'";
     } else if (platform.isAndroid) {
-      if (platform.isChrome) {
-        tip = "Tap the three dots (⋮) and select \"Add to Home screen\"";
-      } else if (platform.isEdge) {
-        tip = "Tap the three lines (≡) and select \"Add to phone\"";
-      } else {
-        tip = "Tap the menu and select \"Add to Home screen\"";
-      }
+      tip = platform.isChrome ? "Tap ⋮ and 'Add to Home screen'" : "Tap menu and 'Add to Home screen'";
     } else if (platform.isMac || platform.isWindows) {
-      if (platform.isSafari) {
-        tip = "Go to File > Add to Dock to install as an app";
-      } else if (platform.isChrome) {
-        tip = "Click the Install icon (computer with arrow) in the address bar or menu > Save and Share > Install page as app";
-      } else if (platform.isEdge) {
-        tip = "Click the App Available icon in the address bar or menu > Apps > Install this site as an app";
-      } else {
-        tip = "Select \"Install\" or \"Add to Applications\" in your browser menu";
-      }
+      tip = platform.isSafari ? "File > Add to Dock" : "Click Install in the address bar";
     } else {
-      tip = "Select \"Add to Home screen\" or \"Install\" in your browser menu";
+      tip = "Select 'Add to Home screen' in your browser menu";
     }
 
     return (
-      <div className="mt-6 text-center animate-in fade-in slide-in-from-bottom-2 duration-700">
-        <p className="text-xs text-muted max-w-[320px] mx-auto">
-          Tip: You can install WelcomeScore by selecting <span className="text-text font-medium">&quot;{tip}&quot;</span>.
-        </p>
+      <div className="mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-1000">
+        <div className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-3 py-1.5 backdrop-blur-sm">
+          <div className="flex h-2 w-2 rounded-full bg-accent animate-pulse" />
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-semibold">
+            Native App Tip: <span className="text-text/90 font-bold ml-1">{tip}</span>
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-6 flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-700">
-      <div className="flex flex-col gap-3 w-full max-w-xs">
-        <button
-          onClick={handleInstallClick}
-          className="group relative flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-md bg-accent px-6 font-sans text-sm font-semibold text-base transition-all active:scale-[0.98] hover:bg-accent/90"
+    <div className="mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <button
+        onClick={handleInstallClick}
+        className="group relative flex h-10 items-center gap-2.5 overflow-hidden rounded-full bg-accent px-5 font-sans text-xs font-bold text-base transition-all active:scale-[0.96] hover:bg-accent/90 shadow-[0_0_20px_rgba(232,162,61,0.2)] hover:shadow-[0_0_25px_rgba(232,162,61,0.4)]"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="transition-transform group-hover:-translate-y-0.5"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="transition-transform group-hover:-translate-y-0.5"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          Install Web App (PWA)
-        </button>
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        <span>Install App</span>
+      </button>
+      <div className="mt-3 flex items-center gap-1.5 opacity-50">
+        <div className="h-px w-4 bg-muted" />
+        <span className="text-[10px] font-medium tracking-tight uppercase">PWA Experience</span>
+        <div className="h-px w-4 bg-muted" />
       </div>
-      <p className="mt-2 text-xs text-muted">
-        Install WelcomeScore as a lightweight App on your device.
-      </p>
     </div>
   );
 }

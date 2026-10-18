@@ -89,7 +89,6 @@ export default function RootLayout({
       <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} bg-base text-text`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(websiteSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(organizationSchema) }} />
-        <PwaRegister />
         <AlgofoxPetProvider>
           <div className="flex min-h-screen flex-col">
             {children}
