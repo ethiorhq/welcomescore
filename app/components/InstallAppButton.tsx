@@ -38,7 +38,7 @@ export default function InstallAppButton() {
       const isStandaloneMedia = window.matchMedia("(display-mode: standalone)").matches;
       const isMinimalUiMedia = window.matchMedia("(display-mode: minimal-ui)").matches;
       const isFullscreenMedia = window.matchMedia("(display-mode: fullscreen)").matches;
-      const isSafariStandalone = (window.navigator as any).standalone === true;
+      const isSafariStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
       const isTwa = document.referrer.includes("android-app://");
 
       return isPwaParam || isStandaloneMedia || isMinimalUiMedia || isFullscreenMedia || isSafariStandalone || isTwa;
