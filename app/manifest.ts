@@ -40,9 +40,10 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/opengraph-image",
         sizes: "1200x630",
         type: "image/png",
+        // @ts-ignore - Next.js 14 MetadataRoute.Manifest type might be outdated for PWA screenshots
         form_factor: "wide",
         label: "WelcomeScore Dashboard"
       }
-    ]
+    ] as any
   };
 }
