@@ -35,7 +35,6 @@ export const metadata: Metadata = {
   ...homepageMetadata,
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_DISPLAY_NAME,
-  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
