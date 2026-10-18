@@ -73,19 +73,19 @@ export default function InstallAppButton() {
   if (!deferredPrompt) {
     let tip = "";
     if (platform.isIOS) {
-      tip = "Tap Share and 'Add to Home Screen'";
+      tip = "TAP SHARE AND 'ADD TO HOME SCREEN'";
     } else if (platform.isAndroid) {
-      tip = platform.isChrome ? "Tap ⋮ and 'Add to Home screen'" : "Tap menu and 'Add to Home screen'";
+      tip = platform.isChrome ? "TAP ⋮ AND 'ADD TO HOME SCREEN'" : "TAP MENU AND 'ADD TO HOME SCREEN'";
     } else {
-      tip = "Click the 'Install' icon in your browser address bar";
+      tip = "CLICK THE 'INSTALL' ICON IN YOUR BROWSER ADDRESS BAR";
     }
 
     return (
-      <div className="mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-1000">
-        <div className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-3 py-1.5 backdrop-blur-sm">
+      <div className="mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-700">
+        <div className="flex items-center gap-3 rounded-md border border-muted/35 bg-surface px-4 py-2.5">
           <div className="flex h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/80 font-bold">
-            PWA TIP: <span className="text-text/90 ml-1 italic">{tip}</span>
+          <p className="font-sans text-[11px] font-bold tracking-widest text-muted">
+            PWA TIP: <span className="text-text">{tip}</span>
           </p>
         </div>
       </div>
@@ -93,15 +93,14 @@ export default function InstallAppButton() {
   }
 
   return (
-    <div className="mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+    <div className="mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
       <button
         onClick={handleInstallClick}
-        className="group relative flex h-9 items-center gap-2.5 overflow-hidden rounded-full bg-accent px-5 font-sans text-[11px] font-bold uppercase tracking-[0.1em] text-base transition-all active:scale-95 hover:bg-accent/90 shadow-[0_0_20px_rgba(232,162,61,0.15)] hover:shadow-[0_0_25px_rgba(232,162,61,0.35)] border border-white/10"
+        className="group flex h-12 items-center gap-2.5 rounded-md bg-accent px-6 font-sans text-sm font-semibold text-base transition-all duration-180 ease-out active:scale-[0.98] hover:bg-accent/90"
       >
-        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         <svg
-          width="14"
-          height="14"
+          width="18"
+          height="18"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -116,11 +115,6 @@ export default function InstallAppButton() {
         </svg>
         <span>Install App</span>
       </button>
-      <div className="mt-3 flex items-center gap-2 opacity-20">
-        <div className="h-[1px] w-3 bg-muted-foreground" />
-        <span className="text-[8px] font-black tracking-[0.3em] uppercase">PWA Experience</span>
-        <div className="h-[1px] w-3 bg-muted-foreground" />
-      </div>
     </div>
   );
 }
