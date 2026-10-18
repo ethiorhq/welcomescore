@@ -2,8 +2,9 @@ const CACHE_NAME = 'welcomescore-cache-v2';
 const STATIC_ASSETS = [
   '/',
   '/favicon.ico',
-  '/icon?size=192',
-  '/icon?size=512',
+  '/icon/medium',
+  '/icon/large',
+  '/icon/maskable',
   '/pets/algofox-spritesheet.webp',
 ];
 
