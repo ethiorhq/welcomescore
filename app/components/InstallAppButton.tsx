@@ -15,20 +15,10 @@ export default function InstallAppButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [platform, setPlatform] = useState<{
-    isIOS: boolean;
-    isAndroid: boolean;
-    isSafari: boolean;
-    isMac: boolean;
-    isWindows: boolean;
-    isChrome: boolean;
-    isEdge: boolean;
-  }>({
+  const [platform, setPlatform] = useState({
     isIOS: false,
     isAndroid: false,
     isSafari: false,
-    isMac: false,
-    isWindows: false,
     isChrome: false,
     isEdge: false,
   });
@@ -37,17 +27,15 @@ export default function InstallAppButton() {
     const userAgent = window.navigator.userAgent;
     const isIOS = /iPad|iPhone|iPod/.test(userAgent);
     const isAndroid = /Android/.test(userAgent);
-    const isWindows = /Win/.test(userAgent);
     const isEdge = /Edg/.test(userAgent);
     const isChrome = /Chrome/.test(userAgent) && !isEdge;
     const isSafari = /Safari/.test(userAgent) && !isChrome && !isEdge;
-    const isMac = /Macintosh/.test(userAgent);
 
-    setPlatform({ isIOS, isAndroid, isSafari, isMac, isWindows, isChrome, isEdge });
+    setPlatform({ isIOS, isAndroid, isSafari, isChrome, isEdge });
 
     if (
       window.matchMedia("(display-mode: standalone)").matches ||
-      ("standalone" in window.navigator && (window.navigator as Navigator & { standalone?: boolean }).standalone === true)
+      ("standalone" in window.navigator && (window.navigator as any).standalone === true)
     ) {
       setIsStandalone(true);
     }
@@ -80,9 +68,7 @@ export default function InstallAppButton() {
     }
   };
 
-  if (isStandalone || isInstalled) {
-    return null;
-  }
+  if (isStandalone || isInstalled) return null;
 
   if (!deferredPrompt) {
     let tip = "";
@@ -90,18 +76,16 @@ export default function InstallAppButton() {
       tip = "Tap Share and 'Add to Home Screen'";
     } else if (platform.isAndroid) {
       tip = platform.isChrome ? "Tap ⋮ and 'Add to Home screen'" : "Tap menu and 'Add to Home screen'";
-    } else if (platform.isMac || platform.isWindows) {
-      tip = platform.isSafari ? "File > Add to Dock" : "Click Install in the address bar";
     } else {
-      tip = "Select 'Add to Home screen' in your browser menu";
+      tip = "Click the 'Install' icon in your browser address bar";
     }
 
     return (
       <div className="mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-1000">
         <div className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-3 py-1.5 backdrop-blur-sm">
-          <div className="flex h-2 w-2 rounded-full bg-accent animate-pulse" />
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-semibold">
-            Native App Tip: <span className="text-text/90 font-bold ml-1">{tip}</span>
+          <div className="flex h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/80 font-bold">
+            PWA TIP: <span className="text-text/90 ml-1 italic">{tip}</span>
           </p>
         </div>
       </div>
@@ -112,15 +96,16 @@ export default function InstallAppButton() {
     <div className="mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
       <button
         onClick={handleInstallClick}
-        className="group relative flex h-10 items-center gap-2.5 overflow-hidden rounded-full bg-accent px-5 font-sans text-xs font-bold text-base transition-all active:scale-[0.96] hover:bg-accent/90 shadow-[0_0_20px_rgba(232,162,61,0.2)] hover:shadow-[0_0_25px_rgba(232,162,61,0.4)]"
+        className="group relative flex h-9 items-center gap-2.5 overflow-hidden rounded-full bg-accent px-5 font-sans text-[11px] font-bold uppercase tracking-[0.1em] text-base transition-all active:scale-95 hover:bg-accent/90 shadow-[0_0_20px_rgba(232,162,61,0.15)] hover:shadow-[0_0_25px_rgba(232,162,61,0.35)] border border-white/10"
       >
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         <svg
-          width="16"
-          height="16"
+          width="14"
+          height="14"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.5"
+          strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
           className="transition-transform group-hover:-translate-y-0.5"
@@ -131,10 +116,10 @@ export default function InstallAppButton() {
         </svg>
         <span>Install App</span>
       </button>
-      <div className="mt-3 flex items-center gap-1.5 opacity-50">
-        <div className="h-px w-4 bg-muted" />
-        <span className="text-[10px] font-medium tracking-tight uppercase">PWA Experience</span>
-        <div className="h-px w-4 bg-muted" />
+      <div className="mt-3 flex items-center gap-2 opacity-20">
+        <div className="h-[1px] w-3 bg-muted-foreground" />
+        <span className="text-[8px] font-black tracking-[0.3em] uppercase">PWA Experience</span>
+        <div className="h-[1px] w-3 bg-muted-foreground" />
       </div>
     </div>
   );
