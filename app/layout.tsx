@@ -3,7 +3,7 @@ import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import SiteFooter from "@/app/components/SiteFooter";
 import AlgofoxPetProvider from "@/app/components/pet/AlgofoxPetProvider";
 import AlgofoxWidget from "@/app/components/pet/AlgofoxWidget";
-import PwaRegister from "@/app/components/PwaRegister";
+import ServiceWorkerRegistry from "@/app/components/ServiceWorkerRegistry";
 import { homepageMetadata } from "@/lib/seo";
 import { ETHIOR_URL, SITE_DESCRIPTION, SITE_DISPLAY_NAME, SITE_NAME, SITE_URL, THEME_COLOR } from "@/lib/site";
 import "./globals.css";
@@ -89,6 +89,7 @@ export default function RootLayout({
       <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} bg-base text-text`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(websiteSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(organizationSchema) }} />
+        <ServiceWorkerRegistry />
         <AlgofoxPetProvider>
           <div className="flex min-h-screen flex-col">
             {children}
