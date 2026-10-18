@@ -20,6 +20,7 @@ export default function InstallAppButton() {
     isAndroid: boolean;
     isSafari: boolean;
     isMac: boolean;
+    isWindows: boolean;
     isChrome: boolean;
     isEdge: boolean;
   }>({
@@ -27,6 +28,7 @@ export default function InstallAppButton() {
     isAndroid: false,
     isSafari: false,
     isMac: false,
+    isWindows: false,
     isChrome: false,
     isEdge: false,
   });
@@ -35,17 +37,18 @@ export default function InstallAppButton() {
     const userAgent = window.navigator.userAgent;
     const isIOS = /iPad|iPhone|iPod/.test(userAgent);
     const isAndroid = /Android/.test(userAgent);
+    const isWindows = /Win/.test(userAgent);
     const isEdge = /Edg/.test(userAgent);
     const isChrome = /Chrome/.test(userAgent) && !isEdge;
     const isSafari = /Safari/.test(userAgent) && !isChrome && !isEdge;
     const isMac = /Macintosh/.test(userAgent);
 
-    setPlatform({ isIOS, isAndroid, isSafari, isMac, isChrome, isEdge });
+    setPlatform({ isIOS, isAndroid, isSafari, isMac, isWindows, isChrome, isEdge });
 
     // Check if already in standalone mode
     if (
       window.matchMedia("(display-mode: standalone)").matches ||
-      ("standalone" in window.navigator && (window.navigator as any).standalone === true)
+      ("standalone" in window.navigator && (window.navigator as Navigator & { standalone?: boolean }).standalone === true)
     ) {
       setIsStandalone(true);
     }
@@ -97,11 +100,11 @@ export default function InstallAppButton() {
       } else {
         tip = "Tap the menu and select \"Add to Home screen\"";
       }
-    } else if (platform.isMac) {
+    } else if (platform.isMac || platform.isWindows) {
       if (platform.isSafari) {
         tip = "Go to File > Add to Dock to install as an app";
       } else if (platform.isChrome) {
-        tip = "Click the Install icon in the address bar or menu > Save and Share > Install page as app";
+        tip = "Click the Install icon (computer with arrow) in the address bar or menu > Save and Share > Install page as app";
       } else if (platform.isEdge) {
         tip = "Click the App Available icon in the address bar or menu > Apps > Install this site as an app";
       } else {
