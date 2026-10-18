@@ -2,8 +2,7 @@ import { MetadataRoute } from "next";
 import { BACKGROUND_COLOR, SITE_DESCRIPTION, SITE_NAME, THEME_COLOR } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
-  return {
-    id: "/",
+  const baseManifest: MetadataRoute.Manifest = {
     name: SITE_NAME,
     short_name: "WelcomeScore",
     description: SITE_DESCRIPTION,
@@ -35,15 +34,20 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["development", "productivity"],
     orientation: "portrait-primary",
     prefer_related_applications: false,
+  };
+
+  // Use Object.assign to include newer PWA properties (id, screenshots with form_factor)
+  // that are valid in browsers but may be missing from the current MetadataRoute.Manifest type.
+  return Object.assign(baseManifest, {
+    id: "/",
     screenshots: [
       {
         src: "/opengraph-image",
         sizes: "1200x630",
         type: "image/png",
-        // @ts-expect-error - Next.js 14 MetadataRoute.Manifest type is missing form_factor/label
         form_factor: "wide",
-        label: "WelcomeScore Dashboard"
-      }
-    ] as MetadataRoute.Manifest["screenshots"],
-  };
+        label: "WelcomeScore Dashboard",
+      },
+    ],
+  });
 }
