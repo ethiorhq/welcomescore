@@ -13,14 +13,17 @@ export default function PolicyPage({
   description,
   effectiveDate,
   sections,
+  children,
 }: {
   eyebrow: string;
   title: string;
   description: string;
   effectiveDate: string;
   sections: PolicySection[];
+  children?: ReactNode;
 }) {
   return (
+
     <main className="flex-1 bg-base px-4 py-10 text-text sm:px-6 sm:py-16">
       <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[12rem_minmax(0,1fr)] lg:gap-12">
         <aside className="lg:sticky lg:top-8 lg:self-start">
@@ -73,9 +76,12 @@ export default function PolicyPage({
               </section>
             ))}
           </div>
+
+          {children && <div className="mt-12">{children}</div>}
         </article>
       </div>
     </main>
+
   );
 }
 

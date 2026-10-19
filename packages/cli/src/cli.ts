@@ -1,15 +1,27 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import ora from "ora";
 import { Command, InvalidArgumentError } from "commander";
 import { applyFixes, planFixes } from "./fixes.js";
 import { evaluateJsHealth } from "./health.js";
 import { renderInteractiveDashboard } from "./interactive.js";
-import { renderCiSummary, renderFixPlan, renderHumanReport, renderJson, renderMarkdown } from "./reporters.js";
+import {
+  renderCiSummary,
+  renderFixPlan,
+  renderHumanReport,
+  renderJson,
+  renderMarkdown,
+} from "./reporters.js";
 import { readLocalSnapshot } from "./snapshot.js";
+
+export type OutputFormat = "json" | "markdown" | "terminal";
 
 export type CliOptions = {
   cwd: string;
   ci: boolean;
   threshold: number;
+  format?: string;
+  output?: string;
   json: boolean;
   markdown: boolean;
   details: boolean;
@@ -24,12 +36,27 @@ export async function runCli(argv: string[] = process.argv): Promise<number> {
   program.parse(argv);
   const options = program.opts<CliOptions>();
 
+  // Resolve normalized output format
+  let format: OutputFormat | undefined;
+  if (options.format) {
+    const rawFormat = options.format.toLowerCase();
+    if (!["json", "markdown", "terminal"].includes(rawFormat)) {
+      writeError("--format must be one of: json, markdown, terminal.");
+      return 2;
+    }
+    format = rawFormat as OutputFormat;
+  } else if (options.json) {
+    format = "json";
+  } else if (options.markdown) {
+    format = "markdown";
+  }
+
   if (options.ci && options.fix) {
     writeError("--ci and --fix cannot be used together. Review and apply templates locally instead.");
     return 2;
   }
-  if (options.json && (options.fix || options.markdown)) {
-    writeError("--json cannot be combined with --fix or --markdown, because JSON must remain the only stdout output.");
+  if (format === "json" && options.fix) {
+    writeError("JSON format cannot be combined with --fix.");
     return 2;
   }
   if (!Number.isInteger(options.threshold) || options.threshold < 0 || options.threshold > 100) {
@@ -37,8 +64,11 @@ export async function runCli(argv: string[] = process.argv): Promise<number> {
     return 2;
   }
 
-  const shouldSpin = !options.ci && !options.json && !options.markdown && process.stderr.isTTY;
-  const spinner = shouldSpin ? ora({ text: "Reading local JavaScript project signals…", color: "yellow" }).start() : null;
+  const isQuietFormat = format === "json" || format === "markdown";
+  const shouldSpin = !options.ci && !isQuietFormat && process.stderr.isTTY;
+  const spinner = shouldSpin
+    ? ora({ text: "Reading local JavaScript project signals…", color: "yellow" }).start()
+    : null;
 
   try {
     const snapshot = await readLocalSnapshot({ cwd: options.cwd, includeGithubLabel: options.github });
@@ -56,16 +86,40 @@ export async function runCli(argv: string[] = process.argv): Promise<number> {
       return 0;
     }
 
-    if (options.json) {
+    // Determine report content
+    let reportContent: string | null = null;
+    if (format === "json") {
+      reportContent = renderJson(report);
+    } else if (format === "markdown") {
+      reportContent = renderMarkdown(report);
+    }
+
+    // Write to output file if requested
+    if (options.output) {
+      const targetPath = path.resolve(options.cwd, options.output);
+      await mkdir(path.dirname(targetPath), { recursive: true });
+      const contentToWrite = reportContent ?? renderMarkdown(report);
+      await writeFile(targetPath, contentToWrite, "utf8");
+      if (!options.ci && !options.json) {
+        process.stderr.write(`Report written to ${options.output}\n`);
+      }
+    }
+
+    // Output to console / terminal
+    if (options.output && isQuietFormat) {
+      // Content already saved to target file
+    } else if (format === "json") {
       process.stdout.write(renderJson(report));
-    } else if (options.markdown) {
+    } else if (format === "markdown") {
       process.stdout.write(renderMarkdown(report));
     } else if (options.ci) {
       process.stderr.write(`${renderCiSummary(report, options.threshold)}\n`);
-    } else if (process.stdout.isTTY) {
-      await renderInteractiveDashboard(report);
+    } else if (format === "terminal" || !process.stdout.isTTY) {
+      process.stdout.write(
+        `${renderHumanReport(report, { details: options.details, color: options.color })}\n`,
+      );
     } else {
-      process.stdout.write(`${renderHumanReport(report, { details: options.details, color: options.color })}\n`);
+      await renderInteractiveDashboard(report);
     }
 
     return options.ci && report.score < options.threshold ? 1 : 0;
@@ -85,6 +139,8 @@ export function buildProgram() {
     .option("--cwd <path>", "project directory to inspect", process.cwd())
     .option("--ci", "quiet CI mode with a threshold exit code", false)
     .option("--threshold <score>", "minimum passing score in CI mode", parseThreshold, 80)
+    .option("--format <format>", "output format: json, markdown, terminal")
+    .option("--output <path>", "write the formatted report to a file")
     .option("--json", "write only the stable report JSON to stdout", false)
     .option("--markdown", "write a Markdown report to stdout", false)
     .option("--details", "include diagnostic details in non-interactive human output", false)

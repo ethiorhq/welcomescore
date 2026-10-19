@@ -1,6 +1,6 @@
 # WelcomeScore CLI
 
-`@ethiorhq/welcomescore` is a local JavaScript and TypeScript repository health tool for npm-package maintainers. It reviews observable package metadata, Node tooling, CI workflow signals, and contributor foundations.
+`@ethiorhq/welcomescore` is an evidence-based local JavaScript and TypeScript repository health tool for open-source maintainers. It evaluates package metadata, Node tooling infrastructure, CI/CD workflow readiness, and contributor onboarding foundations.
 
 ```bash
 npx @ethiorhq/welcomescore
@@ -8,56 +8,57 @@ npx @ethiorhq/welcomescore
 
 The interactive terminal view presents a 0–100 **JavaScript Health Index**. Press `d` to show diagnostics and `q` or `Esc` to close.
 
-## CI mode
+## Usage Modes
 
-Use CI mode for a deterministic threshold check. It emits a concise result to standard error and returns `0` when the score meets the threshold, `1` when a completed audit is below it, and `2` for invalid input or scanner failure.
+### 1. Interactive & Terminal Reporting
+```bash
+npx @ethiorhq/welcomescore
+npx @ethiorhq/welcomescore --no-color
+npx @ethiorhq/welcomescore --details
+```
+
+### 2. CI Mode with Deterministic Thresholds
+Use CI mode for automated pipelines. It emits a concise summary and returns:
+- `0`: Score meets or exceeds `--threshold` (default: 80).
+- `1`: Completed audit score is below threshold.
+- `2`: Invalid CLI arguments or unreadable repository.
 
 ```bash
 npx @ethiorhq/welcomescore --ci --threshold=80
 ```
 
-Use `--json` when another program needs the full report on standard output, or `--markdown` for a human-readable report.
-
+### 3. Machine-Readable JSON & Markdown Reports
 ```bash
-npx @ethiorhq/welcomescore --json > welcomescore-report.json
-npx @ethiorhq/welcomescore --markdown > welcomescore-report.md
+# Output JSON to stdout
+npx @ethiorhq/welcomescore --format=json
+
+# Write Markdown report directly to a file
+npx @ethiorhq/welcomescore --format=markdown --output=.welcomescore/report.md
 ```
 
-## Safe remediation templates
-
-`--fix` is deliberately conservative. It creates only absent low-risk templates and never overwrites an existing file, edits `package.json`, installs dependencies, runs package scripts, creates a commit, changes GitHub, or publishes a package.
+### 4. Safe Remediation Templates (`--fix`)
+`--fix` creates absent low-risk template files. It **never** overwrites existing files, modifies `package.json` in-place, installs dependencies, runs untrusted scripts, commits code, or publishes packages.
 
 ```bash
+# Preview planned file creations
 npx @ethiorhq/welcomescore --fix --dry-run
+
+# Create absent templates
 npx @ethiorhq/welcomescore --fix
 ```
 
-The package metadata suggestion is written as `welcomescore.package-fragment.json` for a maintainer to review and merge manually. Templates may include `.nvmrc`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and a starter issue template only when those paths do not already exist.
+Package metadata suggestions are written safely as `welcomescore.package-fragment.json` for maintainer review. Templates created if absent:
+- `.nvmrc`
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `.github/ISSUE_TEMPLATE/good_first_issue.md`
 
-## Optional public label evidence
+## Privacy & Security Boundary
 
-The default scan is local. It does not upload source code, package manifests, environment variables, git credentials, or analytics to WelcomeScore. With explicit `--github`, the CLI may make one public GitHub API read to check for a curated starter-issue label on the `origin` repository.
+The default audit is completely local. It **does not upload** source code, manifests, environment variables, credentials, or analytics to any remote server. With `--github`, the tool makes a read-only call to GitHub's public API to check for open starter issue labels on the remote `origin`.
 
-```bash
-npx @ethiorhq/welcomescore --github
-```
+## Limitations
 
-## What the index means
+WelcomeScore audits public repository signals. It is **not** a security audit, code-quality certification, legal advice, package safety guarantee, popularity ranking, or endorsement.
 
-The index is a deterministic review of visible project signals. It is **not** a security audit, code-quality certification, legal opinion, popularity ranking, package safety guarantee, or endorsement. A missing signal can be appropriate for a project’s scope; always review diagnostics in context.
-
-For a public GitHub repository view, visit [WelcomeScore JavaScript Health](https://welcomescore.vercel.app/js).
-
-## Development
-
-```bash
-npm install
-npm run check
-npm test
-npm run build
-npm pack --dry-run
-```
-
-## License
-
-WelcomeScore CLI is source-available under the project’s custom Source-Available Attribution License, not an OSI-approved open-source license. See [LICENSE](./LICENSE), [ATTRIBUTION.md](./ATTRIBUTION.md), and [NOTICE](./NOTICE) before redistributing or modifying it.
+For online audits and badge generation, visit [WelcomeScore](https://welcomescore.vercel.app).

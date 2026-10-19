@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PolicyPage, { PolicyCallout, PolicyTable, type PolicySection } from "@/app/components/PolicyPage";
+import AndroidAppDownloadCard from "@/app/components/AndroidAppDownloadCard";
 import { pageMetadata } from "@/lib/seo";
+
 
 export const metadata: Metadata = pageMetadata({
   title: "How WelcomeScore Measures Contributor Readiness",
@@ -134,6 +136,7 @@ const sections: PolicySection[] = [
 ];
 
 export default function HowItWorksPage() {
+
   return (
     <PolicyPage
       eyebrow="Product guide"
@@ -141,6 +144,9 @@ export default function HowItWorksPage() {
       description="A transparent, evidence-bound audit for the public signals that make a first open-source contribution easier to begin."
       effectiveDate="August 27, 2026"
       sections={sections}
-    />
+    >
+      <AndroidAppDownloadCard />
+    </PolicyPage>
   );
 }
+

@@ -1,12 +1,90 @@
 # WelcomeScore
 
-[![WelcomeScore](https://welcomescore.vercel.app/api/badge?repo=ethiorhq/welcomescore&v=3)](https://welcomescore.vercel.app/?repo=ethiorhq/welcomescore)
+[![WelcomeScore](https://welcomescore.vercel.app/api/badge?repo=ethiorhq/welcomescore&v=3)](https://welcomescore.vercel.app/report/ethiorhq/welcomescore)
 
-**WelcomeScore** gives a public GitHub repository a practical readiness score for first-time contributors. It checks the small signals that make a project easier to join: contributor documentation, a code of conduct, setup guidance, a license, beginner-friendly open issues, and recent activity.
+**WelcomeScore** is an evidence-based maintainer control plane and readiness auditor for JavaScript and TypeScript repositories. It evaluates observable onboarding signals—documentation, contribution guidelines, code of conduct, package health, starter issue clarity, and licensing—and computes a single, deterministic **Next Useful Move** with ready-to-use issue drafts and patch plans.
+
+- **Current Production Site:** [https://welcomescore.vercel.app](https://welcomescore.vercel.app)
+- **Future Community Domain:** `https://welcomescore.js.org` *(active upon JS.ORG DNS delegation)*
+- **Shared Report Specification:** [REPORT_SCHEMA.md](docs/REPORT_SCHEMA.md)
 
 > WelcomeScore is source-available under the project’s custom [Source-Available Attribution License](LICENSE), not an OSI-approved open-source license. Public derivatives must preserve the license, notices, and original-project attribution described in [ATTRIBUTION.md](ATTRIBUTION.md).
 
+---
+
+## The Maintainer Loop
+
+```
+1. Audit Repo       ──>  Web Dashboard, CLI, or CI Action
+2. Evidence Report  ──>  Deterministic 0-100 score + signal breakdown
+3. Next Useful Move ──>  Highest-leverage improvement with ready-to-use draft
+4. Action & Verify  ──>  Submit patch, rerun audit, and track improvement timeline
+```
+
+---
+
+## First-Party GitHub Action
+
+Audit contributor readiness automatically on pull requests and pushes using [`ethiorhq/welcomescore-action@v1`](actions/welcomescore):
+
+```yaml
+name: WelcomeScore Contributor Audit
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Audit Contributor Readiness
+        uses: ethiorhq/welcomescore-action@v1
+        with:
+          threshold: 80
+          format: markdown
+          output-file: .welcomescore/report.md
+          upload-report: true
+          comment-on-pr: false
+```
+
+See [docs/GITHUB_ACTION.md](docs/GITHUB_ACTION.md) for full action parameters and idempotent PR commenting options.
+
+---
+
+## CLI (`@ethiorhq/welcomescore`)
+
+The companion CLI runs audits locally without uploading source files:
+
+```bash
+# Basic terminal audit
+npx @ethiorhq/welcomescore
+
+# Enforce CI threshold (exits with code 1 if score < 80)
+npx @ethiorhq/welcomescore --ci --threshold=80
+
+# Output structured report formats
+npx @ethiorhq/welcomescore --format=json
+npx @ethiorhq/welcomescore --format=markdown --output=.welcomescore/report.md
+
+# Preview or apply non-destructive starter templates
+npx @ethiorhq/welcomescore --fix --dry-run
+npx @ethiorhq/welcomescore --fix
+```
+
+See [`packages/cli/README.md`](packages/cli/README.md) for detailed CLI commands and safety flags.
+
+---
+
 ## Governance, community, and policies
+
 
 | Resource | Purpose |
 | --- | --- |

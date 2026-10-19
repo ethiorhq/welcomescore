@@ -395,8 +395,115 @@ export const GUIDES: Guide[] = [
       "write-contributing-guide-developers-use",
     ],
   },
+  {
+    slug: "javascript-package-health-guide",
+    title: "JavaScript and TypeScript Package Health: ESM, Types, Exports, and Boundaries",
+    description:
+      "A practical maintainer guide to building robust, dual-format npm packages with correct export maps, type declarations, engine definitions, and zero dependency leaks.",
+    summary:
+      "Modern JavaScript packages must navigate ESM/CJS compatibility, type definitions, and subpath exports. A clear package structure prevents runtime surprises for consumers and newcomers.",
+    category: "Package ecosystem",
+    keywords: [
+      "npm package health",
+      "TypeScript exports",
+      "dual package hazard",
+      "JavaScript maintenance",
+      "ESM CJS compatibility",
+    ],
+    publishedAt: "2026-10-20",
+    updatedAt: "2026-10-20",
+    readingTime: "8 min read",
+    sections: [
+      {
+        heading: "Avoid the dual package hazard with explicit export conditions",
+        paragraphs: [
+          "When a package supports both CommonJS (require) and ES Modules (import), subtle bugs can emerge if consumers load two separate instances of internal state. Modern Node.js relies on the exports field in package.json to declare entry points cleanly.",
+          "Order condition keys from most specific to least specific: types, import, require, and default. Ensure that subpath imports (like pkg/utils) are explicitly listed in exports or locked down to prevent consumers from relying on private internals.",
+        ],
+        checklist: [
+          "Use exports in package.json with types, import, require, and default keys.",
+          "Provide separate ESM and CJS builds without leaking state between them.",
+          "Prevent unintended private file imports by listing specific entrypoints.",
+        ],
+      },
+      {
+        heading: "Deliver first-class TypeScript types without broken imports",
+        paragraphs: [
+          "Shipping declaration files (.d.ts) is essential for modern developer experience. Ensure declaration files correspond 1-to-1 with entrypoints and that types are tested against NodeNext module resolution.",
+          "If using dual formats, supply separate .d.ts for CJS and .d.mts for ESM, or leverage tsup/pkgroll tools that generate verified type maps automatically.",
+        ],
+        callout:
+          "WelcomeScore's JavaScript Health Dashboard (/api/js-health) continuously verifies package exports, ESM compliance, and type definitions.",
+      },
+      {
+        heading: "Declare supported Node.js engines and audit dependencies",
+        paragraphs: [
+          "Specify the supported Node runtime versions in engines.node (e.g. >=18.0.0). This prevents installation failures in legacy environments and allows tools to warn users early.",
+          "Keep dependencies separated: production dependencies under dependencies, development and build tooling under devDependencies, and shared plugins in peerDependencies.",
+        ],
+      },
+    ],
+    relatedSlugs: [
+      "improve-repository-welcomescore",
+      "github-actions-repository-checks",
+    ],
+  },
+  {
+    slug: "github-actions-repository-checks",
+    title: "Automating Contributor Readiness Checks with GitHub Actions and WelcomeScore",
+    description:
+      "How to set up automated WelcomeScore repository audits in CI using our first-party GitHub Action with threshold assertions and idempotent PR feedback.",
+    summary:
+      "Automating contributor readiness checks in CI ensures that documentation, starter issues, and license signals remain healthy across pull requests and releases.",
+    category: "Automation & CI",
+    keywords: [
+      "GitHub Action contributor readiness",
+      "CI onboarding checks",
+      "WelcomeScore Action",
+      "automated repo audit",
+      "PR comment idempotence",
+    ],
+    publishedAt: "2026-10-20",
+    updatedAt: "2026-10-20",
+    readingTime: "7 min read",
+    sections: [
+      {
+        heading: "Why verify contributor onboarding in CI?",
+        paragraphs: [
+          "Repository health degrades incrementally: a merge removes an essential setup step from the README, an issue template is inadvertently deleted, or a license notice is omitted from a new sub-package. Running checks in CI catches regressions before they affect new contributors.",
+          "The WelcomeScore GitHub Action runs deterministically without network dependencies, verifying public signals, generating structured reports, and optionally evaluating a minimum score threshold.",
+        ],
+        checklist: [
+          "Pin action versions (e.g. ethiorhq/welcomescore-action@v1).",
+          "Set permissions to least-privilege (contents: read, pull-requests: write only if commenting).",
+          "Upload report artifacts (.welcomescore/report.json and report.md) for CI run inspection.",
+        ],
+      },
+      {
+        heading: "Example GitHub Actions workflow configuration",
+        paragraphs: [
+          "Here is a complete, production-ready workflow for auditing contributor readiness on pull requests and pushes:",
+          "Save this workflow file in your repository at .github/workflows/welcomescore.yml. It runs on every pull request, asserts a score threshold of 80, and uploads the verified audit artifacts.",
+        ],
+        callout:
+          "The Action uses deterministic comment markers (<!-- welcomescore-audit-comment -->) to ensure PR comments are updated in-place rather than spamming discussion threads.",
+      },
+      {
+        heading: "Connecting CI findings to the Next Useful Move",
+        paragraphs: [
+          "When an audit reports a gap—such as a missing CONTRIBUTING.md or unmaintained starter issue—the report output identifies the single highest-leverage next move.",
+          "Maintainers can review the generated issue draft or patch plan preview directly from the CI artifact or web dashboard at https://welcomescore.vercel.app/report/owner/repo.",
+        ],
+      },
+    ],
+    relatedSlugs: [
+      "write-contributing-guide-developers-use",
+      "javascript-package-health-guide",
+    ],
+  },
 ];
 
 export function guideBySlug(slug: string) {
   return GUIDES.find((guide) => guide.slug === slug);
 }
+

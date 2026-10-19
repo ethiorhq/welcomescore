@@ -13,10 +13,12 @@
 - Dev Lounge Policy: https://welcomescore.vercel.app/dev-lounge-policy
 - JavaScript Health dashboard: https://welcomescore.vercel.app/js
 - Local npm CLI: `npx @ethiorhq/welcomescore` (published as `@ethiorhq/welcomescore@0.1.0`: https://www.npmjs.com/package/@ethiorhq/welcomescore)
+- First-party GitHub Action: `ethiorhq/welcomescore-action@v1` (https://github.com/ethiorhq/welcomescore/tree/main/actions/welcomescore)
+- Public Report & Schema API: `GET /api/report?repo=owner/repo` (Specification: https://github.com/ethiorhq/welcomescore/blob/main/docs/REPORT_SCHEMA.md)
 
 ## What WelcomeScore does
 
-WelcomeScore reads public GitHub repository signals for six documented checks: contribution guidance, a code of conduct, README setup guidance, a published license, open good-first-issue labels, and recent repository activity. It returns a contributor-readiness score with the visible underlying checks.
+WelcomeScore reads public GitHub repository signals for contributor readiness and package health. It computes deterministic scores, identifies a single evidence-backed Next Useful Move with ready issue drafts and patch plans, tracks privacy-safe improvement timelines, and generates versioned JSON/Markdown reports.
 
 JavaScript Health is a separate deterministic 100-point review for JavaScript and TypeScript maintainers. It checks allowlisted public package metadata, Node tooling paths, CI/workflow indicators, and contributor foundations; it is not a security audit, package-safety guarantee, code-quality certification, legal opinion, popularity ranking, or endorsement. Its companion local CLI, `npx @ethiorhq/welcomescore`, reads a user-selected project directory without uploading source files, package manifests, environment values, or repository credentials to WelcomeScore.
 
@@ -31,6 +33,9 @@ The optional Algofox review provides short, evidence-bound guidance based only o
 - Improving a repository with WelcomeScore: https://welcomescore.vercel.app/guides/improve-repository-welcomescore
 - Safe developer community chat: https://welcomescore.vercel.app/guides/safe-open-source-dev-lounge
 - Make developer documentation discoverable: https://welcomescore.vercel.app/guides/make-developer-docs-discoverable-without-gaming-search
+- JavaScript and TypeScript package health: https://welcomescore.vercel.app/guides/javascript-package-health-guide
+- Automating contributor checks with GitHub Actions: https://welcomescore.vercel.app/guides/github-actions-repository-checks
+
 
 ## Content and usage boundaries
 

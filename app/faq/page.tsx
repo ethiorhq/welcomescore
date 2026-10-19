@@ -138,6 +138,33 @@ const sections: PolicySection[] = [
     ),
   },
   {
+    id: "report-incorrect-signal",
+    title: "Reporting incorrect signals",
+    content: (
+      <>
+        <h3 className="font-sans text-base font-semibold text-text">What should I do if a signal is reported incorrectly?</h3>
+        <p>If your project organizes documentation or licenses in a valid non-standard way (for example, hosting contributing guides in a monorepo subfolder, using a custom OSI license, or utilizing an external CI provider like Buildkite), you can submit a correction via the public report page or the <Link className="text-link underline underline-offset-4" href="/report/ethiorhq/welcomescore">report interface</Link>.</p>
+        <h3 className="font-sans text-base font-semibold text-text">Does a correction immediately change my score?</h3>
+        <p>No. Corrections are triaged deterministically by our maintainer team. Valid submissions become regression test cases or expanded signal patterns, ensuring scores remain trustworthy and immune to manipulation.</p>
+        <PolicyCallout>
+          Corrections never alter public scores without reviewed, deterministic rule changes.
+        </PolicyCallout>
+      </>
+    ),
+  },
+  {
+    id: "mobile-and-cli",
+    title: "CLI, GitHub Actions, and Mobile",
+    content: (
+      <>
+        <h3 className="font-sans text-base font-semibold text-text">Can I run WelcomeScore locally or in CI?</h3>
+        <p>Yes. The npm CLI (<code>npx @ethiorhq/welcomescore</code>) runs locally without uploading source files, and our first-party GitHub Action (<code>ethiorhq/welcomescore-action@v1</code>) automates checks on pull requests.</p>
+        <h3 className="font-sans text-base font-semibold text-text">Is there a mobile app?</h3>
+        <p>WelcomeScore provides an Android companion app consuming our public report and JavaScript health APIs. All scoring runs server-side to guarantee consistency across web and mobile.</p>
+      </>
+    ),
+  },
+  {
     id: "privacy",
     title: "Privacy, ownership, and forks",
     content: (
@@ -153,6 +180,7 @@ const sections: PolicySection[] = [
     ),
   },
 ];
+
 
 export default function FaqPage() {
   return (
