@@ -12,6 +12,14 @@ import {
   renderJson,
   renderMarkdown,
 } from "./reporters.js";
+import {
+  detectStacks,
+  evaluateStackById,
+  readLocalStackSnapshot,
+  renderStackHumanReport,
+  renderStackMarkdown,
+  type StackId,
+} from "./stacks.js";
 import { readLocalSnapshot } from "./snapshot.js";
 
 export type OutputFormat = "json" | "markdown" | "terminal";
@@ -29,6 +37,7 @@ export type CliOptions = {
   dryRun: boolean;
   github: boolean;
   color: boolean;
+  stack?: string;
 };
 
 export async function runCli(argv: string[] = process.argv): Promise<number> {
@@ -74,6 +83,48 @@ export async function runCli(argv: string[] = process.argv): Promise<number> {
     const snapshot = await readLocalSnapshot({ cwd: options.cwd, includeGithubLabel: options.github });
     const report = evaluateJsHealth(snapshot);
     spinner?.succeed("JavaScript project signals read");
+
+    if (options.stack) {
+      const normalized = options.stack.toLowerCase() as StackId;
+      if (!["nextjs", "react", "monorepo"].includes(normalized)) {
+        writeError("--stack must be one of: nextjs, react, monorepo.");
+        return 2;
+      }
+      const stackSnapshot = await readLocalStackSnapshot(options.cwd, snapshot.packageJson);
+      const stackReport = evaluateStackById(stackSnapshot, normalized);
+      if (!stackReport) {
+        writeError(`Could not evaluate stack: ${options.stack}`);
+        return 2;
+      }
+
+      let content: string;
+      if (format === "json") {
+        content = `${JSON.stringify(stackReport, null, 2)}\n`;
+      } else if (format === "markdown") {
+        content = renderStackMarkdown(stackReport);
+      } else {
+        content = `${renderStackHumanReport(stackReport, { color: options.color, details: options.details })}\n`;
+      }
+
+      if (options.output) {
+        const targetPath = path.resolve(options.cwd, options.output);
+        await mkdir(path.dirname(targetPath), { recursive: true });
+        await writeFile(targetPath, content, "utf8");
+        if (!options.ci && !options.json) {
+          process.stderr.write(`Stack report written to ${options.output}\n`);
+        }
+      }
+
+      if (isQuietFormat || options.output) {
+        if (!options.output) {
+          process.stdout.write(content);
+        }
+      } else {
+        process.stdout.write(content);
+      }
+
+      return options.ci && stackReport.score < options.threshold ? 1 : 0;
+    }
 
     if (options.fix) {
       const execution = options.dryRun
@@ -135,10 +186,11 @@ export function buildProgram() {
   program
     .name("welcomescore")
     .description("Local JavaScript and TypeScript repository health checks for package, tooling, CI, and contributor foundations.")
-    .version("0.1.0")
+    .version("0.2.0")
     .option("--cwd <path>", "project directory to inspect", process.cwd())
     .option("--ci", "quiet CI mode with a threshold exit code", false)
     .option("--threshold <score>", "minimum passing score in CI mode", parseThreshold, 80)
+    .option("--stack <stack>", "evaluate deep framework health (nextjs, react, monorepo)")
     .option("--format <format>", "output format: json, markdown, terminal")
     .option("--output <path>", "write the formatted report to a file")
     .option("--json", "write only the stable report JSON to stdout", false)

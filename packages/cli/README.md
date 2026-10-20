@@ -53,6 +53,20 @@ Package metadata suggestions are written safely as `welcomescore.package-fragmen
 - `CODE_OF_CONDUCT.md`
 - `.github/ISSUE_TEMPLATE/good_first_issue.md`
 
+### 5. Deep Framework Stack Health Audits (`--stack`)
+Evaluate architecture, resilience boundaries, compiler compatibility, and build orchestration for modern web stacks:
+
+```bash
+# Next.js Deep Health (App Router, Error/Not-Found boundaries, CWV, Server Actions)
+npx @ethiorhq/welcomescore --stack nextjs
+
+# React 19 Readiness (React 19 compiler patterns, direct ref props, hydration hygiene)
+npx @ethiorhq/welcomescore --stack react
+
+# Monorepo & Tooling (Turborepo pipeline caching, strict lockfiles, Biome/ESLint 9)
+npx @ethiorhq/welcomescore --stack monorepo
+```
+
 ## Privacy & Security Boundary
 
 The default audit is completely local. It **does not upload** source code, manifests, environment variables, credentials, or analytics to any remote server. With `--github`, the tool makes a read-only call to GitHub's public API to check for open starter issue labels on the remote `origin`.

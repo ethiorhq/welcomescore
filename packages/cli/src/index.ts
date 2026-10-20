@@ -12,3 +12,12 @@ export type {
   JsHealthSnapshot,
 } from "./health.js";
 export * from "./report-schema.js";
+export {
+  detectStacks,
+  evaluateAllDetectedStacks,
+  evaluateStackById,
+  readLocalStackSnapshot,
+  renderStackHumanReport,
+  renderStackMarkdown,
+} from "./stacks.js";
+export type { StackId, StackReport, StackSnapshot } from "./stacks.js";

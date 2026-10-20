@@ -138,4 +138,49 @@ describe("WelcomeScore CLI health index", () => {
       readFile(path.join(cwd, "welcomescore.package-fragment.json"), "utf8"),
     ).resolves.toContain("repository");
   });
+
+  it("evaluates a stack when --stack is provided", async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), "welcomescore-cli-stack-"));
+    temporaryDirectories.push(cwd);
+    await writeFile(
+      path.join(cwd, "package.json"),
+      JSON.stringify({
+        name: "next-app-test",
+        dependencies: { next: "14.2.16", react: "18.3.1" },
+      }),
+    );
+    await writeFile(
+      path.join(cwd, "next.config.js"),
+      "module.exports = {};",
+    );
+
+    const outputPath = ".welcomescore/nextjs.json";
+    const code = await runCli([
+      "node",
+      "welcomescore",
+      "--cwd",
+      cwd,
+      "--stack",
+      "nextjs",
+      "--format",
+      "json",
+      "--output",
+      outputPath,
+    ]);
+
+    expect(code).toBe(0);
+    const content = JSON.parse(await readFile(path.join(cwd, outputPath), "utf8"));
+    expect(content.stackId).toBe("nextjs");
+    expect(content.checks.length).toBeGreaterThan(0);
+  });
+
+  it("exits with 2 when an unsupported stack is requested", async () => {
+    const code = await runCli([
+      "node",
+      "welcomescore",
+      "--stack",
+      "unsupported-stack",
+    ]);
+    expect(code).toBe(2);
+  });
 });

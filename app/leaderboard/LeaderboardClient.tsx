@@ -34,6 +34,8 @@ export default function LeaderboardClient() {
   const [loadError, setLoadError] = useState(false);
   const [badgeEntry, setBadgeEntry] = useState<LeaderboardEntry | null>(null);
 
+  const [filter, setFilter] = useState<string>("all");
+
   const loadLeaderboard = useCallback(async () => {
     try {
       const response = await fetch(`/api/leaderboard?ts=${Date.now()}`, {
@@ -54,8 +56,20 @@ export default function LeaderboardClient() {
     void loadLeaderboard();
   }, [loadLeaderboard]);
 
-  const podium = entries.slice(0, 3);
-  const tableEntries = entries.slice(3);
+  const filteredEntries = filter === "all"
+    ? entries
+    : entries.filter((e) => {
+        const lang = (e.primaryLanguage || "").toLowerCase();
+        const repo = e.repoPath.toLowerCase();
+        if (filter === "nextjs") return repo.includes("next") || lang.includes("typescript") || lang.includes("javascript");
+        if (filter === "react") return repo.includes("react") || lang.includes("typescript") || lang.includes("javascript");
+        if (filter === "typescript") return lang.includes("typescript");
+        if (filter === "javascript") return lang.includes("javascript");
+        return true;
+      });
+
+  const podium = filteredEntries.slice(0, 3);
+  const tableEntries = filteredEntries.slice(3);
 
   return (
     <main className="min-h-screen bg-base px-4 py-8 text-text sm:px-6 sm:py-12">
@@ -102,6 +116,31 @@ export default function LeaderboardClient() {
             Audit your repository
           </Link>
         </section>
+
+        {/* Filter Tabs */}
+        <div className="mt-8 flex flex-wrap items-center gap-2">
+          <span className="font-mono text-xs uppercase tracking-wider text-muted mr-1">Filter:</span>
+          {[
+            { id: "all", label: "All Repositories" },
+            { id: "nextjs", label: "▲ Next.js & Web" },
+            { id: "react", label: "⚛ React Ecosystem" },
+            { id: "typescript", label: "TypeScript" },
+            { id: "javascript", label: "JavaScript" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setFilter(tab.id)}
+              className={`rounded-lg px-3 py-1.5 font-mono text-xs font-medium transition ${
+                filter === tab.id
+                  ? "bg-accent text-base font-bold shadow"
+                  : "bg-surface text-muted hover:text-text hover:bg-white/5 border border-muted/20"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
         {isLoading ? <LoadingState /> : null}
         {!isLoading && loadError ? <ErrorState /> : null}
