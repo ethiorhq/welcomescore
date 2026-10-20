@@ -1,6 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
 
 interface AndroidAppDownloadCardProps {
   className?: string;
@@ -9,65 +18,186 @@ interface AndroidAppDownloadCardProps {
 export default function AndroidAppDownloadCard({
   className = "",
 }: AndroidAppDownloadCardProps) {
-  const appUrl = process.env.NEXT_PUBLIC_ANDROID_APP_URL?.trim();
-  const appVersion = process.env.NEXT_PUBLIC_ANDROID_APP_VERSION?.trim();
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [platform, setPlatform] = useState({
+    isIOS: false,
+    isAndroid: false,
+    isSafari: false,
+    isChrome: false,
+    isEdge: false,
+  });
 
-  const isAvailable = Boolean(appUrl && appUrl.startsWith("https://") && !appUrl.includes("debug"));
+  const appUrl = process.env.NEXT_PUBLIC_ANDROID_APP_URL?.trim();
+  const hasNativeApk = Boolean(appUrl && appUrl.startsWith("https://") && !appUrl.includes("debug"));
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const userAgent = window.navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    const isAndroid = /Android/.test(userAgent);
+    const isEdge = /Edg/.test(userAgent);
+    const isChrome = /Chrome/.test(userAgent) && !isEdge;
+    const isSafari = /Safari/.test(userAgent) && !isChrome && !isEdge;
+
+    setPlatform({ isIOS, isAndroid, isSafari, isChrome, isEdge });
+
+    const checkStandalone = () => {
+      const isPwaParam = window.location.search.includes("mode=pwa");
+      const isStandaloneMedia = window.matchMedia("(display-mode: standalone)").matches;
+      const isMinimalUiMedia = window.matchMedia("(display-mode: minimal-ui)").matches;
+      const isFullscreenMedia = window.matchMedia("(display-mode: fullscreen)").matches;
+      const isSafariStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+      const isTwa = document.referrer.includes("android-app://");
+
+      return isPwaParam || isStandaloneMedia || isMinimalUiMedia || isFullscreenMedia || isSafariStandalone || isTwa;
+    };
+
+    if (checkStandalone()) {
+      setIsStandalone(true);
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        setDeferredPrompt(null);
+        setIsInstalled(true);
+      }
+    } else {
+      setShowInstructions((prev) => !prev);
+    }
+  };
+
+  const getPlatformTip = () => {
+    if (platform.isIOS) {
+      return "Tap the Share button in Safari and choose 'Add to Home Screen'.";
+    }
+    if (platform.isAndroid) {
+      return "Tap menu (⋮) in Chrome or your browser and choose 'Install app' or 'Add to Home screen'.";
+    }
+    return "Click the install icon (⊕) in your browser address bar to install on your computer.";
+  };
 
   return (
     <div
       className={`rounded-xl border border-white/10 bg-[#1B1E29] p-5 shadow-lg ${className}`}
       role="region"
-      aria-label="WelcomeScore Android App"
+      aria-label="WelcomeScore Progressive Web App"
     >
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-start gap-3.5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#E8A23D]/10 text-[#E8A23D] border border-[#E8A23D]/20">
-            {/* Android Icon */}
+            {/* Mobile / PWA Device Icon */}
             <svg
               className="h-6 w-6"
               viewBox="0 0 24 24"
-              fill="currentColor"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               aria-hidden="true"
             >
-              <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-1.0002s.4482-.9993.9993-.9993c.5511 0 .9993.4477.9993.9993 0 .5516-.4482 1.0002-.9993 1.0002m-11.046 0c-.5511 0-.9993-.4486-.9993-1.0002s.4482-.9993.9993-.9993c.5511 0 .9993.4477.9993.9993 0 .5516-.4482 1.0002-.9993 1.0002m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.411 13.8566 8.081 12 8.081c-1.8566 0-3.5902.33-5.1378.8687L4.8399 5.4467a.4161.4161 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.7753h24c-.3432-4.1164-2.6889-7.5886-6.1185-9.4539" />
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+              <line x1="12" y1="18" x2="12.01" y2="18" />
             </svg>
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-semibold text-[#F2EEE6]">
-                WelcomeScore for Android
+                WelcomeScore App (PWA)
               </h3>
-              {appVersion && (
-                <span className="font-mono text-[10px] text-[#8B8F9E] bg-white/5 px-1.5 py-0.5 rounded border border-white/5">
-                  v{appVersion}
-                </span>
-              )}
+              <span className="font-mono text-[10px] text-[#22C55E] bg-[#22C55E]/10 px-2 py-0.5 rounded border border-[#22C55E]/20">
+                Installable • Offline Ready
+              </span>
             </div>
-            <p className="text-xs text-[#8B8F9E] mt-0.5">
-              Inspect JavaScript/TypeScript readiness and Next Useful Moves on the go.
+            <p className="text-xs text-[#8B8F9E] mt-1">
+              Install WelcomeScore on Android, iOS, or Desktop for instant audits with zero app store downloads.
             </p>
           </div>
         </div>
 
-        <div className="w-full sm:w-auto shrink-0">
-          {isAvailable ? (
+        <div className="w-full sm:w-auto shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          {isStandalone || isInstalled ? (
+            <div className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#22C55E]/30 bg-[#22C55E]/10 px-3.5 py-2 font-mono text-xs text-[#22C55E]">
+              <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
+              App Installed
+            </div>
+          ) : (
+            <button
+              onClick={handleInstallClick}
+              type="button"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E8A23D] bg-[#E8A23D] px-4 py-2 font-mono text-xs font-semibold text-[#12141C] transition hover:bg-[#E8A23D]/90 active:scale-[0.98]"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              {deferredPrompt ? "Install App Now" : "Install App"}
+            </button>
+          )}
+
+          {hasNativeApk && (
             <a
               href={appUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg border border-[#E8A23D] bg-[#E8A23D]/20 px-4 py-2 font-mono text-xs font-semibold text-[#E8A23D] transition hover:bg-[#E8A23D]/30"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-xs text-[#8B8F9E] transition hover:bg-white/10"
             >
-              Get Android App ↗
+              APK ↗
             </a>
-          ) : (
-            <div className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-[#8B8F9E]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#E8A23D]/60 animate-pulse" />
-              Android app coming soon
-            </div>
           )}
         </div>
       </div>
+
+      {showInstructions && !isStandalone && !isInstalled && (
+        <div className="mt-4 border-t border-white/10 pt-3 text-xs text-[#8B8F9E] flex items-center justify-between gap-3 animate-in fade-in duration-200">
+          <p>
+            <span className="font-semibold text-[#F2EEE6]">Installation guide:</span> {getPlatformTip()}
+          </p>
+          <button
+            onClick={() => setShowInstructions(false)}
+            className="text-[11px] text-[#8B8F9E] hover:text-[#F2EEE6] shrink-0 underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
     </div>
   );
 }
