@@ -1,7 +1,6 @@
 {
   "name": "@ethiorhq/welcomescore",
-  "version": "0.2.0",
-
+  "version": "0.2.1",
   "description": "Local JavaScript and TypeScript repository health checks for package, tooling, CI, and contributor foundations.",
   "keywords": [
     "javascript",
@@ -26,7 +25,7 @@
   "funding": "https://ethior.com",
   "type": "module",
   "bin": {
-    "welcomescore": "./dist/bin.js"
+    "welcomescore": "dist/bin.js"
   },
   "exports": {
     ".": {

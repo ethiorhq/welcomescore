@@ -186,7 +186,7 @@ export function buildProgram() {
   program
     .name("welcomescore")
     .description("Local JavaScript and TypeScript repository health checks for package, tooling, CI, and contributor foundations.")
-    .version("0.2.0")
+    .version("0.2.1")
     .option("--cwd <path>", "project directory to inspect", process.cwd())
     .option("--ci", "quiet CI mode with a threshold exit code", false)
     .option("--threshold <score>", "minimum passing score in CI mode", parseThreshold, 80)
