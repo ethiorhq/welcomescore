@@ -12,18 +12,48 @@ export default function SubscriberModal() {
   const [honeypot, setHoneypot] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubscribedOrSuppressed, setIsSubscribedOrSuppressed] = useState(false);
 
-  // Helper to check if modal is eligible to show
+  // Helper to check if auto-triggers should be suppressed
   const isSuppressed = useCallback(() => {
+    // 1. If already subscribed via cookie
+    if (typeof document !== "undefined" && document.cookie.includes("welcomescore_subscribed=1")) {
+      return true;
+    }
+
+    // 2. If already subscribed or dismissed in localStorage
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) return false;
-      const parsed = JSON.parse(stored) as { status?: string; timestamp?: number };
-      if (!parsed.timestamp) return false;
-      return Date.now() - parsed.timestamp < THIRTY_DAYS_MS;
+      if (stored) {
+        const parsed = JSON.parse(stored) as { status?: string; timestamp?: number };
+        if (parsed.status === "subscribed") return true;
+        if (parsed.timestamp && Date.now() - parsed.timestamp < THIRTY_DAYS_MS) {
+          return true;
+        }
+      }
     } catch {
-      return false;
+      // Safe fallback
     }
+
+    return isSubscribedOrSuppressed;
+  }, [isSubscribedOrSuppressed]);
+
+  // Check IP detection on mount to suppress auto-popups for existing subscribers
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/subscribe", { method: "GET", cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!isMounted) return;
+        if (data?.isSubscribed) {
+          setIsSubscribedOrSuppressed(true);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const openModal = useCallback(() => {
@@ -48,7 +78,20 @@ export default function SubscriberModal() {
     }
   }, []);
 
-  // 1. Delay Trigger (15 seconds)
+  // Listen for explicit manual trigger from footer or other links
+  useEffect(() => {
+    const handleOpenRequest = () => {
+      setStatus("idle");
+      setEmail("");
+      setErrorMessage("");
+      setIsOpen(true);
+    };
+
+    window.addEventListener("open-subscriber-modal", handleOpenRequest);
+    return () => window.removeEventListener("open-subscriber-modal", handleOpenRequest);
+  }, []);
+
+  // 1. Delay Trigger (15 seconds) - only for un-subscribed visitors
   useEffect(() => {
     if (isSuppressed()) return;
     const timer = setTimeout(() => {
@@ -129,11 +172,14 @@ export default function SubscriberModal() {
       }
 
       setStatus("success");
+      setIsSubscribedOrSuppressed(true);
+
       try {
         localStorage.setItem(
           STORAGE_KEY,
           JSON.stringify({ status: "subscribed", timestamp: Date.now() }),
         );
+        document.cookie = "welcomescore_subscribed=1; path=/; max-age=31536000; SameSite=Lax";
       } catch {
         // Safe localStorage fallback
       }
@@ -155,7 +201,7 @@ export default function SubscriberModal() {
         if (e.target === e.currentTarget) closeModal();
       }}
     >
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-accent/30 bg-surface p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#151724] p-6 sm:p-8 shadow-2xl space-y-6">
         {/* Ambient Top Glow */}
         <div
           className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-accent/15 blur-3xl"
@@ -166,14 +212,14 @@ export default function SubscriberModal() {
         <button
           type="button"
           onClick={closeModal}
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg border border-muted/20 bg-base/50 text-muted transition hover:border-accent hover:text-text focus:outline-none"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-base/50 text-muted transition hover:border-accent hover:text-text focus:outline-none"
           aria-label="Close subscription modal"
         >
           ✕
         </button>
 
         {status === "success" ? (
-          /* Component C: Success State / Thank You Screen */
+          /* Success State / Thank You Screen */
           <div className="space-y-4 pt-2 animate-in fade-in duration-300">
             <div className="flex items-center gap-2">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-good/20 text-good font-mono text-sm font-bold">
@@ -194,7 +240,7 @@ export default function SubscriberModal() {
             </p>
 
             {/* ETHIOR Promotion Line */}
-            <div className="rounded-xl border border-muted/20 bg-base/60 p-4 mt-3">
+            <div className="rounded-xl border border-white/10 bg-base/60 p-4 mt-3">
               <p className="font-sans text-xs text-text/90 leading-relaxed">
                 Need custom AI agents or business automation workflows for your team? Explore what we build at{" "}
                 <Link
@@ -212,19 +258,22 @@ export default function SubscriberModal() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="rounded-lg bg-surface border border-muted/30 px-4 py-2 font-mono text-xs text-muted hover:text-text transition"
+                className="rounded-lg bg-surface border border-white/10 px-4 py-2 font-mono text-xs text-muted hover:text-text transition"
               >
                 Close Window
               </button>
             </div>
           </div>
         ) : (
-          /* Component B: Smart Modal Form */
+          /* Smart Modal Form */
           <div className="space-y-4 pt-1">
-            <div className="space-y-1 pr-6">
-              <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-                Developer Updates &amp; Tooling
-              </p>
+            <div className="space-y-1.5 pr-6">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" aria-hidden="true" />
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+                  Developer Updates &amp; Tooling
+                </span>
+              </div>
               <h2 id="subscriber-modal-title" className="font-mono text-xl sm:text-2xl font-bold text-text">
                 Stay Updated with WelcomeScore &amp; ETHIOR
               </h2>
@@ -258,7 +307,7 @@ export default function SubscriberModal() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="developer@example.com"
-                  className="h-11 w-full rounded-lg border border-muted/30 bg-base/80 px-4 font-mono text-sm text-text placeholder:text-muted/60 outline-none transition focus:border-accent focus:ring-1 focus:ring-accent"
+                  className="h-11 w-full rounded-lg border border-white/10 bg-base/80 px-4 font-mono text-sm text-text placeholder:text-muted/60 outline-none transition focus:border-accent focus:ring-1 focus:ring-accent"
                 />
               </div>
 

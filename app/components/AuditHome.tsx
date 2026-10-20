@@ -185,9 +185,7 @@ export default function AuditHome({
           </div>
         ) : null}
 
-        <div className="mt-12 w-full max-w-2xl">
-          <SubscriberBanner source="welcomescore_home_inline" />
-        </div>
+        <SubscriberBanner source="welcomescore_home_inline" className="mt-12 w-full max-w-2xl" />
       </div>
     </main>
   );

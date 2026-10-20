@@ -18,6 +18,20 @@ const ipRateLimitBuckets = new Map<string, { count: number; windowStart: number 
 // In-memory subscriber storage for testing and offline/local development
 const memorySubscribers = new Map<string, StoredSubscriber>();
 
+// In-memory set of subscribed IPs for fast IP detection
+const subscribedIps = new Set<string>();
+
+export function recordSubscribedIp(clientIp: string): void {
+  if (clientIp && clientIp !== "unknown-client") {
+    subscribedIps.add(clientIp);
+  }
+}
+
+export function isIpSubscribed(clientIp: string): boolean {
+  if (!clientIp || clientIp === "unknown-client") return false;
+  return subscribedIps.has(clientIp);
+}
+
 export function isSupabaseConfigured(): boolean {
   return Boolean(SUPABASE_URL && SUPABASE_KEY);
 }
@@ -76,6 +90,7 @@ export async function subscribeEmail(
 
       if (response.ok) {
         const rows = (await response.json().catch(() => [])) as Array<{ id?: string }>;
+        recordSubscribedIp(clientIp);
         return {
           success: true,
           message: "You're on the list! Thank you for supporting WelcomeScore.",
@@ -92,6 +107,7 @@ export async function subscribeEmail(
         errorBody.toLowerCase().includes("duplicate key") ||
         errorBody.toLowerCase().includes("unique constraint")
       ) {
+        recordSubscribedIp(clientIp);
         return {
           success: true,
           message: "You're already on the list! Thank you for supporting WelcomeScore.",
@@ -118,6 +134,7 @@ export async function subscribeEmail(
             createdAt: new Date().toISOString(),
           });
         }
+        recordSubscribedIp(clientIp);
         return {
           success: true,
           message: "You're on the list! Thank you for supporting WelcomeScore.",
@@ -148,6 +165,7 @@ export async function subscribeEmail(
     };
     memorySubscribers.set(email, subscriber);
   }
+  recordSubscribedIp(clientIp);
 
   return {
     success: true,
@@ -164,5 +182,6 @@ export function getMemorySubscribersCount(): number {
 
 export function resetMemorySubscribers(): void {
   memorySubscribers.clear();
+  subscribedIps.clear();
   ipRateLimitBuckets.clear();
 }

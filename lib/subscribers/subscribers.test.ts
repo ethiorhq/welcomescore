@@ -5,6 +5,7 @@ import {
   subscribeEmail,
   resetMemorySubscribers,
   getMemorySubscribersCount,
+  isIpSubscribed,
 } from "./repository";
 
 describe("Subscriber Validation", () => {
@@ -124,5 +125,17 @@ describe("Subscriber Repository & Rate Limiting", () => {
     const blocked = checkRateLimit(ip);
     expect(blocked.allowed).toBe(false);
     expect(blocked.retryAfterSeconds).toBeGreaterThan(0);
+  });
+
+  it("records subscribed client IP and identifies subscribed status", async () => {
+    const testIp = "203.0.113.42";
+    expect(isIpSubscribed(testIp)).toBe(false);
+
+    await subscribeEmail("tester@example.com", "test_source", testIp);
+    expect(isIpSubscribed(testIp)).toBe(true);
+
+    // Reset clears recorded IPs
+    resetMemorySubscribers();
+    expect(isIpSubscribed(testIp)).toBe(false);
   });
 });

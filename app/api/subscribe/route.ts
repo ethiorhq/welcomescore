@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSubscriberSubmission } from "@/lib/subscribers/validation";
-import { subscribeEmail } from "@/lib/subscribers/repository";
+import { subscribeEmail, isIpSubscribed } from "@/lib/subscribers/repository";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+export async function GET(request: NextRequest) {
+  const hasCookie = request.cookies.get("welcomescore_subscribed")?.value === "1";
+  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const clientIp = forwarded || request.headers.get("x-real-ip") || "unknown-client";
+  const ipSubscribed = isIpSubscribed(clientIp);
+
+  return NextResponse.json(
+    {
+      ok: true,
+      isSubscribed: Boolean(hasCookie || ipSubscribed),
+    },
+    {
+      status: 200,
+      headers: { "Cache-Control": "no-store" },
+    },
+  );
+}
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -54,15 +72,25 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return NextResponse.json(
+  const response = NextResponse.json(
     {
       ok: true,
       message: result.message,
       isExisting: result.isExisting ?? false,
+      isSubscribed: true,
     },
     {
       status: 200,
       headers: { "Cache-Control": "no-store" },
     },
   );
+
+  response.cookies.set("welcomescore_subscribed", "1", {
+    path: "/",
+    maxAge: 365 * 24 * 60 * 60,
+    sameSite: "lax",
+    httpOnly: false,
+  });
+
+  return response;
 }
