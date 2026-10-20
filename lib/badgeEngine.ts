@@ -6,6 +6,8 @@ export type BadgeData = {
   repo: string;
   score: number;
   grade: string;
+  label?: string;
+  color?: string;
 };
 
 export type RankConfig = {
@@ -76,6 +78,9 @@ export function normalizeBadgeStyle(value: string | null): BadgeStyleId {
 
 export function createBadgeSvg(data: BadgeData, style: BadgeStyleId) {
   const rank = getRankConfig(data.score);
+  if (data.color) {
+    rank.color = data.color;
+  }
 
   switch (style) {
     case "2":
@@ -111,6 +116,7 @@ function createMinimalBadge(data: BadgeData, rank: RankConfig) {
   const width = 270;
   const leftWidth = 130;
   const repo = compactRepo(data.repo, 22);
+  const badgeLabel = data.label ? data.label.toUpperCase() : "WELCOMESCORE";
 
   return wrapSvg(width, 32, `
     <defs>
@@ -125,7 +131,7 @@ function createMinimalBadge(data: BadgeData, rank: RankConfig) {
       <rect x="${leftWidth}" width="${width - leftWidth}" height="32" fill="${rank.color}"/>
       <rect width="${width}" height="32" fill="url(#sheen)"/>
     </g>
-    <text x="12" y="14" class="label" font-size="9" letter-spacing="1.2">WELCOMESCORE</text>
+    <text x="12" y="14" class="label" font-size="9" letter-spacing="1.2">${escapeXml(badgeLabel)}</text>
     <text x="12" y="26" class="muted" font-size="10">${escapeXml(repo)}</text>
     ${emblemSvg(rank, 143, 8, 16, "#12141C")}
     <text x="166" y="21" fill="#12141C" font-size="14" font-weight="700">${data.score}/100</text>

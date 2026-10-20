@@ -84,6 +84,8 @@ export type WelcomeScoreReport = {
   goodFirstIssues: GoodFirstIssueItem[];
   limitations: string[];
   publicLinks: ReportPublicLinks;
+  detectedStacks?: string[];
+  stackReports?: Record<string, unknown>;
 };
 
 export type ReportValidationResult =

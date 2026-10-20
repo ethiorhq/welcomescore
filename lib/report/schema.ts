@@ -382,6 +382,8 @@ export type CreateReportOptions = {
   analyzedCommit?: string;
   siteBaseUrl?: string;
   analyzedAt?: string;
+  detectedStacks?: string[];
+  stackReports?: Record<string, unknown>;
 };
 
 export function createReportFromAudit(
@@ -467,6 +469,8 @@ export function createReportFromAudit(
       badge: `${siteUrl}/api/badge?repo=${encodeURIComponent(fullName)}`,
       repository: repoBaseUrl,
     },
+    ...(options.detectedStacks ? { detectedStacks: options.detectedStacks } : {}),
+    ...(options.stackReports ? { stackReports: options.stackReports } : {}),
   };
 
   return assertValidReport(report);

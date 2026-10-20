@@ -10,6 +10,9 @@ import ActionDraftModal from "@/app/components/ActionDraftModal";
 import { ImprovementTimeline } from "@/app/components/ImprovementTimeline";
 import SiteFooter from "@/app/components/SiteFooter";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import StackSelector from "@/app/components/report/StackSelector";
+import StackEvidencePanel from "@/app/components/report/StackEvidencePanel";
+import type { StackReport } from "@/lib/stacks/types";
 
 export default function PublicReportView({
   initialReport,
@@ -26,10 +29,19 @@ export default function PublicReportView({
   const [cliCopied, setCliCopied] = useState(false);
   const [actionCopied, setActionCopied] = useState(false);
   const [badgeCopied, setBadgeCopied] = useState(false);
-
+  const [activeStack, setActiveStack] = useState<string>("core");
 
   const repo = report.repository.fullName;
-  const badgeMarkdown = `[![WelcomeScore](${report.publicLinks.badge})](${report.publicLinks.report})`;
+  const stackReports = report.stackReports as Record<string, StackReport> | undefined;
+  const currentStackReport = activeStack !== "core" && stackReports ? stackReports[activeStack] : null;
+
+  const currentScore = currentStackReport ? currentStackReport.score : report.score;
+  const currentGrade = currentStackReport ? currentStackReport.grade : report.grade;
+  const currentCategory = currentStackReport ? currentStackReport.stackName : "Public Repository Audit";
+
+  const badgeMarkdown = currentStackReport
+    ? `[![${currentStackReport.stackName}](${report.publicLinks.badge}&stack=${activeStack})](${report.publicLinks.report}?stack=${activeStack})`
+    : `[![WelcomeScore](${report.publicLinks.badge})](${report.publicLinks.report})`;
   const cliSnippet = `npx @ethiorhq/welcomescore`;
   const actionSnippet = `- uses: ethiorhq/welcomescore-action@v1\n  with:\n    threshold: 80`;
 
@@ -99,6 +111,17 @@ export default function PublicReportView({
           isRechecking={isRechecking}
         />
 
+        {/* Stack Selection Tabs */}
+        {stackReports && Object.keys(stackReports).length > 0 && (
+          <StackSelector
+            activeStack={activeStack}
+            onSelectStack={setActiveStack}
+            coreScore={report.score}
+            coreGrade={report.grade}
+            stackReports={stackReports}
+          />
+        )}
+
         {/* Repository Header & Score Card */}
         <section
           aria-labelledby="repo-header-heading"
@@ -106,8 +129,8 @@ export default function PublicReportView({
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
-              <span className="font-mono text-xs uppercase tracking-wider text-muted">
-                Public Repository Audit
+              <span className="font-mono text-xs uppercase tracking-wider text-accent font-semibold">
+                {currentCategory}
               </span>
               <h1 id="repo-header-heading" className="font-mono text-2xl sm:text-3xl font-bold text-text break-all">
                 {repo}
@@ -135,14 +158,14 @@ export default function PublicReportView({
             {/* Score & Grade Display */}
             <div className="flex items-baseline gap-3 rounded-xl border border-muted/25 bg-base/60 px-6 py-4">
               <span className="font-mono text-5xl sm:text-6xl font-bold tracking-tight text-accent">
-                {report.score}
+                {currentScore}
               </span>
               <div className="flex flex-col">
                 <span className="font-mono text-xs uppercase tracking-wider text-muted">
                   Score / 100
                 </span>
                 <span className="font-mono text-2xl font-bold text-accent">
-                  Grade {report.grade}
+                  Grade {currentGrade}
                 </span>
               </div>
             </div>
@@ -151,12 +174,22 @@ export default function PublicReportView({
           {/* Coverage Summary */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-muted/15 pt-5 font-mono text-xs text-muted">
             <div>
-              <span className="block text-[11px] uppercase tracking-wider text-muted/70">Coverage</span>
-              <strong className="text-text text-sm">{report.coverage.percentage}%</strong>
+              <span className="block text-[11px] uppercase tracking-wider text-muted/70">
+                {currentStackReport ? "Stack Status" : "Coverage"}
+              </span>
+              <strong className="text-text text-sm">
+                {currentStackReport ? "Active Audit" : `${report.coverage.percentage}%`}
+              </strong>
             </div>
             <div>
-              <span className="block text-[11px] uppercase tracking-wider text-muted/70">Observed Signals</span>
-              <strong className="text-text text-sm">{report.coverage.observed}/{report.coverage.possible}</strong>
+              <span className="block text-[11px] uppercase tracking-wider text-muted/70">
+                {currentStackReport ? "Checks Total" : "Observed Signals"}
+              </span>
+              <strong className="text-text text-sm">
+                {currentStackReport
+                  ? `${currentStackReport.checks.length} checks`
+                  : `${report.coverage.observed}/${report.coverage.possible}`}
+              </strong>
             </div>
             <div>
               <span className="block text-[11px] uppercase tracking-wider text-muted/70">Schema</span>
@@ -169,8 +202,72 @@ export default function PublicReportView({
           </div>
         </section>
 
-        {/* Signature Feature: Next Useful Move */}
-        {report.nextUsefulMove && (
+        {/* Stack Next Useful Move (when in stack mode) */}
+        {currentStackReport && currentStackReport.nextUsefulMove && (
+          <section
+            aria-labelledby="stack-next-move-heading"
+            className="rounded-2xl border-2 border-accent/40 bg-surface/90 p-6 sm:p-8 shadow-xl relative overflow-hidden"
+          >
+            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-accent font-semibold mb-2">
+              <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+              Recommended {currentStackReport.stackName} Next Move
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 id="stack-next-move-heading" className="font-mono text-xl sm:text-2xl font-bold text-text">
+                  {currentStackReport.nextUsefulMove.title}
+                </h2>
+                <span className="rounded bg-accent/15 px-3 py-1 font-mono text-xs font-semibold text-accent border border-accent/30">
+                  Effort: {currentStackReport.nextUsefulMove.effort}
+                </span>
+              </div>
+
+              <p className="font-sans text-sm text-text/90 leading-relaxed max-w-3xl">
+                {currentStackReport.nextUsefulMove.whyItMatters}
+              </p>
+
+              {currentStackReport.nextUsefulMove.acceptanceCriteria.length > 0 && (
+                <div>
+                  <h3 className="font-mono text-xs uppercase tracking-wider text-muted mb-2">
+                    Acceptance Criteria
+                  </h3>
+                  <ul className="space-y-1.5 font-sans text-xs text-muted">
+                    {currentStackReport.nextUsefulMove.acceptanceCriteria.map((criterion: string) => (
+                      <li key={criterion} className="flex items-start gap-2">
+                        <span className="text-accent" aria-hidden="true">✓</span>
+                        <span>{criterion}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {currentStackReport.nextUsefulMove?.remediation && (
+                <div className="mt-4 border-t border-muted/15 pt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs text-muted">
+                      Target File: <code className="text-accent font-semibold">{currentStackReport.nextUsefulMove.remediation.targetPath}</code>
+                    </span>
+                    <button
+                      onClick={() => copyToClipboard(currentStackReport.nextUsefulMove?.remediation?.codeSnippet || "", setCliCopied)}
+                      type="button"
+                      className="inline-flex items-center gap-1 rounded bg-accent/15 px-2.5 py-1 font-mono text-[11px] font-semibold text-accent border border-accent/30 hover:bg-accent/25 transition"
+                    >
+                      {cliCopied ? "✓ Copied" : "Copy Solution Code"}
+                    </button>
+                  </div>
+                  <pre className="overflow-x-auto rounded-lg border border-muted/20 bg-base p-3 font-mono text-xs text-text/90 leading-relaxed">
+                    <code>{currentStackReport.nextUsefulMove.remediation.codeSnippet}</code>
+                  </pre>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Core Signature Feature: Next Useful Move (when in core mode) */}
+        {!currentStackReport && report.nextUsefulMove && (
           <section
             aria-labelledby="next-move-heading"
             className="rounded-2xl border-2 border-accent/40 bg-surface/90 p-6 sm:p-8 shadow-xl relative overflow-hidden"
@@ -237,11 +334,15 @@ export default function PublicReportView({
           </section>
         )}
 
-        {/* Evidence Breakdown Panel */}
-        <EvidencePanel
-          checks={report.checks}
-          onReportIncorrectSignal={(check) => setReportingCheck(check)}
-        />
+        {/* Evidence Breakdown: Stack or Core */}
+        {currentStackReport ? (
+          <StackEvidencePanel report={currentStackReport} />
+        ) : (
+          <EvidencePanel
+            checks={report.checks}
+            onReportIncorrectSignal={(check) => setReportingCheck(check)}
+          />
+        )}
 
         {/* Maintainer Improvement History Timeline */}
         <ImprovementTimeline repo={repo} events={timeline} />

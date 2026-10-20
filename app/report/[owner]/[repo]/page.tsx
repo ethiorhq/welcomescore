@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { scoreRepo, ScoreRepoError } from "@/lib/scoreRepo";
 import { createReportFromAudit } from "@/lib/report/schema";
+import { getGitHubStackEvaluation } from "@/lib/stacks/github";
 import { pageMetadata } from "@/lib/seo";
 import { getRepoTimeline, recordImprovementEvent } from "@/lib/improvement/timeline";
 import { calculateImprovementFromPreviousEvent } from "@/lib/improvement/diff";
@@ -30,8 +31,14 @@ export default async function PublicReportPage({
 }) {
   let report;
   try {
-    const scoreResult = await scoreRepo(params.owner, params.repo);
-    report = createReportFromAudit(scoreResult);
+    const [scoreResult, stackEval] = await Promise.all([
+      scoreRepo(params.owner, params.repo),
+      getGitHubStackEvaluation(params.owner, params.repo),
+    ]);
+    report = createReportFromAudit(scoreResult, {
+      detectedStacks: stackEval.detectedStacks,
+      stackReports: stackEval.stackReports,
+    });
   } catch (error) {
     if (error instanceof ScoreRepoError && error.code === "not-found") {
       notFound();

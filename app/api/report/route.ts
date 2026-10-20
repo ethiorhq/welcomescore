@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseRepository, scoreRepo, ScoreRepoError } from "@/lib/scoreRepo";
 import { createReportFromAudit } from "@/lib/report/schema";
+import { getGitHubStackEvaluation } from "@/lib/stacks/github";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,9 +26,16 @@ export async function GET(request: NextRequest) {
   const fresh = request.nextUrl.searchParams.get("fresh") === "true";
 
   try {
-    const scoreResult = await scoreRepo(parsed.owner, parsed.repo, { fresh });
+    const [scoreResult, stackEval] = await Promise.all([
+      scoreRepo(parsed.owner, parsed.repo, { fresh }),
+      getGitHubStackEvaluation(parsed.owner, parsed.repo),
+    ]);
     const siteUrl = request.nextUrl.origin;
-    const report = createReportFromAudit(scoreResult, { siteBaseUrl: siteUrl });
+    const report = createReportFromAudit(scoreResult, {
+      siteBaseUrl: siteUrl,
+      detectedStacks: stackEval.detectedStacks,
+      stackReports: stackEval.stackReports,
+    });
 
     return NextResponse.json(
       {
