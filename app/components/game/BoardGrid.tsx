@@ -8,14 +8,18 @@ import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
 interface BoardGridProps {
   tiles: BoardTile[];
   playerPosition: number;
+  computerPosition: number;
   isMoving?: boolean;
+  movingPlayer?: "player" | "computer" | null;
   onTileClick?: (tile: BoardTile) => void;
 }
 
 export default function BoardGrid({
   tiles,
   playerPosition,
+  computerPosition,
   isMoving = false,
+  movingPlayer = null,
   onTileClick,
 }: BoardGridProps) {
   // Build the 6x6 serpentine 2D array
@@ -54,6 +58,7 @@ export default function BoardGrid({
           <div key={`row-${rowIndex}`} className="grid grid-cols-6 gap-2 sm:gap-2.5">
             {row.map((tile) => {
               const isPlayerHere = playerPosition === tile.id;
+              const isComputerHere = computerPosition === tile.id;
               const isLadder = tile.type === "ladder";
               const isSnake = tile.type === "snake";
               const isFinish = tile.type === "finish";
@@ -80,8 +85,8 @@ export default function BoardGrid({
                   key={tile.id}
                   onClick={() => onTileClick?.(tile)}
                   className={`group relative flex flex-col justify-between rounded-lg border p-1.5 sm:p-2.5 text-left transition-all duration-200 cursor-pointer select-none min-h-[64px] sm:min-h-[84px] md:min-h-[96px] ${tileTheme} ${
-                    isPlayerHere ? "ring-2 ring-accent ring-offset-2 ring-offset-[#0e1019]" : ""
-                  }`}
+                    isPlayerHere ? "ring-2 ring-accent ring-offset-1 ring-offset-[#0e1019]" : ""
+                  } ${isComputerHere ? "ring-2 ring-purple-500 ring-offset-1 ring-offset-[#0e1019]" : ""}`}
                 >
                   {/* Top Bar: Tile # and Special Badge */}
                   <div className="flex items-center justify-between w-full">
@@ -132,35 +137,60 @@ export default function BoardGrid({
                     )}
                   </div>
 
-                  {/* ALGOFOX PLAYER TOKEN OVERLAY */}
-                  {isPlayerHere && (
-                    <motion.div
-                      layoutId="player-pawn"
-                      transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                      className="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-lg bg-accent/25 backdrop-blur-[2px] shadow-[0_0_15px_#E8A23D]"
-                    >
-                      <motion.div
-                        animate={
-                          isMoving
-                            ? { y: [-8, 0], scale: [1.1, 0.95, 1] }
-                            : { y: [0, -3, 0] }
-                        }
-                        transition={{
-                          repeat: Infinity,
-                          duration: isMoving ? 0.25 : 1.5,
-                          ease: "easeInOut",
-                        }}
-                        className="flex flex-col items-center"
-                      >
-                        <AlgofoxSprite
-                          state={isMoving ? "running" : "idle"}
-                          size={36}
-                        />
-                        <span className="rounded-full bg-accent px-1.5 py-0.2 text-[8px] sm:text-[9px] font-mono font-bold text-base shadow">
-                          YOU
-                        </span>
-                      </motion.div>
-                    </motion.div>
+                  {/* PLAYER & COMPUTER TOKENS OVERLAY */}
+                  {(isPlayerHere || isComputerHere) && (
+                    <div className="absolute inset-0 z-30 flex items-center justify-center gap-1.5 p-1 rounded-lg bg-black/45 backdrop-blur-[1px]">
+                      {isPlayerHere && (
+                        <motion.div
+                          animate={
+                            isMoving && movingPlayer === "player"
+                              ? { y: [-6, 0], scale: [1.15, 0.95, 1] }
+                              : { y: [0, -2, 0] }
+                          }
+                          transition={{
+                            repeat: Infinity,
+                            duration: isMoving && movingPlayer === "player" ? 0.2 : 1.6,
+                            ease: "easeInOut",
+                          }}
+                          className="flex flex-col items-center"
+                          title="Algofox (You)"
+                        >
+                          <div className="rounded-full bg-accent/25 p-0.5 shadow-[0_0_10px_#E8A23D]">
+                            <AlgofoxSprite
+                              state={isMoving && movingPlayer === "player" ? "running" : "idle"}
+                              size={isComputerHere ? 24 : 32}
+                            />
+                          </div>
+                          <span className="rounded bg-accent px-1 py-0.2 text-[7px] sm:text-[8px] font-mono font-bold text-base shadow">
+                            YOU
+                          </span>
+                        </motion.div>
+                      )}
+
+                      {isComputerHere && (
+                        <motion.div
+                          animate={
+                            isMoving && movingPlayer === "computer"
+                              ? { y: [-6, 0], scale: [1.15, 0.95, 1] }
+                              : { y: [0, -2, 0] }
+                          }
+                          transition={{
+                            repeat: Infinity,
+                            duration: isMoving && movingPlayer === "computer" ? 0.2 : 1.6,
+                            ease: "easeInOut",
+                          }}
+                          className="flex flex-col items-center"
+                          title="OctoBot AI (Computer Rival)"
+                        >
+                          <div className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border border-purple-400 bg-purple-900/80 text-xs sm:text-sm shadow-[0_0_10px_#A855F7]">
+                            🐙
+                          </div>
+                          <span className="rounded bg-purple-600 px-1 py-0.2 text-[7px] sm:text-[8px] font-mono font-bold text-white shadow">
+                            BOT
+                          </span>
+                        </motion.div>
+                      )}
+                    </div>
                   )}
                 </div>
               );

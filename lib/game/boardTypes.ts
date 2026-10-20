@@ -24,6 +24,8 @@ export type BoardTile = {
 };
 
 export type PlayerStats = {
+  name: string;
+  avatar: string;
   position: number; // 1 to 36
   stars: number;
   coffee: number;
@@ -38,15 +40,20 @@ export type LogEntry = {
   text: string;
   icon: string;
   badge?: string;
+  playerType?: "player" | "computer";
 };
 
 export type BoardGameState = {
   player: PlayerStats;
+  computer: PlayerStats;
+  currentTurn: "player" | "computer";
   isRolling: boolean;
   lastRoll: number | null;
   isMoving: boolean;
   activeTileEvent: BoardTile | null;
   gameStatus: "playing" | "won" | "event";
+  winner: "player" | "computer" | null;
   historyLog: LogEntry[];
   doubleRollActive: boolean;
+  computerDoubleBoost: boolean;
 };

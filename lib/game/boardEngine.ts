@@ -7,6 +7,19 @@ import type {
 import { BOARD_TILES } from "./boardData";
 
 export const INITIAL_PLAYER_STATS: PlayerStats = {
+  name: "Algofox",
+  avatar: "🦊",
+  position: 1,
+  stars: 100,
+  coffee: 2,
+  capital: 100000,
+  turn: 1,
+  bugsSquashed: 0,
+};
+
+export const INITIAL_COMPUTER_STATS: PlayerStats = {
+  name: "OctoBot AI",
+  avatar: "🐙",
   position: 1,
   stars: 100,
   coffee: 2,
@@ -23,20 +36,24 @@ export function createInitialBoardState(): BoardGameState {
   const initialLog: LogEntry = {
     id: "init-0",
     turn: 1,
-    text: "Game initialized at 'git init'. Roll the dice to begin your journey to IPO!",
+    text: "Game initialized! Algofox 🦊 vs OctoBot AI 🐙 in the race to $10B IPO Unicorn!",
     icon: "🌱",
     badge: "START",
   };
 
   return {
     player: { ...INITIAL_PLAYER_STATS },
+    computer: { ...INITIAL_COMPUTER_STATS },
+    currentTurn: "player",
     isRolling: false,
     lastRoll: null,
     isMoving: false,
     activeTileEvent: null,
     gameStatus: "playing",
+    winner: null,
     historyLog: [initialLog],
     doubleRollActive: false,
+    computerDoubleBoost: false,
   };
 }
 
@@ -56,14 +73,18 @@ export type MoveCalculationResult = {
   isVictory: boolean;
 };
 
-export function calculateMove(
+export function calculatePlayerMove(
   currentState: BoardGameState,
+  target: "player" | "computer",
   forcedRoll?: number,
 ): MoveCalculationResult {
-  const baseRoll = forcedRoll !== undefined ? forcedRoll : rollDiceValue();
-  const effectiveRoll = currentState.doubleRollActive ? baseRoll * 2 : baseRoll;
+  const targetPlayer = target === "player" ? currentState.player : currentState.computer;
+  const isBoosted = target === "player" ? currentState.doubleRollActive : currentState.computerDoubleBoost;
 
-  const currentPos = currentState.player.position;
+  const baseRoll = forcedRoll !== undefined ? forcedRoll : rollDiceValue();
+  const effectiveRoll = isBoosted ? baseRoll * 2 : baseRoll;
+
+  const currentPos = targetPlayer.position;
   const targetPos = Math.min(36, currentPos + effectiveRoll);
 
   // Generate intermediate tiles for hopping animation
@@ -93,52 +114,58 @@ export function calculateMove(
   const bugsGained = isSnake ? 1 : 0;
 
   const nextPlayer: PlayerStats = {
+    ...targetPlayer,
     position: finalTile.id,
-    stars: Math.max(0, currentState.player.stars + starsGained),
-    coffee: Math.max(0, currentState.player.coffee + coffeeGained),
-    capital: Math.max(0, currentState.player.capital + capitalGained),
-    turn: currentState.player.turn + 1,
-    bugsSquashed: currentState.player.bugsSquashed + bugsGained,
+    stars: Math.max(0, targetPlayer.stars + starsGained),
+    coffee: Math.max(0, targetPlayer.coffee + coffeeGained),
+    capital: Math.max(0, targetPlayer.capital + capitalGained),
+    turn: targetPlayer.turn + 1,
+    bugsSquashed: targetPlayer.bugsSquashed + bugsGained,
   };
 
   const newLogs: LogEntry[] = [];
+  const tag = target === "player" ? "Algofox 🦊" : "OctoBot 🐙";
 
   // Log 1: Roll result
   newLogs.push({
-    id: `roll-${currentState.player.turn}-${Date.now()}`,
-    turn: currentState.player.turn,
-    text: `Rolled a ${baseRoll}${currentState.doubleRollActive ? " (x2 Boost = " + effectiveRoll + ")" : ""} ➔ Advanced to [Tile ${targetPos}] ${landedTile.name}`,
-    icon: "🎲",
-    badge: `ROLL ${baseRoll}`,
+    id: `roll-${target}-${targetPlayer.turn}-${Date.now()}`,
+    turn: targetPlayer.turn,
+    text: `[${tag}] Rolled a ${baseRoll}${isBoosted ? " (x2 Boost = " + effectiveRoll + ")" : ""} ➔ Advanced to [Tile ${targetPos}] ${landedTile.name}`,
+    icon: target === "player" ? "🎲" : "🤖",
+    badge: `${tag.toUpperCase()} ROLL ${baseRoll}`,
+    playerType: target,
   });
 
   // Log 2: Special event (ladder / snake / finish)
   if (isLadder && landedTile.targetTile) {
     newLogs.push({
-      id: `ladder-${currentState.player.turn}-${Date.now()}`,
-      turn: currentState.player.turn,
-      text: `🚀 ROCKET BOOST! ${landedTile.flavorQuote} ➔ Zoomed to [Tile ${landedTile.targetTile}]!`,
+      id: `ladder-${target}-${targetPlayer.turn}-${Date.now()}`,
+      turn: targetPlayer.turn,
+      text: `🚀 [${tag}] ROCKET BOOST! Zoomed ahead to [Tile ${landedTile.targetTile}]!`,
       icon: "🚀",
       badge: "LADDER",
+      playerType: target,
     });
   } else if (isSnake && landedTile.targetTile) {
     newLogs.push({
-      id: `snake-${currentState.player.turn}-${Date.now()}`,
-      turn: currentState.player.turn,
-      text: `🐛 CRITICAL BUG! ${landedTile.flavorQuote} ➔ Slithered back to [Tile ${landedTile.targetTile}]!`,
+      id: `snake-${target}-${targetPlayer.turn}-${Date.now()}`,
+      turn: targetPlayer.turn,
+      text: `🐛 [${tag}] CRITICAL BUG! Slithered back to [Tile ${landedTile.targetTile}]!`,
       icon: "🐍",
       badge: "SNAKE",
+      playerType: target,
     });
   }
 
   const isVictory = finalTile.id === 36;
   if (isVictory) {
     newLogs.push({
-      id: `win-${currentState.player.turn}-${Date.now()}`,
-      turn: currentState.player.turn,
-      text: `🏆 UNICORN STATUS REACHED! Nasdaq ringing bell at $10B IPO valuation!`,
+      id: `win-${target}-${targetPlayer.turn}-${Date.now()}`,
+      turn: targetPlayer.turn,
+      text: `🏆 [${tag}] UNICORN REACHED! First to ring the Nasdaq bell at $10B IPO!`,
       icon: "🦄",
       badge: "VICTORY",
+      playerType: target,
     });
   }
 
@@ -155,43 +182,117 @@ export function calculateMove(
   };
 }
 
-export function activateCoffeeBoost(state: BoardGameState): BoardGameState {
-  if (state.player.coffee <= 0 || state.doubleRollActive) return state;
+// Backwards-compatible calculateMove for player
+export function calculateMove(
+  currentState: BoardGameState,
+  forcedRoll?: number,
+): MoveCalculationResult {
+  return calculatePlayerMove(currentState, "player", forcedRoll);
+}
 
-  const boostLog: LogEntry = {
-    id: `boost-${Date.now()}`,
-    turn: state.player.turn,
-    text: "☕ Espresso Boost Activated! Next dice roll movement will be DOUBLED (2x)!",
-    icon: "⚡",
-    badge: "2x BOOST",
-  };
+// AI decision logic: should OctoBot spend an espresso cup?
+export function shouldComputerUseBoost(
+  computerStats: PlayerStats,
+  playerStats: PlayerStats,
+): boolean {
+  if (computerStats.coffee <= 0) return false;
 
-  return {
-    ...state,
-    player: {
-      ...state.player,
-      coffee: state.player.coffee - 1,
-    },
-    doubleRollActive: true,
-    historyLog: [boostLog, ...state.historyLog],
-  };
+  // If close to IPO finish line (within 12 tiles)
+  if (computerStats.position >= 24) return true;
+
+  // If falling behind user by 4 or more tiles
+  if (playerStats.position - computerStats.position >= 4) return true;
+
+  // If a ladder is within reach of 2x roll (tile 4, 14, 24)
+  const distToLadder4 = 4 - computerStats.position;
+  const distToLadder14 = 14 - computerStats.position;
+  const distToLadder24 = 24 - computerStats.position;
+
+  if (
+    (distToLadder4 > 0 && distToLadder4 <= 12) ||
+    (distToLadder14 > 0 && distToLadder14 <= 12) ||
+    (distToLadder24 > 0 && distToLadder24 <= 12)
+  ) {
+    return Math.random() > 0.4;
+  }
+
+  return false;
+}
+
+export function activateCoffeeBoost(
+  state: BoardGameState,
+  target: "player" | "computer" = "player",
+): BoardGameState {
+  if (target === "player") {
+    if (state.player.coffee <= 0 || state.doubleRollActive) return state;
+
+    const boostLog: LogEntry = {
+      id: `boost-p-${Date.now()}`,
+      turn: state.player.turn,
+      text: "☕ Algofox Espresso Boost Activated! Next roll will be DOUBLED (2x)!",
+      icon: "⚡",
+      badge: "2x BOOST",
+      playerType: "player",
+    };
+
+    return {
+      ...state,
+      player: {
+        ...state.player,
+        coffee: state.player.coffee - 1,
+      },
+      doubleRollActive: true,
+      historyLog: [boostLog, ...state.historyLog],
+    };
+  } else {
+    if (state.computer.coffee <= 0 || state.computerDoubleBoost) return state;
+
+    const boostLog: LogEntry = {
+      id: `boost-c-${Date.now()}`,
+      turn: state.computer.turn,
+      text: "🤖 OctoBot AI activated Overclocked Espresso! Next roll DOUBLED (2x)!",
+      icon: "⚡",
+      badge: "OCTOBOT 2x",
+      playerType: "computer",
+    };
+
+    return {
+      ...state,
+      computer: {
+        ...state.computer,
+        coffee: state.computer.coffee - 1,
+      },
+      computerDoubleBoost: true,
+      historyLog: [boostLog, ...state.historyLog],
+    };
+  }
 }
 
 export function formatBoardVictoryReceipt(state: BoardGameState): string {
+  const isPlayerWinner = state.winner === "player";
+  const winnerTitle = isPlayerWinner
+    ? "VICTORY: ALGOFOX REACHED IPO!"
+    : "DEFEAT: OCTOBOT AI REACHED IPO FIRST!";
+
   return [
     "=========================================",
     "       ALGOFOX: SPRINT QUEST (IPO)       ",
-    "         THE UNICORN BOARD GAME          ",
+    "        1v1 STARTUP FOUNDER RACE         ",
     "=========================================",
-    `Valuation:       $10,000,000,000 (IPO UNICORN)`,
-    `Turns to IPO:    ${state.player.turn} Turns`,
-    `GitHub Stars:    ⭐ ${state.player.stars.toLocaleString()}`,
-    `Venture Capital: 💰 $${state.player.capital.toLocaleString()}`,
-    `Bugs Survived:   🐛 ${state.player.bugsSquashed}`,
+    `Outcome:         ${winnerTitle}`,
+    `Algofox Tile:    Tile ${state.player.position} of 36`,
+    `OctoBot Tile:    Tile ${state.computer.position} of 36`,
     "-----------------------------------------",
-    `Status:          LEGENDARY TECH FOUNDER`,
-    `Verdict:         Algofox approves this unicorn build! 🦊🚀`,
+    `Algofox Stars:   ⭐ ${state.player.stars.toLocaleString()}`,
+    `Algofox Capital: 💰 $${state.player.capital.toLocaleString()}`,
+    `Turns Elapsed:   ${state.player.turn} Turns`,
+    "-----------------------------------------",
+    `Verdict:         ${
+      isPlayerWinner
+        ? "You outmaneuvered the AI bot to IPO! 🦊🚀"
+        : "OctoBot AI IPO'd first! Time for a rematch! 🐙⚡"
+    }`,
     "=========================================",
-    "Play the Dev Board Game on https://welcomescore.vercel.app",
+    "Play 1v1 on https://welcomescore.vercel.app",
   ].join("\n");
 }
