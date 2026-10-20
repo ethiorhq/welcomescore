@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { GUIDES, guideBySlug } from "@/lib/guides";
 import { pageMetadata } from "@/lib/seo";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
+import GitHubStarBadge from "@/app/components/GitHubStarBadge";
 
 type GuidePageProps = {
   params: {
@@ -101,17 +102,20 @@ export default function GuidePage({ params }: GuidePageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }} />
 
-      <nav aria-label="Breadcrumb" className="font-mono text-xs text-muted">
-        <Link className="text-link underline underline-offset-4" href="/">
-          WelcomeScore
-        </Link>
-        <span aria-hidden="true"> / </span>
-        <Link className="text-link underline underline-offset-4" href="/guides">
-          Developer guides
-        </Link>
-        <span aria-hidden="true"> / </span>
-        <span className="text-text">{guide.category}</span>
-      </nav>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <nav aria-label="Breadcrumb" className="font-mono text-xs text-muted">
+          <Link className="text-link underline underline-offset-4" href="/">
+            WelcomeScore
+          </Link>
+          <span aria-hidden="true"> / </span>
+          <Link className="text-link underline underline-offset-4" href="/guides">
+            Developer guides
+          </Link>
+          <span aria-hidden="true"> / </span>
+          <span className="text-text">{guide.category}</span>
+        </nav>
+        <GitHubStarBadge />
+      </div>
 
       <article className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-14">
         <div className="max-w-3xl">

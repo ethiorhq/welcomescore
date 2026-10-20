@@ -13,6 +13,7 @@ import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import StackSelector from "@/app/components/report/StackSelector";
 import StackEvidencePanel from "@/app/components/report/StackEvidencePanel";
 import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
+import GitHubStarBadge from "@/app/components/GitHubStarBadge";
 import type { StackReport } from "@/lib/stacks/types";
 
 export default function PublicReportView({
@@ -92,15 +93,19 @@ export default function PublicReportView({
             <WelcomeScoreWordmark />
           </Link>
 
-          <nav aria-label="Breadcrumb navigation" className="flex items-center gap-3 font-mono text-xs text-muted">
-            <Link href="/" className="hover:text-text transition">
-              ← Audits
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-text font-medium truncate max-w-[200px] sm:max-w-none">
-              {repo}
-            </span>
-          </nav>
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            <nav aria-label="Breadcrumb navigation" className="hidden sm:flex items-center gap-2 font-mono text-xs text-muted">
+              <Link href="/" className="hover:text-text transition">
+                ← Audits
+              </Link>
+              <span aria-hidden="true" className="text-muted/40">/</span>
+              <span className="text-text font-medium truncate max-w-[140px] md:max-w-[220px]">
+                {repo}
+              </span>
+            </nav>
+            <div className="hidden sm:block h-4 w-px bg-muted/20" aria-hidden="true" />
+            <GitHubStarBadge />
+          </div>
         </div>
       </header>
 

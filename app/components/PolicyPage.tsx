@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import GitHubStarBadge from "@/app/components/GitHubStarBadge";
 
 export type PolicySection = {
   id: string;
@@ -50,18 +51,23 @@ export default function PolicyPage({
         </aside>
 
         <article className="min-w-0">
-          <header className="border-b border-muted/20 pb-7">
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-              {eyebrow}
-            </p>
-            <h1 className="mt-3 font-mono text-3xl font-bold tracking-tight text-text sm:text-5xl">
-              {title}
-            </h1>
-            <p className="mt-4 max-w-3xl font-sans text-base leading-7 text-muted sm:text-lg">
-              {description}
-            </p>
-            <div className="mt-6 inline-flex rounded-md border border-muted/30 bg-surface/70 px-3 py-2 font-mono text-xs text-muted">
-              Effective and last updated: {effectiveDate}
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-muted/20 pb-7">
+            <div>
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                {eyebrow}
+              </p>
+              <h1 className="mt-3 font-mono text-3xl font-bold tracking-tight text-text sm:text-5xl">
+                {title}
+              </h1>
+              <p className="mt-4 max-w-3xl font-sans text-base leading-7 text-muted sm:text-lg">
+                {description}
+              </p>
+              <div className="mt-6 inline-flex rounded-md border border-muted/30 bg-surface/70 px-3 py-2 font-mono text-xs text-muted">
+                Effective and last updated: {effectiveDate}
+              </div>
+            </div>
+            <div className="shrink-0 self-start">
+              <GitHubStarBadge />
             </div>
           </header>
 

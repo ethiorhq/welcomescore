@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import BackButton from "@/app/components/BackButton";
 import LoungeTurnstile from "@/app/components/LoungeTurnstile";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import GitHubStarBadge from "@/app/components/GitHubStarBadge";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
@@ -387,11 +388,12 @@ function DevLoungeContent() {
               A temporary space for practical contributor questions, small wins, and public audit context. Messages disappear after 24 hours.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <BackButton />
             <Link href="/" className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15">
               Check a repository
             </Link>
+            <GitHubStarBadge />
           </div>
         </header>
 

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import GitHubStarBadge from "@/app/components/GitHubStarBadge";
 import { getJsHealthRemediation } from "@/lib/jsHealth/remediation";
 import type { JsHealthCategory, JsHealthCheck, JsHealthReport } from "@/lib/jsHealth/types";
 
@@ -77,9 +78,12 @@ export default function JsHealthDashboard() {
               JavaScript Health is a read-only audit for package metadata, Node tooling, CI evidence, and contributor foundations.
             </p>
           </div>
-          <div className="rounded-md border border-accent/25 bg-surface/70 px-4 py-3 font-mono text-xs text-muted shadow-[0_0_35px_rgba(232,162,61,0.05)]">
-            <p className="text-accent">npx @ethiorhq/welcomescore</p>
-            <p className="mt-1">Local CLI · no source upload</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="rounded-md border border-accent/25 bg-surface/70 px-4 py-3 font-mono text-xs text-muted shadow-[0_0_35px_rgba(232,162,61,0.05)]">
+              <p className="text-accent">npx @ethiorhq/welcomescore</p>
+              <p className="mt-1">Local CLI · no source upload</p>
+            </div>
+            <GitHubStarBadge />
           </div>
         </header>
 

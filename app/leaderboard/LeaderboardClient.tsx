@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import BackButton from "@/app/components/BackButton";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import GitHubStarBadge from "@/app/components/GitHubStarBadge";
 
 type EvaluationFreshness = "fresh" | "stale" | "expired";
 
@@ -88,7 +89,7 @@ export default function LeaderboardClient() {
               Rankings are earned through real contributor-health audits and added by a visitor only after qualification.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <BackButton />
             <Link
               href="/"
@@ -102,6 +103,7 @@ export default function LeaderboardClient() {
             >
               Dev Lounge
             </Link>
+            <GitHubStarBadge />
           </div>
         </header>
 

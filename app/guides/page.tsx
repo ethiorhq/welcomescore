@@ -3,6 +3,7 @@ import Link from "next/link";
 import { GUIDES } from "@/lib/guides";
 import { pageMetadata } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site";
+import GitHubStarBadge from "@/app/components/GitHubStarBadge";
 
 export const metadata: Metadata = {
   ...pageMetadata({
@@ -24,15 +25,20 @@ export const metadata: Metadata = {
 export default function GuidesPage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-8 pt-12 sm:px-6 sm:pt-16">
-      <section className="max-w-3xl">
-        <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-accent">Developer guides</p>
-        <h1 className="mt-4 font-sans text-4xl font-semibold tracking-tight text-text sm:text-5xl">
-          Better first contributions start with clearer paths.
-        </h1>
-        <p className="mt-5 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-          Practical, evidence-led writing for contributors and maintainers who want to make public repositories easier to understand, safer to join, and more useful to improve.
-        </p>
-      </section>
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <section className="max-w-3xl">
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-accent">Developer guides</p>
+          <h1 className="mt-4 font-sans text-4xl font-semibold tracking-tight text-text sm:text-5xl">
+            Better first contributions start with clearer paths.
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-muted sm:text-lg">
+            Practical, evidence-led writing for contributors and maintainers who want to make public repositories easier to understand, safer to join, and more useful to improve.
+          </p>
+        </section>
+        <div className="shrink-0 self-start">
+          <GitHubStarBadge />
+        </div>
+      </div>
 
       <section aria-label="Published WelcomeScore guides" className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {GUIDES.map((guide) => (

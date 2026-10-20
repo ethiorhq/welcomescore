@@ -7,6 +7,7 @@ import InstallAppButton from "@/app/components/InstallAppButton";
 import ScoreCard from "@/app/components/ScoreCard";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
+import GitHubStarBadge from "@/app/components/GitHubStarBadge";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import type { ScoreResult } from "@/lib/scoreRepo";
@@ -100,7 +101,10 @@ export default function AuditHome({
   }, [initialRepository, runCheck]);
 
   return (
-    <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-20">
+    <main className="relative flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-20">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-8 z-30">
+        <GitHubStarBadge />
+      </div>
       {initialRepository ? (
         <div className="mx-auto w-full max-w-3xl">
           <BackButton />
