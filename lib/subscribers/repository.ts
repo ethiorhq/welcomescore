@@ -99,12 +99,40 @@ export async function subscribeEmail(
         };
       }
 
+      // Check if table migration is pending in Supabase (relation doesn't exist)
+      if (
+        response.status === 404 ||
+        errorBody.includes("PGRST205") ||
+        errorBody.toLowerCase().includes("does not exist") ||
+        errorBody.toLowerCase().includes("could not find the table")
+      ) {
+        console.warn(
+          "[WelcomeScore Subscribers] Table 'subscribers' is pending migration in Supabase. Storing in memory fallback. Please run supabase/migrations/20261020_subscribers.sql in your Supabase SQL Editor.",
+        );
+        const isExisting = memorySubscribers.has(email);
+        if (!isExisting) {
+          memorySubscribers.set(email, {
+            id: randomUUID(),
+            email,
+            source,
+            createdAt: new Date().toISOString(),
+          });
+        }
+        return {
+          success: true,
+          message: "You're on the list! Thank you for supporting WelcomeScore.",
+          isExisting,
+        };
+      }
+
+      console.error("[WelcomeScore Subscribers] Supabase error:", response.status, errorBody);
       return {
         success: false,
         error: "Subscription service encountered an error. Please try again shortly.",
         code: "SUPABASE_ERROR",
       };
-    } catch {
+    } catch (err) {
+      console.error("[WelcomeScore Subscribers] Fetch error:", err);
       // Network or unexpected issue connecting to Supabase: fall back to memory
     }
   }
