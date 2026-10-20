@@ -128,7 +128,7 @@ export async function subscribeEmail(
       console.error("[WelcomeScore Subscribers] Supabase error:", response.status, errorBody);
       return {
         success: false,
-        error: "Subscription service encountered an error. Please try again shortly.",
+        error: `Subscription service encountered an error (${response.status}: ${errorBody.slice(0, 150)}). Please try again shortly.`,
         code: "SUPABASE_ERROR",
       };
     } catch (err) {
