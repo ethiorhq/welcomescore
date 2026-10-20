@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   DEFAULT_GITHUB_REPO_NAME,
   DEFAULT_GITHUB_REPO_OWNER,
   getGitHubRepoUrl,
-  getShieldsStarBadgeUrl,
 } from "@/lib/githubBadge";
 
 export interface GitHubStarBadgeProps {
@@ -22,10 +21,31 @@ export default function GitHubStarBadge({
   className = "",
 }: GitHubStarBadgeProps) {
   const repoUrl = getGitHubRepoUrl(repoOwner, repoName);
-  const shieldsBadgeUrl = getShieldsStarBadgeUrl(repoOwner, repoName);
+  const [stars, setStars] = useState<number | null>(2);
+
+  // Fetch real-time star count from GitHub API with graceful fallback
+  useEffect(() => {
+    let isMounted = true;
+    fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
+      headers: { Accept: "application/vnd.github.v3+json" },
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (isMounted && data && typeof data.stargazers_count === "number") {
+          setStars(data.stargazers_count);
+        }
+      })
+      .catch(() => {
+        // Safe offline fallback
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [repoOwner, repoName]);
 
   const containerClasses = floating
-    ? "fixed top-3 right-3 sm:top-5 sm:right-6 z-40 animate-in fade-in slide-in-from-top-2 duration-300"
+    ? "fixed top-4 right-4 sm:top-6 sm:right-8 z-40 animate-in fade-in slide-in-from-top-2 duration-300"
     : "inline-flex items-center";
 
   return (
@@ -36,17 +56,17 @@ export default function GitHubStarBadge({
         rel="noopener noreferrer"
         aria-label={`Star ${repoOwner}/${repoName} on GitHub`}
         title={`Give ${repoOwner}/${repoName} a star on GitHub`}
-        className={`group relative inline-flex items-center gap-2 sm:gap-2.5 rounded-full border border-blue-500/30 bg-[#17181C]/90 px-3 py-1.5 sm:px-3.5 sm:py-1.5 text-xs font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-blue-500/80 hover:bg-[#22242B] shadow-[0_0_12px_rgba(59,130,246,0.2)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${className}`}
+        className={`group relative inline-flex items-center gap-2 rounded-md border border-muted/35 bg-surface/90 px-3 py-1.5 font-mono text-xs font-medium text-text backdrop-blur-md transition-all duration-200 hover:border-accent/50 hover:bg-surface hover:text-accent shadow-[0_0_15px_rgba(232,162,61,0.08)] hover:shadow-[0_0_20px_rgba(232,162,61,0.22)] active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-accent ${className}`}
       >
-        {/* Animated Glowing Pulse */}
+        {/* Animated Glowing Accent Pulse */}
         <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75"></span>
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-accent"></span>
         </span>
 
-        {/* Gold Star Icon with hover rotate & scale */}
+        {/* WelcomeScore Amber Star Icon with hover rotate & scale */}
         <svg
-          className="h-3.5 w-3.5 shrink-0 text-yellow-400 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-125"
+          className="h-3.5 w-3.5 shrink-0 text-accent transition-transform duration-300 group-hover:rotate-12 group-hover:scale-125"
           fill="currentColor"
           viewBox="0 0 24 24"
           aria-hidden="true"
@@ -54,23 +74,14 @@ export default function GitHubStarBadge({
           <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.784 1.399 8.166L12 18.896l-7.333 3.864 1.399-8.166L.133 9.21l8.2-1.192z" />
         </svg>
 
-        {/* Call to action label */}
-        <span className="hidden xs:inline font-sans font-medium text-gray-200 transition-colors group-hover:text-white">
-          Star on GitHub
-        </span>
-        <span className="inline xs:hidden font-sans font-medium text-gray-200 transition-colors group-hover:text-white">
-          Star
+        {/* CTA Label in WelcomeScore font-mono */}
+        <span className="font-mono text-xs font-semibold tracking-tight text-text group-hover:text-accent transition-colors">
+          Star<span className="hidden xs:inline"> on GitHub</span>
         </span>
 
-        {/* Shields.io Live Star Count Badge */}
-        <span className="hidden sm:inline-flex items-center shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={shieldsBadgeUrl}
-            alt="GitHub Stars"
-            className="h-4 pointer-events-none"
-            loading="lazy"
-          />
+        {/* Theme-matched Star Count Badge (matching .js.org curve & colors) */}
+        <span className="inline-flex items-center rounded border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-mono text-[11px] font-bold text-accent transition-colors group-hover:border-accent/60 group-hover:bg-accent/20">
+          {stars !== null ? stars : "★"}
         </span>
       </a>
     </div>
