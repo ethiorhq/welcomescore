@@ -8,7 +8,7 @@ import ScoreCard from "@/app/components/ScoreCard";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
 import GitHubStarBadge from "@/app/components/GitHubStarBadge";
-import SurviveSprintModal from "@/app/components/game/SurviveSprintModal";
+import DevBoardModal from "@/app/components/game/DevBoardModal";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import type { ScoreResult } from "@/lib/scoreRepo";
@@ -158,12 +158,12 @@ export default function AuditHome({
               type="button"
               onClick={() => setIsGameOpen(true)}
               className="group inline-flex h-11 items-center justify-center gap-2 rounded-md border border-accent/40 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-all duration-180 ease-out hover:border-accent hover:bg-accent/20 hover:shadow-[0_0_15px_rgba(232,162,61,0.2)] active:scale-[0.98] sm:h-10"
-              title="Take a Dev Break: Play Survive the Sprint (Shift+G)"
+              title="Play Dev Board Game: Algofox Sprint Quest (Shift+G)"
             >
-              <span className="text-base transition-transform group-hover:rotate-12">🎮</span>
-              <span>Dev Break: Survive the Sprint</span>
+              <span className="text-base transition-transform group-hover:rotate-45">🎲</span>
+              <span>Dev Board Game: Sprint Quest</span>
               <span className="rounded border border-accent/30 bg-accent/20 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-accent">
-                Mini-Game
+                Board Game
               </span>
             </button>
           </div>
@@ -223,7 +223,7 @@ export default function AuditHome({
         <SubscriberBanner source="welcomescore_home_inline" className="mt-12 w-full max-w-2xl" />
       </div>
 
-      <SurviveSprintModal
+      <DevBoardModal
         isOpen={isGameOpen}
         onClose={() => setIsGameOpen(false)}
       />
