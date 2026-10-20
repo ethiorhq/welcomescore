@@ -6,6 +6,7 @@ import BackButton from "@/app/components/BackButton";
 import InstallAppButton from "@/app/components/InstallAppButton";
 import ScoreCard from "@/app/components/ScoreCard";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import type { ScoreResult } from "@/lib/scoreRepo";
@@ -183,6 +184,10 @@ export default function AuditHome({
             />
           </div>
         ) : null}
+
+        <div className="mt-12 w-full max-w-2xl">
+          <SubscriberBanner source="welcomescore_home_inline" />
+        </div>
       </div>
     </main>
   );

@@ -12,6 +12,7 @@ import SiteFooter from "@/app/components/SiteFooter";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import StackSelector from "@/app/components/report/StackSelector";
 import StackEvidencePanel from "@/app/components/report/StackEvidencePanel";
+import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
 import type { StackReport } from "@/lib/stacks/types";
 
 export default function PublicReportView({
@@ -436,6 +437,9 @@ export default function PublicReportView({
             </div>
           </div>
         </section>
+
+        {/* Community & ETHIOR Updates Subscription */}
+        <SubscriberBanner source="welcomescore_report" />
 
         {/* Limitations & Ethical Boundary Disclaimer */}
         <section aria-labelledby="limits-heading" className="rounded-xl border border-muted/20 bg-surface/40 p-6 space-y-3 font-sans text-xs text-muted leading-relaxed">

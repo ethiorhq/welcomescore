@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PolicyPage, { PolicyCallout, PolicyTable, type PolicySection } from "@/app/components/PolicyPage";
 import AndroidAppDownloadCard from "@/app/components/AndroidAppDownloadCard";
+import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
 import { pageMetadata } from "@/lib/seo";
 
 
@@ -146,6 +147,7 @@ export default function HowItWorksPage() {
       sections={sections}
     >
       <AndroidAppDownloadCard />
+      <SubscriberBanner source="welcomescore_how_it_works" className="mt-8" />
     </PolicyPage>
   );
 }

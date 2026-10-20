@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import SiteFooter from "@/app/components/SiteFooter";
 import AlgofoxPetProvider from "@/app/components/pet/AlgofoxPetProvider";
 import AlgofoxWidget from "@/app/components/pet/AlgofoxWidget";
+import SubscriberModal from "@/app/components/subscribers/SubscriberModal";
 import ServiceWorkerRegistry from "@/app/components/ServiceWorkerRegistry";
 import { homepageMetadata } from "@/lib/seo";
 import { ETHIOR_URL, SITE_DESCRIPTION, SITE_DISPLAY_NAME, SITE_NAME, SITE_URL, THEME_COLOR } from "@/lib/site";
@@ -96,6 +97,7 @@ export default function RootLayout({
             <SiteFooter />
           </div>
           <AlgofoxWidget />
+          <SubscriberModal />
         </AlgofoxPetProvider>
       </body>
     </html>
