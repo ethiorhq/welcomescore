@@ -43,6 +43,9 @@ export default function SiteFooter() {
           Guide RSS
         </a>
       </p>
+      <p className="mt-2 text-[11px] text-muted/70">
+        © {new Date().getFullYear()} ETHIOR. All rights reserved.
+      </p>
     </footer>
   );
 }
