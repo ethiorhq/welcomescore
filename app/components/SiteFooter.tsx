@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ETHIOR_URL, SITE_DISPLAY_NAME, SITE_URL, SOURCE_REPOSITORY_URL } from "@/lib/site";
 import LocalWorkspaceFooterLink from "@/app/components/LocalWorkspaceFooterLink";
 import SubscribeFooterLink from "@/app/components/subscribers/SubscribeFooterLink";
+import EthiorSocialLinks from "@/app/components/EthiorSocialLinks";
 
 const FOOTER_LINKS = [
   { href: "/how-it-works", label: "How it works" },
@@ -24,7 +25,12 @@ export default function SiteFooter() {
         <SubscribeFooterLink />
         <LocalWorkspaceFooterLink />
       </nav>
-      <p className="mt-5 leading-6">
+
+      <div className="my-5 border-y border-muted/15 py-4">
+        <EthiorSocialLinks />
+      </div>
+
+      <p className="mt-4 leading-6">
         Built by{" "}
         <a className="text-link underline underline-offset-4" href={ETHIOR_URL}>
           ETHIOR
