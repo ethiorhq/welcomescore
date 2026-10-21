@@ -26,11 +26,7 @@ export default function SiteFooter() {
         <LocalWorkspaceFooterLink />
       </nav>
 
-      <div className="my-5 border-y border-muted/15 py-4">
-        <EthiorSocialLinks />
-      </div>
-
-      <p className="mt-4 leading-6">
+      <p className="mt-5 leading-6">
         Built by{" "}
         <a className="text-link underline underline-offset-4" href={ETHIOR_URL}>
           ETHIOR
@@ -49,7 +45,12 @@ export default function SiteFooter() {
           Guide RSS
         </a>
       </p>
-      <p className="mt-2 text-[11px] text-muted/70">
+
+      <div className="mt-3 flex justify-center">
+        <EthiorSocialLinks showLabel={false} />
+      </div>
+
+      <p className="mt-3 text-[11px] text-muted/70">
         © {new Date().getFullYear()} ETHIOR. All rights reserved.
       </p>
     </footer>

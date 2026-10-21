@@ -89,15 +89,23 @@ export const ETHIOR_SOCIALS: SocialLinkItem[] = [
   },
 ];
 
-export default function EthiorSocialLinks({ className = "" }: { className?: string }) {
+export default function EthiorSocialLinks({
+  className = "",
+  showLabel = true,
+}: {
+  className?: string;
+  showLabel?: boolean;
+}) {
   return (
     <div
       className={`flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3.5 ${className}`}
       aria-label="ETHIOR social media profiles"
     >
-      <span className="font-mono text-[11px] font-bold tracking-wider text-muted/80 uppercase">
-        Connect with ETHIOR:
-      </span>
+      {showLabel && (
+        <span className="font-mono text-[11px] font-bold tracking-wider text-muted/80 uppercase">
+          Connect with ETHIOR:
+        </span>
+      )}
 
       <div className="flex items-center gap-2">
         {ETHIOR_SOCIALS.map(({ id, name, url, icon, hoverStyles }) => (
