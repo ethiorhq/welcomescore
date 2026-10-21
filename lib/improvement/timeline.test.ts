@@ -38,7 +38,7 @@ describe("Improvement Timeline Engine", () => {
       grade: "C",
       checks: validReportFixture.checks.map((chk) =>
         chk.id === "contributing-guide"
-          ? { ...chk, status: "fail", points: 0 }
+          ? { ...chk, status: "missing", points: 0 }
           : chk,
       ),
 
@@ -47,9 +47,8 @@ describe("Improvement Timeline Engine", () => {
         title: "Add a focused CONTRIBUTING.md guide",
         evidenceIds: ["contributing-guide"],
         whyItMatters: "Helps contributors get started.",
-        smallestSafeNextStep: "Draft a basic guide.",
         expectedOutcome: "Clearer PRs.",
-        effortBand: "medium",
+        effort: "medium",
         acceptanceCriteria: ["CONTRIBUTING.md exists in repository root"],
         suggestedFiles: ["CONTRIBUTING.md"],
         limitations: ["Deterministic public audit"],
@@ -65,9 +64,8 @@ describe("Improvement Timeline Engine", () => {
         title: "Add issue templates",
         evidenceIds: ["issue-templates"],
         whyItMatters: "Templates organize incoming issues.",
-        smallestSafeNextStep: "Add bug_report.md template.",
         expectedOutcome: "Standardized bugs.",
-        effortBand: "low",
+        effort: "small",
         acceptanceCriteria: [".github/ISSUE_TEMPLATE exists"],
         suggestedFiles: [".github/ISSUE_TEMPLATE/bug_report.md"],
         limitations: ["Deterministic public audit"],
@@ -114,9 +112,8 @@ describe("Improvement Timeline Engine", () => {
         title: "Add contributing guide",
         evidenceIds: ["contributing-guide"],
         whyItMatters: "Guide onboarding.",
-        smallestSafeNextStep: "Draft guide.",
         expectedOutcome: "Better PRs.",
-        effortBand: "medium",
+        effort: "medium",
         acceptanceCriteria: ["CONTRIBUTING.md exists"],
         suggestedFiles: ["CONTRIBUTING.md"],
         limitations: ["Deterministic audit"],
