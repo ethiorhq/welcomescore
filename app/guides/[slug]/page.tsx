@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { GUIDES, guideBySlug } from "@/lib/guides";
 import { pageMetadata } from "@/lib/seo";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
-import GitHubStarBadge from "@/app/components/GitHubStarBadge";
+import HeaderControls from "@/app/components/HeaderControls";
 
 type GuidePageProps = {
   params: {
@@ -114,7 +114,7 @@ export default function GuidePage({ params }: GuidePageProps) {
           <span aria-hidden="true"> / </span>
           <span className="text-text">{guide.category}</span>
         </nav>
-        <GitHubStarBadge />
+        <HeaderControls />
       </div>
 
       <article className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-14">

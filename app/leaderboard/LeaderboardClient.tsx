@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import BackButton from "@/app/components/BackButton";
 import BadgeShareModal from "@/app/components/BadgeShareModal";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
-import GitHubStarBadge from "@/app/components/GitHubStarBadge";
+import HeaderControls from "@/app/components/HeaderControls";
 
 type EvaluationFreshness = "fresh" | "stale" | "expired";
 
@@ -103,7 +103,7 @@ export default function LeaderboardClient() {
             >
               Dev Lounge
             </Link>
-            <GitHubStarBadge />
+            <HeaderControls />
           </div>
         </header>
 

@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
-import GitHubStarBadge from "@/app/components/GitHubStarBadge";
+import HeaderControls from "@/app/components/HeaderControls";
 import { getJsHealthRemediation } from "@/lib/jsHealth/remediation";
 import type { JsHealthCategory, JsHealthCheck, JsHealthReport } from "@/lib/jsHealth/types";
 
@@ -83,7 +83,7 @@ export default function JsHealthDashboard() {
               <p className="text-accent">npx @ethiorhq/welcomescore</p>
               <p className="mt-1">Local CLI · no source upload</p>
             </div>
-            <GitHubStarBadge />
+            <HeaderControls />
           </div>
         </header>
 

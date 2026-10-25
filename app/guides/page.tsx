@@ -3,7 +3,7 @@ import Link from "next/link";
 import { GUIDES } from "@/lib/guides";
 import { pageMetadata } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site";
-import GitHubStarBadge from "@/app/components/GitHubStarBadge";
+import HeaderControls from "@/app/components/HeaderControls";
 
 export const metadata: Metadata = {
   ...pageMetadata({
@@ -36,7 +36,7 @@ export default function GuidesPage() {
           </p>
         </section>
         <div className="shrink-0 self-start">
-          <GitHubStarBadge />
+          <HeaderControls />
         </div>
       </div>
 

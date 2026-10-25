@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import GitHubStarBadge from "@/app/components/GitHubStarBadge";
+import HeaderControls from "@/app/components/HeaderControls";
 
 export type PolicySection = {
   id: string;
@@ -67,7 +67,7 @@ export default function PolicyPage({
               </div>
             </div>
             <div className="shrink-0 self-start">
-              <GitHubStarBadge />
+              <HeaderControls />
             </div>
           </header>
 

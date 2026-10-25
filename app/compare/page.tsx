@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import BackButton from "@/app/components/BackButton";
 import ScoreCard from "@/app/components/ScoreCard";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
-import GitHubStarBadge from "@/app/components/GitHubStarBadge";
+import HeaderControls from "@/app/components/HeaderControls";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import type { ScoreResult } from "@/lib/scoreRepo";
@@ -108,7 +108,7 @@ export default function ComparePage() {
     <main className="flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-16">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
         <BackButton />
-        <GitHubStarBadge />
+        <HeaderControls />
       </div>
 
       <div className="mx-auto w-full max-w-7xl flex-1">

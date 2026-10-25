@@ -167,7 +167,7 @@ export default function AlgofoxWidget() {
   return (
     <aside
       ref={asideRef}
-      className="pointer-events-none fixed bottom-3 right-3 z-40 flex w-[min(16rem,calc(100vw-1.5rem))] flex-col items-end sm:bottom-5 sm:right-5"
+      className="pointer-events-none fixed bottom-2 right-2 z-40 flex w-[min(15rem,calc(100vw-1.5rem))] flex-col items-end sm:bottom-5 sm:right-5"
       style={
         position
           ? { left: position.left, top: position.top, right: "auto", bottom: "auto" }
@@ -177,7 +177,7 @@ export default function AlgofoxWidget() {
     >
       {quote ? (
         <div
-          className={`pointer-events-auto mb-1 max-w-[15rem] rounded-md border border-accent/30 bg-surface/95 px-3 py-2 shadow-xl backdrop-blur ${
+          className={`pointer-events-auto mb-1 max-w-[14rem] rounded-md border border-accent/30 bg-surface/95 px-3 py-2 shadow-xl backdrop-blur ${
             isMobileBubbleOpen ? "block" : "hidden sm:block"
           }`}
         >
@@ -233,7 +233,7 @@ export default function AlgofoxWidget() {
         <AlgofoxSprite
           state={state}
           size={56}
-          className="drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)] sm:[transform:scale(1.25)] sm:origin-bottom-right"
+          className="drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)] origin-bottom-right scale-[0.78] sm:scale-100 sm:[transform:scale(1.25)]"
         />
       </button>
     </aside>

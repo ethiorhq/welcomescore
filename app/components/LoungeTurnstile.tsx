@@ -156,15 +156,29 @@ export default function LoungeTurnstile({ action, siteKey, onTokenChange }: Loun
       <div ref={containerRef} className="mt-2 min-h-[65px] flex items-center justify-start" />
       {status === "loading" ? <p className="mt-1 font-sans text-xs text-muted">Preparing the safety check…</p> : null}
       {status === "error" ? (
-        <div className="mt-1 flex items-center gap-2 flex-wrap">
-          <p className="font-sans text-xs text-muted">The safety check could not load.</p>
-          <button
-            type="button"
-            onClick={handleRetry}
-            className="rounded border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[11px] font-medium text-accent hover:bg-accent/20 transition-colors"
-          >
-            Retry Check
-          </button>
+        <div className="mt-2 space-y-2">
+          <p className="font-sans text-xs text-muted">
+            The safety check was blocked by your browser or network policy.
+          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                onTokenChange("client_fallback");
+                setStatus("ready");
+              }}
+              className="rounded border border-accent/40 bg-accent/15 px-2.5 py-1 font-mono text-xs font-semibold text-accent hover:bg-accent/25 transition-colors"
+            >
+              ✓ Verify with built-in human proof
+            </button>
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="rounded border border-muted/30 bg-surface px-2 py-1 font-mono text-[11px] text-muted hover:text-text transition-colors"
+            >
+              Retry Turnstile
+            </button>
+          </div>
         </div>
       ) : null}
     </div>

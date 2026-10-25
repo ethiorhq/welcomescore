@@ -13,7 +13,7 @@ import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import StackSelector from "@/app/components/report/StackSelector";
 import StackEvidencePanel from "@/app/components/report/StackEvidencePanel";
 import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
-import GitHubStarBadge from "@/app/components/GitHubStarBadge";
+import HeaderControls from "@/app/components/HeaderControls";
 import type { StackReport } from "@/lib/stacks/types";
 
 export default function PublicReportView({
@@ -104,7 +104,7 @@ export default function PublicReportView({
               </span>
             </nav>
             <div className="hidden sm:block h-4 w-px bg-muted/20" aria-hidden="true" />
-            <GitHubStarBadge />
+            <HeaderControls />
           </div>
         </div>
       </header>

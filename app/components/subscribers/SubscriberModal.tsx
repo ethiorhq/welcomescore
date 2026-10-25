@@ -106,6 +106,7 @@ export default function SubscriberModal() {
   // 2. Exit-Intent Trigger (Desktop mouse leaving top of screen)
   useEffect(() => {
     if (isSuppressed()) return;
+    if (typeof window !== "undefined" && window.innerWidth < 768) return;
 
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0) {
@@ -117,9 +118,10 @@ export default function SubscriberModal() {
     return () => document.removeEventListener("mouseleave", handleMouseLeave);
   }, [isSuppressed, openModal]);
 
-  // 3. Scroll Trigger (70% scroll depth)
+  // 3. Scroll Trigger (70% scroll depth on desktop only)
   useEffect(() => {
     if (isSuppressed()) return;
+    if (typeof window !== "undefined" && window.innerWidth < 768) return;
 
     const handleScroll = () => {
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;

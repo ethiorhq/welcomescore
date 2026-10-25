@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import BackButton from "@/app/components/BackButton";
 import LoungeTurnstile from "@/app/components/LoungeTurnstile";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
-import GitHubStarBadge from "@/app/components/GitHubStarBadge";
+import HeaderControls from "@/app/components/HeaderControls";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import AlgofoxSprite from "@/app/components/pet/AlgofoxSprite";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
@@ -393,7 +393,7 @@ function DevLoungeContent() {
             <Link href="/" className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15">
               Check a repository
             </Link>
-            <GitHubStarBadge />
+            <HeaderControls />
           </div>
         </header>
 

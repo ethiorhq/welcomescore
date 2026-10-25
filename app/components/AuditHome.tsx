@@ -7,8 +7,7 @@ import InstallAppButton from "@/app/components/InstallAppButton";
 import ScoreCard from "@/app/components/ScoreCard";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
-import GitHubStarBadge from "@/app/components/GitHubStarBadge";
-import ServerSwitcher from "@/app/components/ServerSwitcher";
+import HeaderControls from "@/app/components/HeaderControls";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import type { ScoreResult } from "@/lib/scoreRepo";
@@ -103,10 +102,10 @@ export default function AuditHome({
 
 
   return (
-    <main className="relative flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 pt-20 pb-10 text-text sm:px-6 sm:py-20">
-      <div className="absolute top-3 right-3 sm:top-6 sm:right-8 z-30 flex flex-col items-end gap-1.5">
-        <GitHubStarBadge />
-        <ServerSwitcher />
+    <main className="relative flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 pt-3 pb-10 text-text sm:px-6 sm:py-16">
+      {/* Top Header Row: Mobile Natural Flow, Desktop Absolute Positioned */}
+      <div className="w-full flex justify-end pb-3 sm:absolute sm:top-6 sm:right-8 sm:w-auto sm:pb-0 z-30">
+        <HeaderControls />
       </div>
       {initialRepository ? (
         <div className="mx-auto w-full max-w-3xl">
@@ -124,19 +123,19 @@ export default function AuditHome({
               className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
               href="/leaderboard"
             >
-              Explore the Hall of Fame
+              <span className="hidden sm:inline">Explore the </span>Hall of Fame
             </Link>
             <Link
               className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
               href="/lounge"
             >
-              Open Dev Lounge
+              <span className="hidden sm:inline">Open </span>Dev Lounge
             </Link>
             <Link
               className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
               href="/js"
             >
-              JavaScript Health
+              <span className="hidden sm:inline">JavaScript </span><span className="sm:hidden">JS </span>Health
             </Link>
           </div>
 

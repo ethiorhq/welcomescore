@@ -1,6 +1,5 @@
-const CACHE_NAME = 'welcomescore-cache-v2';
+const CACHE_NAME = 'welcomescore-cache-v3-multi-edge';
 const STATIC_ASSETS = [
-  '/',
   '/favicon.ico',
   '/icon/medium',
   '/icon/large',
