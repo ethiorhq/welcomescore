@@ -45,7 +45,10 @@ export async function GET(request: Request) {
     try {
       const res = await fetch(`${supabaseUrl.replace(/\/$/, "")}/rest/v1/`, {
         method: "HEAD",
-        headers: { apikey: supabaseKey },
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
         cache: "no-store",
         signal: AbortSignal.timeout(3000),
       });
