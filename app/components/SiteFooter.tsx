@@ -8,6 +8,7 @@ const FOOTER_LINKS = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/devops", label: "DevOps Doctor" },
   { href: "/org", label: "Fleet Cockpit" },
+  { href: "/templates", label: "Template Studio" },
   { href: "/guides", label: "Developer guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/policies/multi-server", label: "Multi-Server Policy" },

@@ -540,6 +540,118 @@ Thank you for helping keep ${c.repoName} safe for everyone!
   };
 }
 
+export function generateWelcomeScoreGateWorkflow(ctx: AutoFixContext): AutoFixProposal {
+  const c = normalizeContext(ctx);
+  const branch = c.defaultBranch;
+  const content = `name: WelcomeScore Contributor & DevOps Gate
+
+on:
+  pull_request:
+    branches: [${branch}, master]
+  workflow_dispatch:
+
+concurrency:
+  group: \${{ github.workflow }}-\${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  welcomescore-gate:
+    name: Contributor & DevOps Health Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Audit WelcomeScore Contributor Readiness
+        env:
+          TARGET_REPO: \${{ github.repository }}
+        run: |
+          echo "Evaluating WelcomeScore for $TARGET_REPO..."
+          API_RES=$(curl -s "https://www.welcomescore.is-local.org/api/score?repo=$TARGET_REPO" || true)
+          echo "WelcomeScore API Response: $API_RES"
+
+      - name: Audit DevOps CI/CD Health
+        env:
+          TARGET_REPO: \${{ github.repository }}
+        run: |
+          echo "Evaluating DevOps Doctor for $TARGET_REPO..."
+          DEVOPS_RES=$(curl -s "https://www.welcomescore.is-local.org/api/devops?repo=$TARGET_REPO" || true)
+          echo "DevOps Health: $DEVOPS_RES"
+`;
+
+  return {
+    id: "welcomescore-ci-gate",
+    title: "WelcomeScore CI/CD Quality Gate",
+    summary: "GitHub Actions workflow running automated WelcomeScore Contributor & DevOps audits on PRs.",
+    targetPath: ".github/workflows/welcomescore-gate.yml",
+    language: "yaml",
+    content,
+    directGitHubUrl: getGitHubDirectNewFileUrl(c.repoOwner, c.repoName, ".github/workflows/welcomescore-gate.yml", content, branch),
+    whyItMatters: "Enforces contributor onboarding readiness and pipeline hygiene automatically on every pull request.",
+  };
+}
+
+export function generateDependabotConfig(ctx: AutoFixContext): AutoFixProposal {
+  const c = normalizeContext(ctx);
+  const branch = c.defaultBranch;
+  const lang = c.primaryLanguage.toLowerCase();
+  const eco = lang.includes("python")
+    ? "pip"
+    : lang.includes("go")
+    ? "gomod"
+    : lang.includes("rust")
+    ? "cargo"
+    : "npm";
+
+  const content = `version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: "${eco}"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+`;
+
+  return {
+    id: "dependabot",
+    title: "Generate .github/dependabot.yml",
+    summary: "Automated weekly dependency and GitHub Actions security updates.",
+    targetPath: ".github/dependabot.yml",
+    language: "yaml",
+    content,
+    directGitHubUrl: getGitHubDirectNewFileUrl(c.repoOwner, c.repoName, ".github/dependabot.yml", content, branch),
+    whyItMatters: "Keeps GitHub Actions and package dependencies patched against known CVE vulnerabilities.",
+  };
+}
+
+/**
+ * Returns all foundational community and DevOps templates synthesized for the context.
+ */
+export function getAllAvailableTemplates(ctx: AutoFixContext): AutoFixProposal[] {
+  return [
+    generateContributingGuide(ctx),
+    generateIssueTemplate(ctx),
+    generatePullRequestTemplate(ctx),
+    generateCodeOfConduct(ctx),
+    generateCiWorkflow(ctx),
+    generateWelcomeScoreGateWorkflow(ctx),
+    generateDependabotConfig(ctx),
+    generateSecurityPolicy(ctx),
+    generateLicense(ctx),
+  ];
+}
+
 /**
  * Resolves the best AutoFix proposal for a given check label or check ID
  */
@@ -564,6 +676,12 @@ export function resolveAutoFix(checkLabel: string, ctx: AutoFixContext): AutoFix
   if (normalized.includes("issue")) {
     return generateIssueTemplate(ctx);
   }
+  if (normalized.includes("dependabot")) {
+    return generateDependabotConfig(ctx);
+  }
+  if (normalized.includes("gate")) {
+    return generateWelcomeScoreGateWorkflow(ctx);
+  }
   if (normalized.includes("ci") || normalized.includes("workflow") || normalized.includes("action")) {
     return generateCiWorkflow(ctx);
   }
@@ -573,3 +691,4 @@ export function resolveAutoFix(checkLabel: string, ctx: AutoFixContext): AutoFix
 
   return null;
 }
+

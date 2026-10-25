@@ -22,6 +22,7 @@ export const PUBLIC_ROUTE_PATHS = [
   "/leaderboard",
   "/devops",
   "/org",
+  "/templates",
   "/lounge",
   "/how-it-works",
   "/faq",

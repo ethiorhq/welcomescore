@@ -3,11 +3,14 @@ import {
   generateCiWorkflow,
   generateCodeOfConduct,
   generateContributingGuide,
+  generateDependabotConfig,
   generateIssueTemplate,
   generateLicense,
   generatePullRequestTemplate,
   generateReadmeSetup,
   generateSecurityPolicy,
+  generateWelcomeScoreGateWorkflow,
+  getAllAvailableTemplates,
   getGitHubDirectNewFileUrl,
   resolveAutoFix,
 } from "./engine";
@@ -97,6 +100,29 @@ describe("AutoFix Engine", () => {
     expect(fix.content).toContain("Private Security Advisory");
   });
 
+  it("generates WelcomeScore CI Gate workflow", () => {
+    const fix = generateWelcomeScoreGateWorkflow(ctx);
+    expect(fix.targetPath).toBe(".github/workflows/welcomescore-gate.yml");
+    expect(fix.content).toContain("WelcomeScore Contributor & DevOps Gate");
+    expect(fix.content).toContain("actions/checkout@v4");
+    expect(fix.content).toContain("api/score?repo=");
+  });
+
+  it("generates dependabot.yml configuration", () => {
+    const fix = generateDependabotConfig(ctx);
+    expect(fix.targetPath).toBe(".github/dependabot.yml");
+    expect(fix.content).toContain('package-ecosystem: "github-actions"');
+    expect(fix.content).toContain('package-ecosystem: "npm"');
+  });
+
+  it("returns all 9 available templates in getAllAvailableTemplates", () => {
+    const templates = getAllAvailableTemplates(ctx);
+    expect(templates.length).toBe(9);
+    expect(templates.map((t) => t.targetPath)).toContain("CONTRIBUTING.md");
+    expect(templates.map((t) => t.targetPath)).toContain(".github/dependabot.yml");
+    expect(templates.map((t) => t.targetPath)).toContain(".github/workflows/welcomescore-gate.yml");
+  });
+
   it("resolves appropriate AutoFix proposal by check label", () => {
     expect(resolveAutoFix("CONTRIBUTING.md", ctx)?.id).toBe("contributing");
     expect(resolveAutoFix("CODE_OF_CONDUCT.md", ctx)?.id).toBe("code-of-conduct");
@@ -106,6 +132,8 @@ describe("AutoFix Engine", () => {
     expect(resolveAutoFix("Pull Request Template", ctx)?.id).toBe("pr-template");
     expect(resolveAutoFix("CI Workflow", ctx)?.id).toBe("ci-workflow");
     expect(resolveAutoFix("Security Policy", ctx)?.id).toBe("security-policy");
+    expect(resolveAutoFix("Dependabot updates", ctx)?.id).toBe("dependabot");
+    expect(resolveAutoFix("CI Gate", ctx)?.id).toBe("welcomescore-ci-gate");
     expect(resolveAutoFix("Unknown Check", ctx)).toBeNull();
   });
 });

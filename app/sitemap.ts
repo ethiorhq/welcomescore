@@ -17,7 +17,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       path === "/compare" ||
       path === "/leaderboard" ||
       path === "/devops" ||
-      path === "/org"
+      path === "/org" ||
+      path === "/templates"
     ) {
       priority = 0.9;
       changeFrequency = "daily";
