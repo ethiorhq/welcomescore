@@ -15,7 +15,10 @@
     "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAFlmQZgErAfxtUn3",
     "TURNSTILE_ALLOWED_HOSTNAMES": "welcomescore.is-local.org,www.welcomescore.is-local.org,welcomescore.pages.dev,welcomescore.js.org",
     "GROQ_REVIEW_MODEL": "openai/gpt-oss-20b",
-    "GEMINI_REVIEW_MODEL": "gemini-3.7-flash"
+    "GEMINI_REVIEW_MODEL": "gemini-3.7-flash",
+    "SUPABASE_URL": "https://gznnbppmxqrjmyntaria.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://gznnbppmxqrjmyntaria.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6bm5icHBteHFyam15bnRhcmlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MjU0NzcsImV4cCI6MjEwMzMwMTQ3N30.IFljHygMluc6wUoe32qKA-lO5jNAaYGa562fisdoVEw"
   },
   "account_id": "0ad28641fcdacb5e69211baa6aa1da7a",
   "workers_dev": true,
