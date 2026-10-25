@@ -62,7 +62,7 @@ export default function GuideOpenGraphImage({ params }: ImageProps) {
               padding: "7px 10px",
             }}
           >
-            .js.org
+            ETHIOR
           </div>
         </div>
 

@@ -6,7 +6,7 @@ WelcomeScore is created and maintained by **ETHIOR**. This guide explains the at
 
 For any public redistribution, hosted deployment, public demo, or derivative repository, retain a visible credit substantially equivalent to:
 
-> Original project: [WelcomeScore.js.org](https://welcomescore.vercel.app) · Source: [github.com/ethiorhq/welcomescore](https://github.com/ethiorhq/welcomescore)
+> Original project: [WelcomeScore by ETHIOR](https://www.welcomescore.is-local.org) · Source: [github.com/ethiorhq/welcomescore](https://github.com/ethiorhq/welcomescore)
 
 For a website, place this credit in the footer or in a clearly linked Credits/About page reachable from every public page. The credit must remain legible, functional where links are supported, and must not be hidden behind a sign-in wall or visually obscured.
 

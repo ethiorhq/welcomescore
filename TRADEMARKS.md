@@ -6,13 +6,13 @@ This policy explains the limited permitted use of ETHIOR and WelcomeScore brand 
 
 ## Brand identifiers
 
-The following may be trademarks, service marks, trade names, or brand identifiers of ETHIOR: **ETHIOR**, **WelcomeScore**, **WelcomeScore.js.org**, associated logos, product names, domain names, and visual identity elements.
+The following may be trademarks, service marks, trade names, or brand identifiers of ETHIOR: **ETHIOR**, **WelcomeScore**, **WelcomeScore by ETHIOR**, associated logos, product names, domain names, and visual identity elements.
 
 ## Permitted use without separate permission
 
 You may use the names and links solely to provide accurate Required Attribution under the project license, to identify the unmodified original project, or to make a truthful factual reference to the canonical project. For example:
 
-> Original project: WelcomeScore.js.org by ETHIOR.
+> Original project: WelcomeScore by ETHIOR.
 
 You may also state that your work is derived from WelcomeScore if that statement is accurate and if you clearly identify your modifications.
 

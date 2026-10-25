@@ -1,6 +1,9 @@
 export const SITE_NAME = "WelcomeScore";
-export const SITE_DISPLAY_NAME = "WelcomeScore";
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://welcomescore.vercel.app";
+export const SITE_DISPLAY_NAME = "WelcomeScore by ETHIOR";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.welcomescore.is-local.org";
+export const CLOUDFLARE_PRODUCTION_URL = "https://www.welcomescore.is-local.org";
+export const CLOUDFLARE_PAGES_URL = "https://welcomescore.pages.dev";
+export const VERCEL_MIRROR_URL = "https://welcomescore.vercel.app";
 export const SOURCE_REPOSITORY_URL = "https://github.com/ethiorhq/welcomescore";
 export const ETHIOR_URL = "https://ethior.com";
 export const ETHIOR_FACEBOOK_URL = "https://www.facebook.com/ethiorhq/";
@@ -8,7 +11,7 @@ export const ETHIOR_INSTAGRAM_URL = "https://www.instagram.com/ethiorhq/";
 export const ETHIOR_LINKEDIN_URL = "https://www.linkedin.com/company/ethior";
 export const ETHIOR_GITHUB_URL = "https://github.com/ethiorhq";
 export const SITE_DESCRIPTION =
-  "Evaluate how ready a public GitHub repository is for first-time contributors with evidence-bound guidance.";
+  "WelcomeScore by ETHIOR evaluates how ready a public GitHub repository is for first-time contributors with evidence-bound guidance.";
 
 export const THEME_COLOR = "#12141C";
 export const BACKGROUND_COLOR = "#12141C";

@@ -113,10 +113,10 @@ export function createErrorBadgeSvg(label = "Repo not found") {
 }
 
 function createMinimalBadge(data: BadgeData, rank: RankConfig) {
-  const width = 270;
-  const leftWidth = 130;
+  const width = 290;
+  const leftWidth = 150;
   const repo = compactRepo(data.repo, 22);
-  const badgeLabel = data.label ? data.label.toUpperCase() : "WELCOMESCORE";
+  const badgeLabel = data.label ? `${data.label.toUpperCase()} · ETHIOR` : "WELCOMESCORE · ETHIOR";
 
   return wrapSvg(width, 32, `
     <defs>
@@ -131,11 +131,11 @@ function createMinimalBadge(data: BadgeData, rank: RankConfig) {
       <rect x="${leftWidth}" width="${width - leftWidth}" height="32" fill="${rank.color}"/>
       <rect width="${width}" height="32" fill="url(#sheen)"/>
     </g>
-    <text x="12" y="14" class="label" font-size="9" letter-spacing="1.2">${escapeXml(badgeLabel)}</text>
+    <text x="12" y="14" class="label" font-size="8.5" letter-spacing="1.1">${escapeXml(badgeLabel)}</text>
     <text x="12" y="26" class="muted" font-size="10">${escapeXml(repo)}</text>
-    ${emblemSvg(rank, 143, 8, 16, "#12141C")}
-    <text x="166" y="21" fill="#12141C" font-size="14" font-weight="700">${data.score}/100</text>
-    <text x="246" y="21" fill="#12141C" font-size="12" font-weight="700">${escapeXml(data.grade)}</text>
+    ${emblemSvg(rank, 160, 8, 16, "#12141C")}
+    <text x="183" y="21" fill="#12141C" font-size="14" font-weight="700">${data.score}/100</text>
+    <text x="263" y="21" fill="#12141C" font-size="12" font-weight="700">${escapeXml(data.grade)}</text>
   `);
 }
 
@@ -152,7 +152,7 @@ function createRankShieldBadge(data: BadgeData, rank: RankConfig) {
     <rect x="1" y="1" width="418" height="90" rx="10" fill="#1B1E29" stroke="url(#rankBorder)" stroke-width="2"/>
     <rect x="14" y="14" width="64" height="64" rx="9" fill="${rank.darkColor}" stroke="${rank.color}"/>
     ${emblemSvg(rank, 30, 30, 32, rank.color)}
-    <text x="96" y="27" class="label" font-size="10" letter-spacing="1.5">${rank.level.toUpperCase()}</text>
+    <text x="96" y="27" class="label" font-size="10" letter-spacing="1.5">ETHIOR · ${rank.level.toUpperCase()}</text>
     <text x="96" y="48" class="text" font-size="18" font-weight="700">${escapeXml(rank.title)}</text>
     <text x="96" y="68" class="muted" font-size="12">${escapeXml(repo)}</text>
     <text x="382" y="46" text-anchor="end" fill="${rank.color}" font-size="30" font-weight="700">${data.score}</text>
@@ -164,7 +164,7 @@ function createMetricBarBadge(data: BadgeData, rank: RankConfig) {
   return wrapSvg(520, 54, `
     <rect x="1" y="1" width="518" height="52" rx="8" fill="#1B1E29" stroke="#303543"/>
     <rect x="1" y="1" width="8" height="52" rx="4" fill="${rank.color}"/>
-    <text x="24" y="19" class="label" font-size="9" letter-spacing="1.2">WELCOMESCORE</text>
+    <text x="24" y="19" class="label" font-size="9" letter-spacing="1.2">WELCOMESCORE · ETHIOR</text>
     <text x="24" y="38" class="text" font-size="14" font-weight="700">${data.score}/100</text>
     <line x1="150" y1="11" x2="150" y2="43" stroke="#303543"/>
     <text x="168" y="19" class="label" font-size="9" letter-spacing="1.2">GRADE</text>
@@ -191,7 +191,7 @@ function createGlowBadge(data: BadgeData, rank: RankConfig) {
     </defs>
     <rect x="1" y="1" width="428" height="102" rx="11" fill="#12141C" stroke="url(#edge)" stroke-width="2"/>
     <rect x="2" y="2" width="426" height="100" rx="10" fill="url(#glow)"/>
-    <text x="20" y="26" fill="${rank.color}" font-size="10" font-weight="700" letter-spacing="1.5">WELCOMESCORE .JS.ORG</text>
+    <text x="20" y="26" fill="${rank.color}" font-size="10" font-weight="700" letter-spacing="1.5">WELCOMESCORE · ETHIOR</text>
     <text x="20" y="47" class="text" font-size="15" font-weight="700">${escapeXml(repo)}</text>
     <text x="20" y="72" class="muted" font-size="12">${escapeXml(rank.level)} · ${escapeXml(rank.status)}</text>
     <!-- The rank chip and score block occupy separate vertical zones so an emblem never reads as part of a three-digit score. -->

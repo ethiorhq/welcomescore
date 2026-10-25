@@ -1,7 +1,7 @@
 # Algofox and the WelcomeScore Dev Roast & Motivation Engine
 
 **Implementation blueprint and operating guide**  
-**Product:** WelcomeScore.js.org  
+**Product:** WelcomeScore by ETHIOR  
 **Status:** Implemented and deployed, with deterministic reviews fully operational and optional provider enhancement configured for further troubleshooting.
 
 > **Simple explanation:** Algofox is WelcomeScore’s friendly developer companion. WelcomeScore first measures whether a public GitHub repository is welcoming to a first-time contributor. Algofox then explains the result in human language: what is working, what needs attention, and the next practical step. It can be encouraging, lightly tough when the technical evidence supports it, and celebratory for strong contributor paths. It is never meant to judge or insult a person.

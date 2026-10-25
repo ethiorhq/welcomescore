@@ -1,26 +1,52 @@
 import { ImageResponse } from "next/og";
 import { parseRepository, scoreRepo } from "@/lib/scoreRepo";
+import { badgeResponse, createBadgeSvg, createErrorBadgeSvg, normalizeBadgeStyle } from "@/lib/badgeEngine";
 
 export const revalidate = 300;
 
-const regularFont = fetch(
-  "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6pfjptAgt5VM-kVkqdyU8n5ig.ttf",
-).then((response) => response.arrayBuffer());
-const boldFont = fetch(
-  "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3pQP8lc.ttf",
-).then((response) => response.arrayBuffer());
+let regularFontPromise: Promise<ArrayBuffer> | null = null;
+let boldFontPromise: Promise<ArrayBuffer> | null = null;
+
+function getRegularFont() {
+  if (!regularFontPromise) {
+    regularFontPromise = fetch(
+      "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6pfjptAgt5VM-kVkqdyU8n5ig.ttf",
+    ).then((response) => response.arrayBuffer());
+  }
+  return regularFontPromise;
+}
+
+function getBoldFont() {
+  if (!boldFontPromise) {
+    boldFontPromise = fetch(
+      "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3pQP8lc.ttf",
+    ).then((response) => response.arrayBuffer());
+  }
+  return boldFontPromise;
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const parsedRepository = parseRepository(searchParams.get("repo") ?? "");
 
   if (!parsedRepository) {
+    if (searchParams.get("v") || searchParams.get("style")) {
+      return badgeResponse(createErrorBadgeSvg(), 400);
+    }
     return errorImage();
   }
 
+  const style = normalizeBadgeStyle(searchParams.get("style"));
+  const wantsSvg = searchParams.has("v") || searchParams.get("format") === "svg" || !searchParams.has("png");
+
   try {
     const result = await scoreRepo(parsedRepository.owner, parsedRepository.repo);
-    const [regular, bold] = await Promise.all([regularFont, boldFont]);
+
+    if (wantsSvg) {
+      return badgeResponse(createBadgeSvg(result, style));
+    }
+
+    const [regular, bold] = await Promise.all([getRegularFont(), getBoldFont()]);
 
     return new ImageResponse(
       (
@@ -93,7 +119,7 @@ export async function GET(request: Request) {
                 lineHeight: 1,
               }}
             >
-              .js.org
+              ETHIOR
             </span>
           </div>
 
@@ -155,7 +181,7 @@ export async function GET(request: Request) {
 }
 
 async function errorImage() {
-  const regular = await regularFont;
+  const regular = await getRegularFont();
 
   return new ImageResponse(
     (

@@ -1,0 +1,139 @@
+# ETHIOR WelcomeScore — Comprehensive LLM Knowledge Base (llms-full.txt)
+
+> WelcomeScore by ETHIOR is the industry-standard contributor readiness audit engine and maintainer control plane for public GitHub repositories and JavaScript/TypeScript projects.
+
+---
+
+## 1. Executive Summary & Brand Identity
+
+- **Product Name:** ETHIOR WelcomeScore (WelcomeScore by ETHIOR)
+- **Publisher / Organization:** ETHIOR (https://ethior.com)
+- **Source Repository:** https://github.com/ethiorhq/welcomescore
+- **Primary Edge Host:** https://www.welcomescore.is-local.org/ (Cloudflare Workers & Pages)
+- **High-Availability Mirror:** https://welcomescore.vercel.app/ (Vercel Edge Network)
+- **Pages Fallback:** https://welcomescore.pages.dev/
+- **License:** Source-Available Attribution License 1.0 (ETHIOR)
+
+ETHIOR WelcomeScore provides deterministic, evidence-bound scoring (0–100) of public GitHub repositories to assess how prepared a codebase is to receive and onboard first-time open source contributors.
+
+---
+
+## 2. Core Methodology: The 5 Contributor Readiness Pillars
+
+WelcomeScore computes an objective audit score across five foundational pillars:
+
+### Pillar 1: Documentation & Discovery (20 Points)
+- **README Presence & Quality:** Clear project description, problem statement, and live demo links.
+- **Quickstart Instructions:** Step-by-step instructions allowing a newcomer to clone, install, and execute the application locally in under 5 minutes.
+- **Architecture Overview:** Clear explanation of repository directory structure, technologies, and runtime requirements.
+
+### Pillar 2: Contributor Onboarding & Guidelines (25 Points)
+- **CONTRIBUTING.md:** Dedicated contributor guide defining local setup, branch conventions, PR submission checklists, and test execution.
+- **Environment Configuration:** Explicit documentation of public vs. secret `.env` variables with zero private credential requirements for local baseline runs.
+- **Review Expectations:** Transparent criteria on review timelines and maintainer feedback boundaries.
+
+### Pillar 3: Mentorship & "Good First Issue" Curation (25 Points)
+- **Beginner-Friendly Labels:** Active issues tagged with `good first issue`, `help wanted`, or `first-timers-only`.
+- **Task Scoping:** Clearly defined acceptance criteria, bounded scope, and pointer to relevant files.
+- **Absence of Blockers:** Issues do not require production infrastructure, internal secrets, or architectural decisions.
+
+### Pillar 4: Community Standards & Licensing (15 Points)
+- **CODE_OF_CONDUCT.md:** Explicit behavioral standards (e.g. Contributor Covenant) with a private contact address for reporting violations.
+- **Open Source / Declared License:** Valid, recognizable license (MIT, Apache 2.0, MPL 2.0, BSD, etc.) in the repository root.
+- **Security Policy (SECURITY.md):** Clear vulnerability disclosure route that directs reporters away from public issue trackers.
+
+### Pillar 5: Velocity, Activity & Responsiveness (15 Points)
+- **Recent Commit Velocity:** Merged commits or releases within the preceding 90 days.
+- **Issue Triage Signals:** Ratio of open to closed issues demonstrating that incoming contributions are actively acknowledged.
+- **Pull Request Lifecycle:** Historical record of merged community contributions.
+
+---
+
+## 3. The Maintainer Loop & "Next Useful Move"
+
+Unlike vanity badges or cosmetic linters, WelcomeScore identifies a single, deterministic **Next Useful Move**:
+1. It analyzes the specific audit gaps (e.g., missing CONTRIBUTING.md or unmaintained starter issues).
+2. It generates a copy-pasteable pull request plan or issue draft tailored specifically to the audited repository.
+3. Maintainers apply the change, re-run the audit, and verify score improvements instantly.
+
+---
+
+## 4. Algofox: Dev Roast & Motivation Companion
+
+Algofox is WelcomeScore's robotic cyber-fox mascot. It provides two guidance modes:
+- **Calm & Constructive Mode:** Deterministic guidance celebrating strong documentation and highlighting practical next steps.
+- **Dev Roast Mode (Opt-In):** A lighthearted, evidence-backed critique pointing out repository friction without personal attacks or toxic language.
+
+**AI Engine Architecture:**
+- Deterministic rule engine fallback guarantees 100% offline uptime and zero-latency roasts.
+- LLM review enhancement via Groq (Llama-3.3-70b-versatile) and Google Gemini (gemini-2.5-flash / gemini-1.5-flash).
+- Strict privacy guarantee: Source code, private tokens, or proprietary logic are NEVER uploaded or fed to model training.
+
+---
+
+## 5. Public APIs and Developer Integrations
+
+### SVG Contributor Badge API
+```
+GET https://www.welcomescore.is-local.org/api/badge?repo=:owner/:repo&v=3
+```
+Returns a responsive, caching-optimized SVG badge displaying the current WelcomeScore and grade (A+, A, B, C, Needs Work).
+
+### Public JSON Report API
+```
+GET https://www.welcomescore.is-local.org/api/report?repo=:owner/:repo
+```
+Returns a fully typed JSON payload adhering to the WelcomeScore Shared Report Specification (`REPORT_SCHEMA.md`).
+
+### Local CLI (`@ethiorhq/welcomescore`)
+Inspect local repositories directly in the terminal without transmitting code:
+```bash
+npx @ethiorhq/welcomescore
+# or pass specific repository
+npx @ethiorhq/welcomescore ethiorhq/welcomescore
+```
+
+### GitHub Action (`ethiorhq/welcomescore-action@v1`)
+Automate contributor readiness audits on pull requests and pushes:
+```yaml
+name: WelcomeScore Contributor Audit
+on: [pull_request]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ethiorhq/welcomescore-action@v1
+        with:
+          min-score: 80
+```
+
+---
+
+## 6. High-Availability Dual-Server Architecture
+
+WelcomeScore operates on an active-active dual server topology:
+1. **Primary Cloudflare Server:** Powered by Cloudflare Workers & Pages via OpenNext (`@opennextjs/cloudflare`), running across 300+ global edge cities.
+2. **Vercel Server Mirror:** Hosted on Vercel Edge Runtime (`welcomescore.vercel.app`), serving as a zero-downtime hot standby.
+3. **Database & State:** Shared serverless database on Supabase (`gznnbppmxqrjmyntaria.supabase.co`) with connection pooling, keeping community chats, subscriber lists, and Hall of Fame records synchronized across both platforms.
+
+---
+
+## 7. Developer Guides Library
+
+- Contributor Onboarding Checklist: https://www.welcomescore.is-local.org/guides/open-source-contributor-onboarding-checklist
+- How to Write a CONTRIBUTING.md Developers Will Actually Use: https://www.welcomescore.is-local.org/guides/write-contributing-guide-developers-use
+- Creating Honest Good-First Issues: https://www.welcomescore.is-local.org/guides/honest-good-first-issues
+- README Setup Path for New Contributors: https://www.welcomescore.is-local.org/guides/readme-setup-new-contributor
+- How to Use a WelcomeScore Result to Improve a Repository: https://www.welcomescore.is-local.org/guides/improve-repository-welcomescore
+- Safe Open-Source Developer Community Chat: https://www.welcomescore.is-local.org/guides/safe-open-source-dev-lounge
+- Making Developer Docs Discoverable: https://www.welcomescore.is-local.org/guides/make-developer-docs-discoverable-without-gaming-search
+- JavaScript and TypeScript Package Health: https://www.welcomescore.is-local.org/guides/javascript-package-health-guide
+- Automating Contributor Checks with GitHub Actions: https://www.welcomescore.is-local.org/guides/github-actions-repository-checks
+
+---
+
+## 8. Brand Attribution & Legal Notice
+
+WelcomeScore is an official project of ETHIOR. All trademarks, service marks, visual identity elements, and algorithms are proprietary to ETHIOR. 
+For media inquiries, enterprise partnerships, or commercial license discussions, visit https://ethior.com.

@@ -13,7 +13,7 @@ export default function WelcomeScoreWordmark({
       <span
         className={`mt-0.5 inline-flex rounded-md border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-mono text-xs font-semibold text-accent sm:mt-2 sm:px-2 sm:py-1 ${badgeClassName}`}
       >
-        .js.org
+        ETHIOR
       </span>
     </span>
   );

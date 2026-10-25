@@ -40,6 +40,9 @@ export default function OpenGraphImage() {
           <div style={{ color: "#E8A23D", display: "flex", fontFamily: "monospace", fontSize: 30, fontWeight: 700, letterSpacing: -1 }}>
             WelcomeScore
           </div>
+          <div style={{ border: "1px solid rgba(232, 162, 61, 0.35)", borderRadius: 8, padding: "4px 10px", color: "#E8A23D", fontFamily: "monospace", fontSize: 16, fontWeight: 700 }}>
+            ETHIOR
+          </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 930, zIndex: 1 }}>
@@ -56,7 +59,7 @@ export default function OpenGraphImage() {
 
         <div style={{ alignItems: "center", display: "flex", justifyContent: "space-between", zIndex: 1 }}>
           <div style={{ color: "#8B8F9E", display: "flex", fontFamily: "monospace", fontSize: 20 }}>
-            welcomescore.js.org
+            welcomescore.is-local.org
           </div>
           <div
             style={{

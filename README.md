@@ -1,11 +1,12 @@
 # WelcomeScore
 
-[![WelcomeScore](https://welcomescore.vercel.app/api/badge?repo=ethiorhq/welcomescore&v=3)](https://welcomescore.vercel.app/report/ethiorhq/welcomescore)
+[![ETHIOR WelcomeScore](https://www.welcomescore.is-local.org/api/badge?repo=ethiorhq/welcomescore&v=3)](https://www.welcomescore.is-local.org/report/ethiorhq/welcomescore)
 
-**WelcomeScore** is an evidence-based maintainer control plane and readiness auditor for JavaScript and TypeScript repositories. It evaluates observable onboarding signals—documentation, contribution guidelines, code of conduct, package health, starter issue clarity, and licensing—and computes a single, deterministic **Next Useful Move** with ready-to-use issue drafts and patch plans.
+**WelcomeScore by ETHIOR** is an evidence-based maintainer control plane and readiness auditor for JavaScript and TypeScript repositories. It evaluates observable onboarding signals—documentation, contribution guidelines, code of conduct, package health, starter issue clarity, and licensing—and computes a single, deterministic **Next Useful Move** with ready-to-use issue drafts and patch plans.
 
-- **Current Production Site:** [https://welcomescore.vercel.app](https://welcomescore.vercel.app)
-- **Future Community Domain:** `https://welcomescore.js.org` *(active upon JS.ORG DNS delegation)*
+- **Primary Production Site (Cloudflare Edge):** [https://www.welcomescore.is-local.org](https://www.welcomescore.is-local.org)
+- **Pages Production Mirror:** [https://welcomescore.pages.dev](https://welcomescore.pages.dev)
+- **Vercel Production Mirror:** [https://welcomescore.vercel.app](https://welcomescore.vercel.app)
 - **Shared Report Specification:** [REPORT_SCHEMA.md](docs/REPORT_SCHEMA.md)
 
 > WelcomeScore is source-available under the project’s custom [Source-Available Attribution License](LICENSE), not an OSI-approved open-source license. Public derivatives must preserve the license, notices, and original-project attribution described in [ATTRIBUTION.md](ATTRIBUTION.md).

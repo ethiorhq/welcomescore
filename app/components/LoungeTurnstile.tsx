@@ -27,38 +27,65 @@ export default function LoungeTurnstile({ action, siteKey, onTokenChange }: Loun
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     let timeoutId: number | null = null;
 
     function renderWidget() {
-      if (cancelled || !window.turnstile || !containerRef.current || widgetIdRef.current) {
+      if (cancelled || !containerRef.current || widgetIdRef.current) {
         return;
       }
-      window.turnstile.ready(() => {
-        if (cancelled || !window.turnstile || !containerRef.current || widgetIdRef.current) {
+      if (!window.turnstile) {
+        return;
+      }
+
+      const executeRender = () => {
+        if (cancelled || !containerRef.current || widgetIdRef.current || !window.turnstile?.render) {
           return;
         }
-        widgetIdRef.current = window.turnstile.render(containerRef.current, {
-          sitekey: siteKey,
-          action,
-          theme: "dark",
-          size: "flexible",
-          callback: (token: string) => {
-            onTokenChange(token);
+        try {
+          widgetIdRef.current = window.turnstile.render(containerRef.current, {
+            sitekey: siteKey,
+            action,
+            theme: "dark",
+            size: "normal",
+            callback: (token: string) => {
+              if (!cancelled) {
+                onTokenChange(token);
+                setStatus("ready");
+              }
+            },
+            "expired-callback": () => {
+              if (!cancelled) {
+                onTokenChange(null);
+                setStatus("ready");
+              }
+            },
+            "error-callback": () => {
+              if (!cancelled) {
+                onTokenChange(null);
+                setStatus("error");
+              }
+            },
+          });
+          if (!cancelled) {
             setStatus("ready");
-          },
-          "expired-callback": () => {
-            onTokenChange(null);
-            setStatus("ready");
-          },
-          "error-callback": () => {
-            onTokenChange(null);
+          }
+        } catch (err) {
+          console.warn("Turnstile render error", err);
+          if (!cancelled) {
             setStatus("error");
-          },
-        });
-      });
+          }
+        }
+      };
+
+      if (typeof window.turnstile.render === "function") {
+        executeRender();
+      } else if (typeof window.turnstile.ready === "function") {
+        window.turnstile.ready(executeRender);
+      }
     }
 
     const existingScript = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
@@ -85,9 +112,13 @@ export default function LoungeTurnstile({ action, siteKey, onTokenChange }: Loun
 
     timeoutId = window.setTimeout(() => {
       if (!cancelled && !widgetIdRef.current) {
-        setStatus("error");
+        if (window.turnstile?.render) {
+          renderWidget();
+        } else {
+          setStatus("error");
+        }
       }
-    }, 12_000);
+    }, 8_000);
 
     return () => {
       cancelled = true;
@@ -95,19 +126,47 @@ export default function LoungeTurnstile({ action, siteKey, onTokenChange }: Loun
       if (timeoutId !== null) {
         window.clearTimeout(timeoutId);
       }
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
+      if (widgetIdRef.current && window.turnstile?.remove) {
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch {
+          // ignore
+        }
       }
       widgetIdRef.current = null;
     };
-  }, [action, onTokenChange, siteKey]);
+  }, [action, onTokenChange, siteKey, retryCount]);
+
+  const handleRetry = () => {
+    setStatus("loading");
+    if (widgetIdRef.current && window.turnstile?.remove) {
+      try {
+        window.turnstile.remove(widgetIdRef.current);
+      } catch {
+        // ignore
+      }
+      widgetIdRef.current = null;
+    }
+    setRetryCount((prev) => prev + 1);
+  };
 
   return (
     <div className="mt-3 rounded-md border border-muted/25 bg-base/25 p-3">
       <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Visitor verification</p>
-      <div ref={containerRef} className="mt-2 min-h-[65px]" />
+      <div ref={containerRef} className="mt-2 min-h-[65px] flex items-center justify-start" />
       {status === "loading" ? <p className="mt-1 font-sans text-xs text-muted">Preparing the safety check…</p> : null}
-      {status === "error" ? <p className="mt-1 font-sans text-xs text-muted">The safety check could not load. Refresh the Lounge or try again shortly.</p> : null}
+      {status === "error" ? (
+        <div className="mt-1 flex items-center gap-2 flex-wrap">
+          <p className="font-sans text-xs text-muted">The safety check could not load.</p>
+          <button
+            type="button"
+            onClick={handleRetry}
+            className="rounded border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[11px] font-medium text-accent hover:bg-accent/20 transition-colors"
+          >
+            Retry Check
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

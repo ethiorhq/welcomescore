@@ -62,7 +62,7 @@ export default async function ReceiptOpenGraphImage({ params }: ReceiptImageProp
                 padding: "7px 10px",
               }}
             >
-              .js.org
+              ETHIOR
             </div>
           </div>
 
@@ -112,7 +112,7 @@ export default async function ReceiptOpenGraphImage({ params }: ReceiptImageProp
           }}
         >
           <div style={{ color: "#E8A23D", display: "flex", fontFamily: "monospace", fontSize: 34, fontWeight: 700 }}>
-            WelcomeScore.js.org
+            WelcomeScore by ETHIOR
           </div>
           <div style={{ display: "flex", fontFamily: "sans-serif", fontSize: 30, marginTop: 22 }}>
             This dated audit receipt is unavailable.

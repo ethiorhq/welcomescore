@@ -17,7 +17,7 @@ export function pageMetadata({
   description,
   path,
   imagePath = "/opengraph-image",
-  imageAlt = "WelcomeScore — contributor readiness for public GitHub repositories",
+  imageAlt = "ETHIOR WelcomeScore — contributor readiness auditor for public GitHub repositories",
   type = "website",
   publishedTime,
   modifiedTime,
@@ -73,9 +73,11 @@ export function pageMetadata({
 }
 
 export const homepageMetadata = pageMetadata({
-  title: "WelcomeScore — Is your repo ready for first-time contributors?",
-  description: SITE_DESCRIPTION,
+  title: "ETHIOR WelcomeScore — Is Your Repository Ready for First-Time Contributors?",
+  description:
+    "WelcomeScore by ETHIOR evaluates how ready a public GitHub repository is for first-time contributors with deterministic 5-pillar audits, onboarding checklists, and developer badges.",
   path: "/",
+  imageAlt: "ETHIOR WelcomeScore — GitHub repository contributor readiness and onboarding audit",
 });
 
 export const DEFAULT_METADATA_DESCRIPTION = SITE_DESCRIPTION;

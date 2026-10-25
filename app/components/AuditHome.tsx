@@ -8,7 +8,7 @@ import ScoreCard from "@/app/components/ScoreCard";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
 import GitHubStarBadge from "@/app/components/GitHubStarBadge";
-import DevBoardModal from "@/app/components/game/DevBoardModal";
+import ServerSwitcher from "@/app/components/ServerSwitcher";
 import { getAlgofoxMessage } from "@/app/components/pet/algofoxMessages";
 import { useAlgofoxPet } from "@/app/components/pet/AlgofoxPetProvider";
 import type { ScoreResult } from "@/lib/scoreRepo";
@@ -27,7 +27,6 @@ export default function AuditHome({
   const [isChecking, setIsChecking] = useState(false);
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isGameOpen, setIsGameOpen] = useState(false);
   const initialScanStarted = useRef(false);
   const isRepositoryEmpty = repository.trim().length === 0;
   const { setAlgofoxState } = useAlgofoxPet();
@@ -102,26 +101,11 @@ export default function AuditHome({
     }
   }, [initialRepository, runCheck]);
 
-  useEffect(() => {
-    const handleGlobalKey = (e: KeyboardEvent) => {
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
-        return;
-      }
-      if (e.shiftKey && (e.key.toLowerCase() === "g" || e.key === "G")) {
-        e.preventDefault();
-        setIsGameOpen((prev) => !prev);
-      }
-    };
-    window.addEventListener("keydown", handleGlobalKey);
-    return () => window.removeEventListener("keydown", handleGlobalKey);
-  }, []);
 
   return (
     <main className="relative flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-20">
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-8 z-30">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-8 z-30 flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+        <ServerSwitcher />
         <GitHubStarBadge />
       </div>
       {initialRepository ? (
@@ -154,18 +138,7 @@ export default function AuditHome({
             >
               JavaScript Health
             </Link>
-            <button
-              type="button"
-              onClick={() => setIsGameOpen(true)}
-              className="group inline-flex h-11 items-center justify-center gap-2 rounded-md border border-accent/40 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-all duration-180 ease-out hover:border-accent hover:bg-accent/20 hover:shadow-[0_0_15px_rgba(232,162,61,0.2)] active:scale-[0.98] sm:h-10"
-              title="Play Dev Board Game: Algofox Sprint Quest (Shift+G)"
-            >
-              <span className="text-base transition-transform group-hover:rotate-45">🎲</span>
-              <span>Dev Board Game: Sprint Quest</span>
-              <span className="rounded border border-accent/30 bg-accent/20 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-accent">
-                Board Game
-              </span>
-            </button>
+
           </div>
 
           <form
@@ -222,11 +195,6 @@ export default function AuditHome({
 
         <SubscriberBanner source="welcomescore_home_inline" className="mt-12 w-full max-w-2xl" />
       </div>
-
-      <DevBoardModal
-        isOpen={isGameOpen}
-        onClose={() => setIsGameOpen(false)}
-      />
     </main>
   );
 }

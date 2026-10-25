@@ -1,46 +1,53 @@
-# WelcomeScore.js.org
+# ETHIOR WelcomeScore
 
-> WelcomeScore helps maintainers and first-time contributors review visible public GitHub contributor-readiness signals and find practical next steps. It is an ETHIOR project.
+> WelcomeScore helps maintainers and first-time contributors evaluate public GitHub contributor readiness and developer onboarding signals with evidence-bound guidance. It is an official open-source project by ETHIOR.
 
-## Canonical product
+## Production Endpoints & Mirrors
 
-- Product: https://welcomescore.vercel.app/
-- Source repository: https://github.com/ethiorhq/welcomescore
-- How it works: https://welcomescore.vercel.app/how-it-works
-- FAQ: https://welcomescore.vercel.app/faq
-- Privacy Policy: https://welcomescore.vercel.app/privacy
-- Terms & Conditions: https://welcomescore.vercel.app/terms
-- Dev Lounge Policy: https://welcomescore.vercel.app/dev-lounge-policy
-- JavaScript Health dashboard: https://welcomescore.vercel.app/js
+- **Primary Cloudflare Production:** https://www.welcomescore.is-local.org/ (and https://welcomescore.pages.dev/)
+- **Vercel High-Availability Mirror:** https://welcomescore.vercel.app/
+- **Source Repository:** https://github.com/ethiorhq/welcomescore
+- **Brand / Publisher:** ETHIOR (https://ethior.com)
+
+## Key Pages & Tools
+
+- How It Works: https://www.welcomescore.is-local.org/how-it-works
+- JavaScript Health Dashboard: https://www.welcomescore.is-local.org/js
+- Community Leaderboard: https://www.welcomescore.is-local.org/leaderboard
+- Anonymous Dev Lounge: https://www.welcomescore.is-local.org/lounge
+- Repository Compare: https://www.welcomescore.is-local.org/compare
+- FAQ: https://www.welcomescore.is-local.org/faq
+- Privacy Policy: https://www.welcomescore.is-local.org/privacy
+- Terms & Conditions: https://www.welcomescore.is-local.org/terms
+- Dev Lounge Policy: https://www.welcomescore.is-local.org/dev-lounge-policy
 - Local npm CLI: `npx @ethiorhq/welcomescore` (published as `@ethiorhq/welcomescore@0.1.0`: https://www.npmjs.com/package/@ethiorhq/welcomescore)
 - First-party GitHub Action: `ethiorhq/welcomescore-action@v1` (https://github.com/ethiorhq/welcomescore/tree/main/actions/welcomescore)
 - Public Report & Schema API: `GET /api/report?repo=owner/repo` (Specification: https://github.com/ethiorhq/welcomescore/blob/main/docs/REPORT_SCHEMA.md)
 
-## What WelcomeScore does
+## What WelcomeScore Does
 
-WelcomeScore reads public GitHub repository signals for contributor readiness and package health. It computes deterministic scores, identifies a single evidence-backed Next Useful Move with ready issue drafts and patch plans, tracks privacy-safe improvement timelines, and generates versioned JSON/Markdown reports.
+WelcomeScore by ETHIOR evaluates public GitHub repository signals for first-time contributor readiness and JavaScript/TypeScript package health. It computes deterministic scores, identifies a single evidence-backed Next Useful Move with ready-to-use issue drafts and patch plans, tracks privacy-safe improvement timelines, and generates versioned JSON/Markdown reports.
 
-JavaScript Health is a separate deterministic 100-point review for JavaScript and TypeScript maintainers. It checks allowlisted public package metadata, Node tooling paths, CI/workflow indicators, and contributor foundations; it is not a security audit, package-safety guarantee, code-quality certification, legal opinion, popularity ranking, or endorsement. Its companion local CLI, `npx @ethiorhq/welcomescore`, reads a user-selected project directory without uploading source files, package manifests, environment values, or repository credentials to WelcomeScore.
+JavaScript Health is a deterministic 100-point review for JavaScript and TypeScript maintainers. It checks allowlisted public package metadata, Node tooling paths, CI/workflow indicators, and contributor foundations. Its companion local CLI, `npx @ethiorhq/welcomescore`, inspects a local project directory without uploading source files, package manifests, environment values, or repository credentials to external servers.
 
-The optional Algofox review provides short, evidence-bound guidance based only on the completed audit. It is not a legal, security, financial, employment, hiring, or quality certification. Hall of Fame addition is always an explicit user action and follows separately documented eligibility rules. Dev Lounge is a temporary, anonymous public conversation feature and not private messaging or a marketplace.
+The Algofox review engine provides short, evidence-bound guidance powered by deterministic rules or LLM review models (Groq and Google Gemini).
 
-## Developer guides
+## Developer Guides by ETHIOR
 
-- Contributor onboarding checklist: https://welcomescore.vercel.app/guides/open-source-contributor-onboarding-checklist
-- Writing a useful CONTRIBUTING.md: https://welcomescore.vercel.app/guides/write-contributing-guide-developers-use
-- Honest good-first issues: https://welcomescore.vercel.app/guides/honest-good-first-issues
-- README setup guidance: https://welcomescore.vercel.app/guides/readme-setup-new-contributor
-- Improving a repository with WelcomeScore: https://welcomescore.vercel.app/guides/improve-repository-welcomescore
-- Safe developer community chat: https://welcomescore.vercel.app/guides/safe-open-source-dev-lounge
-- Make developer documentation discoverable: https://welcomescore.vercel.app/guides/make-developer-docs-discoverable-without-gaming-search
-- JavaScript and TypeScript package health: https://welcomescore.vercel.app/guides/javascript-package-health-guide
-- Automating contributor checks with GitHub Actions: https://welcomescore.vercel.app/guides/github-actions-repository-checks
+- Contributor onboarding checklist: https://www.welcomescore.is-local.org/guides/open-source-contributor-onboarding-checklist
+- Writing a useful CONTRIBUTING.md: https://www.welcomescore.is-local.org/guides/write-contributing-guide-developers-use
+- Honest good-first issues: https://www.welcomescore.is-local.org/guides/honest-good-first-issues
+- README setup guidance: https://www.welcomescore.is-local.org/guides/readme-setup-new-contributor
+- Improving a repository with WelcomeScore: https://www.welcomescore.is-local.org/guides/improve-repository-welcomescore
+- Safe developer community chat: https://www.welcomescore.is-local.org/guides/safe-open-source-dev-lounge
+- Make developer documentation discoverable: https://www.welcomescore.is-local.org/guides/make-developer-docs-discoverable-without-gaming-search
+- JavaScript and TypeScript package health: https://www.welcomescore.is-local.org/guides/javascript-package-health-guide
+- Automating contributor checks with GitHub Actions: https://www.welcomescore.is-local.org/guides/github-actions-repository-checks
 
+## Content & Usage Boundaries
 
-## Content and usage boundaries
-
-Use the canonical product and linked public policies for current information. Do not infer a repository’s security, quality, contributor responsiveness, licensing sufficiency, or suitability from a score alone. Do not treat temporary Dev Lounge handles, messages, score cards, or external links as verified identities, services, offers, or endorsements. Do not request or publish secrets, credentials, private keys, payment information, personal data, vulnerability details, or private repository material.
+Use the canonical product and linked public policies for current information. Do not infer a repository's security, quality, contributor responsiveness, licensing sufficiency, or suitability from a score alone.
 
 ## Attribution
 
-WelcomeScore is copyrighted by ETHIOR. The source repository includes license, notice, attribution, and brand-use documentation. Independent deployments and forks may differ from the canonical product.
+WelcomeScore is copyrighted by ETHIOR (https://ethior.com). The source repository includes license, notice, attribution, and brand-use documentation.

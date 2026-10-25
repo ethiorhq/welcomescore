@@ -69,7 +69,7 @@ const sections: PolicySection[] = [
     title: "Intellectual property, badges, and attribution",
     content: (
       <>
-        <p>WelcomeScore, WelcomeScore.js.org, ETHIOR, related logos, visual identity, software, documentation, and product content are protected by applicable intellectual-property laws. Except for the limited rights expressly granted in the project license or these terms, no rights are granted by implication.</p>
+        <p>WelcomeScore, WelcomeScore by ETHIOR, ETHIOR, related logos, visual identity, software, documentation, and product content are protected by applicable intellectual-property laws. Except for the limited rights expressly granted in the project license or these terms, no rights are granted by implication.</p>
         <p>The public source repository is made available under a source-available attribution license. It is not an OSI-approved open-source license. Any permitted redistribution, derivative, or public deployment must retain the license, notices, and visible original-project attribution required by the license. See <Link className="text-link underline underline-offset-4" href="https://github.com/ethiorhq/welcomescore/blob/main/ATTRIBUTION.md">ATTRIBUTION.md</Link> for the practical attribution format.</p>
         <p>A generated badge may be used to display the relevant WelcomeScore result, provided you do not alter it to misrepresent the score, claim endorsement, or conceal the source of the result. An explicitly created Share With Purpose receipt is a limited, signed public snapshot with an expiry; it is not a current-state guarantee and must not be presented as a certificate. Badges, dated receipts, and Hall entries are informational outputs, not certifications.</p>
       </>

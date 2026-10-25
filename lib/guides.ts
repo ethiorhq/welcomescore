@@ -492,7 +492,7 @@ export const GUIDES: Guide[] = [
         heading: "Connecting CI findings to the Next Useful Move",
         paragraphs: [
           "When an audit reports a gap—such as a missing CONTRIBUTING.md or unmaintained starter issue—the report output identifies the single highest-leverage next move.",
-          "Maintainers can review the generated issue draft or patch plan preview directly from the CI artifact or web dashboard at https://welcomescore.vercel.app/report/owner/repo.",
+          "Maintainers can review the generated issue draft or patch plan preview directly from the CI artifact or web dashboard at https://www.welcomescore.is-local.org/report/owner/repo.",
         ],
       },
     ],
