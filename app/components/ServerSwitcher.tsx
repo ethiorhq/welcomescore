@@ -16,7 +16,9 @@ export default function ServerSwitcher({ className = "" }: { className?: string 
 
   if (!mounted) {
     return (
-      <div className={`inline-flex items-center gap-1.5 rounded-full border border-muted/20 bg-surface/50 px-2.5 py-1 text-[11px] font-mono text-muted ${className}`}>
+      <div
+        className={`inline-flex items-center gap-1.5 rounded-md border border-muted/30 bg-surface/90 px-2 py-0.5 font-mono text-[10px] text-muted ${className}`}
+      >
         <span className="h-1.5 w-1.5 rounded-full bg-accent/60" />
         <span>Checking server…</span>
       </div>
@@ -24,7 +26,10 @@ export default function ServerSwitcher({ className = "" }: { className?: string 
   }
 
   const isVercel = currentHost.includes("vercel.app");
-  const isCloudflare = currentHost.includes("is-local.org") || currentHost.includes("pages.dev") || currentHost.includes("workers.dev");
+  const isCloudflare =
+    currentHost.includes("is-local.org") ||
+    currentHost.includes("pages.dev") ||
+    currentHost.includes("workers.dev");
 
   const activeLabel = isVercel
     ? "Vercel Node"
@@ -36,32 +41,46 @@ export default function ServerSwitcher({ className = "" }: { className?: string 
     ? `${CLOUDFLARE_PRODUCTION_URL}${currentPath}`
     : `${VERCEL_MIRROR_URL}${currentPath}`;
 
-  const switchLabel = isVercel
-    ? "Cloudflare Edge"
-    : "Vercel Mirror";
+  const switchActionText = isVercel
+    ? "Switch to Cloudflare Edge →"
+    : "Switch to Vercel Mirror →";
+
+  const switchActionShort = isVercel ? "Switch to Cloudflare →" : "Switch to Vercel →";
 
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-full border border-muted/25 bg-surface/70 px-3 py-1 font-mono text-xs shadow-sm backdrop-blur-md transition-colors hover:border-muted/40 ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md border border-muted/30 bg-surface/90 px-2 py-0.5 font-mono text-[10px] sm:text-[11px] text-muted shadow-sm backdrop-blur-md transition-all duration-200 hover:border-accent/40 ${className}`}
       title={`Currently serving from ${activeLabel}. Click to switch server.`}
     >
-      <span className="flex items-center gap-1.5 text-muted">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-        </span>
-        <span className="font-medium text-text">{activeLabel}</span>
+      {/* Live Glowing Status Indicator */}
+      <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
+        <span
+          className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-70 ${
+            isCloudflare ? "bg-emerald-400" : "bg-accent"
+          }`}
+        />
+        <span
+          className={`relative inline-flex h-1.5 w-1.5 rounded-full ${
+            isCloudflare ? "bg-emerald-500" : "bg-accent"
+          }`}
+        />
       </span>
 
-      <span className="text-muted/40">|</span>
+      {/* Active host name */}
+      <span className="font-medium text-text/80 whitespace-nowrap">{activeLabel}</span>
 
+      <span className="text-muted/30" aria-hidden="true">
+        ·
+      </span>
+
+      {/* Action link */}
       <a
         href={targetUrl}
-        className="text-[11px] text-accent hover:underline hover:text-accent/90 transition-colors flex items-center gap-1"
-        title={`Failover or switch to ${switchLabel}`}
+        className="font-semibold text-accent hover:underline hover:text-accent/90 transition-colors whitespace-nowrap"
+        title={`Failover or switch to ${isVercel ? "Cloudflare Edge" : "Vercel Mirror"}`}
       >
-        <span>Switch to {switchLabel}</span>
-        <span aria-hidden="true">→</span>
+        <span className="hidden sm:inline">{switchActionText}</span>
+        <span className="inline sm:hidden">{switchActionShort}</span>
       </a>
     </div>
   );

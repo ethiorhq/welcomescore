@@ -103,10 +103,10 @@ export default function AuditHome({
 
 
   return (
-    <main className="relative flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 py-10 text-text sm:px-6 sm:py-20">
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-8 z-30 flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-        <ServerSwitcher />
+    <main className="relative flex min-h-screen flex-1 flex-col overflow-x-hidden bg-base px-4 pt-20 pb-10 text-text sm:px-6 sm:py-20">
+      <div className="absolute top-3 right-3 sm:top-6 sm:right-8 z-30 flex flex-col items-end gap-1.5">
         <GitHubStarBadge />
+        <ServerSwitcher />
       </div>
       {initialRepository ? (
         <div className="mx-auto w-full max-w-3xl">
@@ -119,26 +119,25 @@ export default function AuditHome({
             <WelcomeScoreWordmark />
           </h1>
 
-          <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <div className="mt-5 flex flex-wrap justify-center gap-2 sm:gap-3">
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent sm:h-10"
+              className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
               href="/leaderboard"
             >
               Explore the Hall of Fame
             </Link>
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 sm:h-10"
+              className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
               href="/lounge"
             >
               Open Dev Lounge
             </Link>
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-md border border-muted/35 bg-surface px-4 font-sans text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent sm:h-10"
+              className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
               href="/js"
             >
               JavaScript Health
             </Link>
-
           </div>
 
           <form

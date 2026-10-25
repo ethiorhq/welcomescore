@@ -91,12 +91,14 @@ export default function SubscriberModal() {
     return () => window.removeEventListener("open-subscriber-modal", handleOpenRequest);
   }, []);
 
-  // 1. Delay Trigger (15 seconds) - only for un-subscribed visitors
+  // 1. Delay Trigger (45 seconds on desktop only) - avoids congesting mobile viewport
   useEffect(() => {
     if (isSuppressed()) return;
+    if (typeof window !== "undefined" && window.innerWidth < 768) return;
+
     const timer = setTimeout(() => {
       openModal();
-    }, 15_000);
+    }, 45_000);
 
     return () => clearTimeout(timer);
   }, [isSuppressed, openModal]);
