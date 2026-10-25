@@ -44,6 +44,9 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  verification: {
+    google: "googlee36968cc925022c1",
+  },
   category: "Developer tools",
   keywords: [
     "open source contributor onboarding",
