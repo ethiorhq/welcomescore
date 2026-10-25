@@ -2,7 +2,6 @@ import { ImageResponse } from "next/og";
 import { verifyShareReceiptToken } from "@/lib/shareReceipt";
 import { formatReceiptDate } from "@/lib/shareTypes";
 
-export const runtime = "edge";
 export const alt = "WelcomeScore dated contributor-readiness audit context";
 export const size = {
   width: 1200,

@@ -1,14 +1,13 @@
 import { ImageResponse } from "next/og";
 import { parseRepository, scoreRepo } from "@/lib/scoreRepo";
 
-export const runtime = "edge";
 export const revalidate = 300;
 
 const regularFont = fetch(
-  new URL("./IBMPlexMono-Regular.ttf", import.meta.url),
+  "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6pfjptAgt5VM-kVkqdyU8n5ig.ttf",
 ).then((response) => response.arrayBuffer());
 const boldFont = fetch(
-  new URL("./IBMPlexMono-Bold.ttf", import.meta.url),
+  "https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3pQP8lc.ttf",
 ).then((response) => response.arrayBuffer());
 
 export async function GET(request: Request) {

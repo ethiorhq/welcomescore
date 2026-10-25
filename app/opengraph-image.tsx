@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt = "WelcomeScore — contributor readiness for public GitHub repositories";
 export const size = {
   width: 1200,
