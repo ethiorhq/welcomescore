@@ -12,6 +12,7 @@
   },
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://www.welcomescore.is-local.org",
+    "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAFlmQZgErAfxtUn3",
     "TURNSTILE_ALLOWED_HOSTNAMES": "welcomescore.is-local.org,www.welcomescore.is-local.org,welcomescore.pages.dev,welcomescore.js.org",
     "GROQ_REVIEW_MODEL": "openai/gpt-oss-20b",
     "GEMINI_REVIEW_MODEL": "gemini-3.7-flash"
