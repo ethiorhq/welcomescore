@@ -21,6 +21,27 @@ const BADGE_STYLES = [
     height: 32,
   },
   {
+    id: "flat",
+    name: "Shields Flat",
+    description: "Standard Shields.io compact pill",
+    width: 140,
+    height: 20,
+  },
+  {
+    id: "flat-square",
+    name: "Flat Square",
+    description: "Crisp rectangular badge",
+    width: 140,
+    height: 20,
+  },
+  {
+    id: "for-the-badge",
+    name: "For the Badge",
+    description: "High-impact uppercase banner",
+    width: 180,
+    height: 28,
+  },
+  {
     id: "2",
     name: "Rank shield",
     description: "Legacy shield visual style",

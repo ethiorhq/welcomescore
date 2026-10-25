@@ -120,22 +120,28 @@ export default function AuditHome({
 
           <div className="mt-5 flex flex-wrap justify-center gap-2 sm:gap-3">
             <Link
+              className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/20"
+              href="/devops"
+            >
+              ⚡ DevOps Doctor
+            </Link>
+            <Link
+              className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
+              href="/org"
+            >
+              🏢 Fleet Cockpit
+            </Link>
+            <Link
               className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
               href="/leaderboard"
             >
               <span className="hidden sm:inline">Explore the </span>Hall of Fame
             </Link>
             <Link
-              className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15"
+              className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
               href="/lounge"
             >
               <span className="hidden sm:inline">Open </span>Dev Lounge
-            </Link>
-            <Link
-              className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md border border-muted/35 bg-surface px-3 sm:px-4 font-sans text-xs sm:text-sm font-medium text-muted transition-colors duration-180 ease-out hover:border-accent/45 hover:text-accent"
-              href="/js"
-            >
-              <span className="hidden sm:inline">JavaScript </span><span className="sm:hidden">JS </span>Health
             </Link>
           </div>
 

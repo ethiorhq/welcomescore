@@ -12,7 +12,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     if (path === "/") {
       priority = 1.0;
       changeFrequency = "daily";
-    } else if (path === "/how-it-works" || path === "/compare" || path === "/leaderboard") {
+    } else if (
+      path === "/how-it-works" ||
+      path === "/compare" ||
+      path === "/leaderboard" ||
+      path === "/devops" ||
+      path === "/org"
+    ) {
       priority = 0.9;
       changeFrequency = "daily";
     } else if (path === "/faq" || path === "/guides" || path === "/js") {

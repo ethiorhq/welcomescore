@@ -15,6 +15,8 @@ import StackEvidencePanel from "@/app/components/report/StackEvidencePanel";
 import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
 import HeaderControls from "@/app/components/HeaderControls";
 import type { StackReport } from "@/lib/stacks/types";
+import AutoFixModal from "@/app/components/report/AutoFixModal";
+import type { AutoFixPackage } from "@/lib/autofix/engine";
 
 export default function PublicReportView({
   initialReport,
@@ -27,6 +29,7 @@ export default function PublicReportView({
   const [timeline, setTimeline] = useState<ImprovementEvent[]>(initialTimeline);
   const [isRechecking, setIsRechecking] = useState(false);
   const [isDraftModalOpen, setIsDraftModalOpen] = useState(false);
+  const [activeAutoFix, setActiveAutoFix] = useState<AutoFixPackage | null>(null);
   const [reportingCheck, setReportingCheck] = useState<EvidenceItem | null>(null);
   const [cliCopied, setCliCopied] = useState(false);
   const [actionCopied, setActionCopied] = useState(false);
@@ -346,7 +349,10 @@ export default function PublicReportView({
         ) : (
           <EvidencePanel
             checks={report.checks}
+            repo={repo}
+            defaultBranch={report.repository.defaultBranch || "main"}
             onReportIncorrectSignal={(check) => setReportingCheck(check)}
+            onTriggerAutoFix={(pkg) => setActiveAutoFix(pkg)}
           />
         )}
 
@@ -464,6 +470,14 @@ export default function PublicReportView({
 
       {/* Global Footer */}
       <SiteFooter />
+
+      {/* Auto-Fix Modal */}
+      {activeAutoFix && (
+        <AutoFixModal
+          fixPackage={activeAutoFix}
+          onClose={() => setActiveAutoFix(null)}
+        />
+      )}
 
       {/* Action Draft Modal */}
       {report.nextUsefulMove && (

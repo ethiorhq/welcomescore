@@ -1,10 +1,14 @@
 "use client";
 
 import type { EvidenceItem } from "@/lib/report/types";
+import { resolveAutoFix, type AutoFixPackage } from "@/lib/autofix/engine";
 
 type EvidencePanelProps = {
   checks: EvidenceItem[];
+  repo?: string;
+  defaultBranch?: string;
   onReportIncorrectSignal?: (check: EvidenceItem) => void;
+  onTriggerAutoFix?: (pkg: AutoFixPackage) => void;
 };
 
 const STATUS_BADGES: Record<
@@ -31,7 +35,10 @@ const STATUS_BADGES: Record<
 
 export default function EvidencePanel({
   checks,
+  repo = "",
+  defaultBranch = "main",
   onReportIncorrectSignal,
+  onTriggerAutoFix,
 }: EvidencePanelProps) {
   // Group by category
   const categories = Array.from(new Set(checks.map((c) => c.category)));
@@ -105,6 +112,19 @@ export default function EvidencePanel({
                           </span>
 
                           <div className="flex items-center gap-2 font-mono text-[11px]">
+                            {check.status !== "pass" && repo && onTriggerAutoFix ? (() => {
+                              const autoFix = resolveAutoFix(check.label, { repo, branch: defaultBranch });
+                              return autoFix ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onTriggerAutoFix(autoFix)}
+                                  className="inline-flex items-center gap-1 rounded bg-accent/20 px-2 py-0.5 font-mono text-[11px] font-semibold text-accent border border-accent/40 hover:bg-accent/30 transition cursor-pointer"
+                                  title={`Generate 1-Click PR on GitHub for ${check.label}`}
+                                >
+                                  ⚡ 1-Click Fix
+                                </button>
+                              ) : null;
+                            })() : null}
                             {check.sourceUrl && (
                               <a
                                 href={check.sourceUrl}

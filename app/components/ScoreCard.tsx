@@ -11,6 +11,8 @@ import {
   CONTRIBUTING_TEMPLATE,
 } from "@/lib/templates";
 import type { Check, ScoreResult } from "@/lib/scoreRepo";
+import { resolveAutoFix, type AutoFixPackage } from "@/lib/autofix/engine";
+import AutoFixModal from "@/app/components/report/AutoFixModal";
 
 const TEMPLATE_OPTIONS = {
   "CONTRIBUTING.md": {
@@ -45,6 +47,7 @@ export default function ScoreCard({
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateFile | null>(
     null,
   );
+  const [activeAutoFix, setActiveAutoFix] = useState<AutoFixPackage | null>(null);
   const [isAddingToLeaderboard, setIsAddingToLeaderboard] = useState(false);
   const [hallOfFameStatus, setHallOfFameStatus] = useState<HallOfFameStatus>(
     result.isEligibleForLeaderboard ? "checking" : "ready",
@@ -138,7 +141,9 @@ export default function ScoreCard({
             check={check}
             repo={result.repo}
             defaultBranch={result.defaultBranch}
+            language={result.primaryLanguage}
             onOpenTemplate={setSelectedTemplate}
+            onOpenAutoFix={setActiveAutoFix}
           />
         ))}
       </div>
@@ -230,6 +235,13 @@ export default function ScoreCard({
           title={TEMPLATE_OPTIONS[selectedTemplate].title}
           content={TEMPLATE_OPTIONS[selectedTemplate].content}
           onClose={() => setSelectedTemplate(null)}
+        />
+      ) : null}
+
+      {activeAutoFix ? (
+        <AutoFixModal
+          fixPackage={activeAutoFix}
+          onClose={() => setActiveAutoFix(null)}
         />
       ) : null}
 
@@ -523,22 +535,34 @@ function CheckPill({
   check,
   repo,
   defaultBranch,
+  description,
+  language,
   onOpenTemplate,
+  onOpenAutoFix,
 }: {
   check: Check;
   repo: string;
   defaultBranch: string;
+  description?: string;
+  language?: string;
   onOpenTemplate: (template: TemplateFile) => void;
+  onOpenAutoFix: (pkg: AutoFixPackage) => void;
 }) {
   const pointLabel = check.passed
     ? `+${check.points}`
     : `0/${check.maxPoints ?? check.points}`;
   const templateFile = isTemplateFile(check.label) ? check.label : null;
-  const canCreateOnGitHub = [
-    "CONTRIBUTING.md",
-    "CODE_OF_CONDUCT.md",
-    "LICENSE",
-  ].includes(check.label);
+  const autoFix = !check.passed
+    ? resolveAutoFix(check.label, {
+        repo,
+        branch: defaultBranch,
+        description,
+        language,
+      })
+    : null;
+  const canCreateOnGitHub =
+    !autoFix &&
+    ["CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "LICENSE"].includes(check.label);
   const createFileUrl = `https://github.com/${repo}/new/${encodeURIComponent(
     defaultBranch,
   )}?filename=${encodeURIComponent(check.label)}`;
@@ -556,9 +580,18 @@ function CheckPill({
       </span>
       <span className="break-words">{check.label}</span>
       <span className="font-mono">{pointLabel}</span>
-      {!check.passed && (templateFile || canCreateOnGitHub) ? (
+      {!check.passed && (autoFix || templateFile || canCreateOnGitHub) ? (
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1 border-l border-muted/35 pl-2">
-          {templateFile ? (
+          {autoFix ? (
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded bg-accent/20 px-2 py-0.5 font-mono text-[11px] font-semibold text-accent border border-accent/40 hover:bg-accent/30 transition cursor-pointer"
+              onClick={() => onOpenAutoFix(autoFix)}
+            >
+              ⚡ 1-Click Fix
+            </button>
+          ) : null}
+          {!autoFix && templateFile ? (
             <button
               type="button"
               className="text-link underline underline-offset-2"
@@ -567,7 +600,7 @@ function CheckPill({
               Get template
             </button>
           ) : null}
-          {canCreateOnGitHub ? (
+          {!autoFix && canCreateOnGitHub ? (
             <a
               className="text-link underline underline-offset-2"
               href={createFileUrl}

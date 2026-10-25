@@ -1,4 +1,12 @@
-export const BADGE_STYLE_IDS = ["1", "2", "3", "4"] as const;
+export const BADGE_STYLE_IDS = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "flat",
+  "flat-square",
+  "for-the-badge",
+] as const;
 
 export type BadgeStyleId = typeof BADGE_STYLE_IDS[number];
 
@@ -8,6 +16,7 @@ export type BadgeData = {
   grade: string;
   label?: string;
   color?: string;
+  metric?: string;
 };
 
 export type RankConfig = {
@@ -71,9 +80,13 @@ export function normalizeBadgeStyle(value: string | null): BadgeStyleId {
     shield: "2",
     metrics: "3",
     glow: "4",
+    flat: "flat",
+    "flat-square": "flat-square",
+    "for-the-badge": "for-the-badge",
   };
-  const style = value ? namedStyles[value.toLowerCase()] ?? value : "1";
-  return BADGE_STYLE_IDS.includes(style as BadgeStyleId) ? style as BadgeStyleId : "1";
+  const key = (value || "").toLowerCase().trim();
+  const matched = namedStyles[key] ?? value;
+  return BADGE_STYLE_IDS.includes(matched as BadgeStyleId) ? (matched as BadgeStyleId) : "1";
 }
 
 export function createBadgeSvg(data: BadgeData, style: BadgeStyleId) {
@@ -89,6 +102,12 @@ export function createBadgeSvg(data: BadgeData, style: BadgeStyleId) {
       return createMetricBarBadge(data, rank);
     case "4":
       return createGlowBadge(data, rank);
+    case "flat":
+      return createFlatBadge(data, rank, false);
+    case "flat-square":
+      return createFlatBadge(data, rank, true);
+    case "for-the-badge":
+      return createForTheBadge(data, rank);
     default:
       return createMinimalBadge(data, rank);
   }
@@ -200,6 +219,55 @@ function createGlowBadge(data: BadgeData, rank: RankConfig) {
     <text x="402" y="29" text-anchor="end" fill="${rank.color}" font-size="9" font-weight="700" letter-spacing=".9">${escapeXml(rank.level.toUpperCase())}</text>
     <text x="404" y="76" text-anchor="end" fill="${rank.color}" font-size="40" font-weight="700">${data.score}</text>
     <text x="404" y="93" text-anchor="end" class="muted" font-size="11">${escapeXml(data.grade)} grade / 100</text>
+  `);
+}
+
+function createFlatBadge(data: BadgeData, rank: RankConfig, isSquare = false) {
+  const leftText = data.label ? data.label : "welcomescore";
+  const rightText = `${data.score} ${data.grade}`;
+  const leftWidth = Math.max(80, leftText.length * 7 + 16);
+  const rightWidth = Math.max(50, rightText.length * 7.5 + 16);
+  const totalWidth = leftWidth + rightWidth;
+  const radius = isSquare ? 0 : 3;
+
+  return wrapSvg(totalWidth, 20, `
+    <linearGradient id="b" x2="0" y2="100%">
+      <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+      <stop offset="1" stop-opacity=".1"/>
+    </linearGradient>
+    <clipPath id="a">
+      <rect width="${totalWidth}" height="20" rx="${radius}" fill="#fff"/>
+    </clipPath>
+    <g clip-path="url(#a)">
+      <rect width="${leftWidth}" height="20" fill="#252936"/>
+      <rect x="${leftWidth}" width="${rightWidth}" height="20" fill="${rank.color}"/>
+      <rect width="${totalWidth}" height="20" fill="url(#b)"/>
+    </g>
+    <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+      <text x="${leftWidth / 2}" y="15" fill="#010101" fill-opacity=".3">${escapeXml(leftText)}</text>
+      <text x="${leftWidth / 2}" y="14">${escapeXml(leftText)}</text>
+      <text x="${leftWidth + rightWidth / 2}" y="15" fill="#010101" fill-opacity=".3">${escapeXml(rightText)}</text>
+      <text x="${leftWidth + rightWidth / 2}" y="14" fill="#12141C" font-weight="700">${escapeXml(rightText)}</text>
+    </g>
+  `);
+}
+
+function createForTheBadge(data: BadgeData, rank: RankConfig) {
+  const leftText = (data.label ? data.label : "WELCOMESCORE").toUpperCase();
+  const rightText = `${data.score} ${data.grade}`.toUpperCase();
+  const leftWidth = Math.max(120, leftText.length * 8.5 + 24);
+  const rightWidth = Math.max(70, rightText.length * 9 + 24);
+  const totalWidth = leftWidth + rightWidth;
+
+  return wrapSvg(totalWidth, 28, `
+    <g shape-rendering="crispEdges">
+      <rect width="${leftWidth}" height="28" fill="#1B1E29"/>
+      <rect x="${leftWidth}" width="${rightWidth}" height="28" fill="${rank.color}"/>
+    </g>
+    <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="10" font-weight="bold" letter-spacing="1.2">
+      <text x="${leftWidth / 2}" y="17.5" fill="#fff">${escapeXml(leftText)}</text>
+      <text x="${leftWidth + rightWidth / 2}" y="17.5" fill="#12141C">${escapeXml(rightText)}</text>
+    </g>
   `);
 }
 
