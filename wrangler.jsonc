@@ -10,5 +10,15 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "account_id": "0ad28641fcdacb5e69211baa6aa1da7a"
+  "account_id": "0ad28641fcdacb5e69211baa6aa1da7a",
+  "routes": [
+    {
+      "pattern": "welcomescore.is-local.org",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.welcomescore.is-local.org",
+      "custom_domain": true
+    }
+  ]
 }
