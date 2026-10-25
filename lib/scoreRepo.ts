@@ -259,6 +259,7 @@ function githubFetch(url: string, fresh = false) {
   const headers = new Headers({
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
+    "User-Agent": "WelcomeScore/0.1.0",
   });
 
   if (process.env.GITHUB_TOKEN) {

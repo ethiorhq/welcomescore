@@ -11,7 +11,7 @@
     "build:worker": "opennextjs-cloudflare build",
     "preview": "opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare deploy",
-    "deploy:pages": "wrangler pages deploy .open-next/assets --project-name=welcomescore --branch=main --force",
+    "deploy:pages": "node scripts/prepare-pages.mjs && wrangler pages deploy .open-next/assets --project-name=welcomescore --branch=main --force",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",

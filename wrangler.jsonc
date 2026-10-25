@@ -10,6 +10,12 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://www.welcomescore.is-local.org",
+    "TURNSTILE_ALLOWED_HOSTNAMES": "welcomescore.is-local.org,www.welcomescore.is-local.org,welcomescore.pages.dev,welcomescore.js.org",
+    "GROQ_REVIEW_MODEL": "openai/gpt-oss-20b",
+    "GEMINI_REVIEW_MODEL": "gemini-3.7-flash"
+  },
   "account_id": "0ad28641fcdacb5e69211baa6aa1da7a",
   "workers_dev": true,
   "routes": [
