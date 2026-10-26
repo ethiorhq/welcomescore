@@ -9,6 +9,7 @@ const FOOTER_LINKS = [
   { href: "/devops", label: "DevOps Doctor" },
   { href: "/org", label: "Fleet Cockpit" },
   { href: "/templates", label: "Template Studio" },
+  { href: "/js", label: "JS Health Index" },
   { href: "/guides", label: "Developer guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/policies/multi-server", label: "Multi-Server Policy" },
