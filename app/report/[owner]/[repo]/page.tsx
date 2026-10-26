@@ -9,6 +9,8 @@ import { calculateImprovementFromPreviousEvent } from "@/lib/improvement/diff";
 import { generateAuditReportLd, stringifyJsonLd } from "@/lib/schemaLd";
 import PublicReportView from "./PublicReportView";
 
+import ReportErrorNotice from "./ReportErrorNotice";
+
 export const runtime = "nodejs";
 export const revalidate = 300;
 
@@ -57,11 +59,26 @@ export default async function PublicReportPage({
       stackReports: stackEval.stackReports,
     });
   } catch (error) {
-    if (error instanceof ScoreRepoError && error.code === "not-found") {
-      notFound();
+    if (error instanceof ScoreRepoError) {
+      if (error.code === "not-found") {
+        notFound();
+      }
+      return (
+        <ReportErrorNotice
+          owner={params.owner}
+          repo={params.repo}
+          errorType={error.code}
+          message={error.message}
+        />
+      );
     }
-    // Re-throw or handle
-    throw error;
+    return (
+      <ReportErrorNotice
+        owner={params.owner}
+        repo={params.repo}
+        errorType="generic"
+      />
+    );
   }
 
   const repo = `${params.owner}/${params.repo}`.toLowerCase();

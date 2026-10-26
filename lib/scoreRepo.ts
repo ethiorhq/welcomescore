@@ -125,14 +125,13 @@ export async function scoreRepo(
     githubFetch(issueSearchUrl.toString(), options.fresh),
   ]);
 
-  if ([contentsResponse, readmeResponse, issuesResponse].some(isRateLimited)) {
+  if ([contentsResponse, readmeResponse].some(isRateLimited)) {
     throw new ScoreRepoError("rate-limit", 429);
   }
 
   if (
     !isAllowedOptionalResponse(contentsResponse) ||
-    !isAllowedOptionalResponse(readmeResponse) ||
-    !issuesResponse.ok
+    !isAllowedOptionalResponse(readmeResponse)
   ) {
     throw new ScoreRepoError("upstream-error", 502);
   }
@@ -143,7 +142,9 @@ export async function scoreRepo(
   const readme = readmeResponse.ok
     ? ((await readmeResponse.json()) as GitHubReadme)
     : null;
-  const issueSearch = (await issuesResponse.json()) as GitHubIssueSearch;
+  const issueSearch: GitHubIssueSearch = issuesResponse.ok
+    ? ((await issuesResponse.json()) as GitHubIssueSearch)
+    : { total_count: 0, items: [] };
 
   const fileNames = new Set(files.map((file) => file.name.toLowerCase()));
   const hasContributingGuide = fileNames.has("contributing.md");
