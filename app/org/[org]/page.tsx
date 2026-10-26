@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import OrgFleetDashboard from "../OrgFleetDashboard";
 import { aggregateOrgFleet } from "@/lib/org/fleetEngine";
+import { pageMetadata } from "@/lib/seo";
+import { generateOrgFleetLd, stringifyJsonLd } from "@/lib/schemaLd";
 
 interface PageProps {
   params: Promise<{
@@ -11,9 +13,14 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { org } = await params;
 
-  return {
+  const baseMeta = pageMetadata({
     title: `${org} Organization Multi-Repo Fleet Audit · ETHIOR WelcomeScore`,
     description: `Fleet-wide contributor health index, stale repository radar, and license compliance intelligence for GitHub organization @${org}.`,
+    path: `/org/${org}`,
+  });
+
+  return {
+    ...baseMeta,
     keywords: [
       org,
       "ETHIOR",
@@ -22,15 +29,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       `${org} contributor readiness`,
       "fleet cockpit",
     ],
-    openGraph: {
-      title: `${org} GitHub Fleet Health Cockpit · ETHIOR`,
-      description: `Unified contributor readiness and DevOps audit across all public repositories in @${org}.`,
-      type: "profile",
-      url: `https://www.welcomescore.is-local.org/org/${org}`,
-    },
-    alternates: {
-      canonical: `https://www.welcomescore.is-local.org/org/${org}`,
-    },
   };
 }
 
@@ -50,10 +48,19 @@ export default async function OrgFleetPage({ params }: PageProps) {
     },
   ]);
 
+  const jsonLd = generateOrgFleetLd(org);
+
   return (
-    <OrgFleetDashboard
-      initialOrg={org}
-      initialReport={initialReport}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: stringifyJsonLd(jsonLd) }}
+      />
+      <OrgFleetDashboard
+        initialOrg={org}
+        initialReport={initialReport}
+      />
+    </>
   );
 }
+

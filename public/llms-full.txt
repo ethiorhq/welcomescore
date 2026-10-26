@@ -133,7 +133,34 @@ WelcomeScore operates on an active-active dual server topology:
 
 ---
 
-## 8. Brand Attribution & Legal Notice
+## 8. All-in-One DevOps & Contributor Engineering Suite
 
-WelcomeScore is an official project of ETHIOR. All trademarks, service marks, visual identity elements, and algorithms are proprietary to ETHIOR. 
+WelcomeScore provides enterprise-grade developer tooling beyond onboarding audits:
+
+### DevOps CI/CD Pipeline Doctor (`/devops`)
+- Profiler for GitHub Actions workflow files (`.github/workflows/*.yml`).
+- Evaluates dependency caching (`actions/setup-node` with cache, pip/cargo caching).
+- Concurrency management (`concurrency.cancel-in-progress: true` to prevent runner pile-ups).
+- Supply-chain security (SHA commit pinning for third-party actions).
+- License compliance radar: analyzes copyleft licenses (GPL, AGPL) vs. permissive licenses (MIT, Apache 2.0).
+- Calculates estimated wasted billable runner minutes saved per month.
+
+### Multi-Repo Fleet Cockpit (`/org/:org`)
+- Aggregates all public repositories for an entire GitHub organization.
+- Monitors stale repository drift, missing licenses, and fleet-wide onboarding scores.
+- Renders distribution matrices and fleet-wide actionable recommendations.
+
+### Community Template & CI Studio (`/templates`)
+- Zero-token interactive generator for open-source health files.
+- Generates CONTRIBUTING.md, issue templates, PR templates, Dependabot configs, and GitHub Actions CI pipelines with 1-click GitHub dispatch.
+
+### Deep Stack Scans (React 19 & Next.js Deep Health)
+- Scans `package.json` and directory trees for React 19 compiler compatibility, Server Actions, Next.js App Router, dynamic OpenGraph generation, and metadata APIs.
+
+---
+
+## 9. Brand Attribution & Legal Notice
+
+WelcomeScore is an official open-source project by ETHIOR. All trademarks, service marks, visual identity elements, and algorithms are proprietary to ETHIOR. 
 For media inquiries, enterprise partnerships, or commercial license discussions, visit https://ethior.com.
+

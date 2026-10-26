@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import DevOpsDashboard from "../../DevOpsDashboard";
 import { diagnoseDevOps } from "@/lib/devops/doctor";
+import { pageMetadata } from "@/lib/seo";
+import { generateDevOpsAuditLd, stringifyJsonLd } from "@/lib/schemaLd";
 
 interface PageProps {
   params: Promise<{
@@ -13,11 +15,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { owner, repo } = await params;
   const fullName = `${owner}/${repo}`;
 
-  return {
+  const baseMeta = pageMetadata({
     title: `${fullName} DevOps CI/CD & License Audit · ETHIOR WelcomeScore`,
     description: `Comprehensive DevOps pipeline analysis for ${fullName}. Audit GitHub Actions runner efficiency, dependency caching, supply-chain pin security, and license compliance.`,
+    path: `/devops/${owner}/${repo}`,
+    type: "article",
+  });
+
+  return {
+    ...baseMeta,
     keywords: [
       fullName,
+      owner,
+      repo,
       "ETHIOR",
       `${repo} github actions`,
       `${repo} devops score`,
@@ -25,15 +35,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       `${repo} license compliance`,
       "pipeline doctor",
     ],
-    openGraph: {
-      title: `${fullName} DevOps Pipeline Diagnostic · ETHIOR`,
-      description: `Grade and billable runner efficiency diagnosis for ${fullName}.`,
-      type: "article",
-      url: `https://www.welcomescore.is-local.org/devops/${owner}/${repo}`,
-    },
-    alternates: {
-      canonical: `https://www.welcomescore.is-local.org/devops/${owner}/${repo}`,
-    },
   };
 }
 
@@ -49,10 +50,19 @@ export default async function RepoDevOpsPage({ params }: PageProps) {
     workflowFiles: [],
   });
 
+  const jsonLd = generateDevOpsAuditLd(owner, repo, initialReport);
+
   return (
-    <DevOpsDashboard
-      initialRepo={fullName}
-      initialReport={initialReport}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: stringifyJsonLd(jsonLd) }}
+      />
+      <DevOpsDashboard
+        initialRepo={fullName}
+        initialReport={initialReport}
+      />
+    </>
   );
 }
+

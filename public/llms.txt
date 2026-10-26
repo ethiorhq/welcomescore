@@ -11,11 +11,16 @@
 
 ## Key Pages & Tools
 
-- How It Works: https://www.welcomescore.is-local.org/how-it-works
+- Primary Contributor Readiness Audit: https://www.welcomescore.is-local.org/
+- DevOps CI/CD Pipeline Doctor & License Radar: https://www.welcomescore.is-local.org/devops
+- Multi-Repo Fleet Cockpit: https://www.welcomescore.is-local.org/org
+- Community Template & CI Studio: https://www.welcomescore.is-local.org/templates
 - JavaScript Health Dashboard: https://www.welcomescore.is-local.org/js
-- Community Leaderboard: https://www.welcomescore.is-local.org/leaderboard
+- Community Leaderboard (Hall of Fame): https://www.welcomescore.is-local.org/leaderboard
 - Anonymous Dev Lounge: https://www.welcomescore.is-local.org/lounge
 - Repository Compare: https://www.welcomescore.is-local.org/compare
+- Multi-Server Active-Active Mirror Policy: https://www.welcomescore.is-local.org/policies/multi-server
+- How It Works: https://www.welcomescore.is-local.org/how-it-works
 - FAQ: https://www.welcomescore.is-local.org/faq
 - Privacy Policy: https://www.welcomescore.is-local.org/privacy
 - Terms & Conditions: https://www.welcomescore.is-local.org/terms
@@ -23,14 +28,21 @@
 - Local npm CLI: `npx @ethiorhq/welcomescore` (published as `@ethiorhq/welcomescore@0.1.0`: https://www.npmjs.com/package/@ethiorhq/welcomescore)
 - First-party GitHub Action: `ethiorhq/welcomescore-action@v1` (https://github.com/ethiorhq/welcomescore/tree/main/actions/welcomescore)
 - Public Report & Schema API: `GET /api/report?repo=owner/repo` (Specification: https://github.com/ethiorhq/welcomescore/blob/main/docs/REPORT_SCHEMA.md)
+- DevOps Doctor Diagnostic API: `GET /api/devops?repo=owner/repo`
+- Organization Fleet Aggregator API: `GET /api/org/:org`
 
 ## What WelcomeScore Does
 
-WelcomeScore by ETHIOR evaluates public GitHub repository signals for first-time contributor readiness and JavaScript/TypeScript package health. It computes deterministic scores, identifies a single evidence-backed Next Useful Move with ready-to-use issue drafts and patch plans, tracks privacy-safe improvement timelines, and generates versioned JSON/Markdown reports.
+WelcomeScore by ETHIOR is the all-in-one developer experience, contributor readiness, and DevOps audit engine for public GitHub repositories. Key capabilities include:
 
-JavaScript Health is a deterministic 100-point review for JavaScript and TypeScript maintainers. It checks allowlisted public package metadata, Node tooling paths, CI/workflow indicators, and contributor foundations. Its companion local CLI, `npx @ethiorhq/welcomescore`, inspects a local project directory without uploading source files, package manifests, environment values, or repository credentials to external servers.
-
-The Algofox review engine provides short, evidence-bound guidance powered by deterministic rules or LLM review models (Groq and Google Gemini).
+1. **Contributor Readiness Audit**: Deterministic 5-pillar scoring checking CONTRIBUTING.md, Code of Conduct, README setup, License, and Good-First-Issue signals.
+2. **DevOps Pipeline Doctor**: Profiler for GitHub Actions workflows calculating wasted runner compute minutes, dependency caching (npm/pnpm/yarn/pip), concurrency cancellation, supply-chain SHA pinning, and copyleft/permissive license compliance.
+3. **Multi-Repo Fleet Cockpit**: Organization-wide health overview for GitHub organizations (`/org/:org`) detecting stale repository drift, missing licenses, and fleet contributor readiness averages.
+4. **Community Template & CI Studio**: Zero-token interactive generator for GitHub issue forms, PR templates, Dependabot configs, CONTRIBUTING.md guides, and GitHub Actions CI pipelines with 1-click dispatch.
+5. **Next Useful Move & 1-Click Auto-Fix**: Automatically identifies the single highest-impact onboarding gap and provides complete copyable remediation patches and issue drafts.
+6. **Stack-Specific Deep Health**: Automated deep scans for React 19 readiness and Next.js modern architecture (App Router, Turbopack, dynamic OpenGraph, metadata APIs).
+7. **Multi-Server Edge Resilience**: Powered by Cloudflare Workers (Primary) and Vercel Edge (Mirror) with automatic health probes and client-side failover.
+8. **Algofox Dev Assistant & Review**: Interactive community companion providing evidence-bound actionable feedback without evaluating private code.
 
 ## Developer Guides by ETHIOR
 

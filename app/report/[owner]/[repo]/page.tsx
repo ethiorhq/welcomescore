@@ -6,6 +6,7 @@ import { getGitHubStackEvaluation } from "@/lib/stacks/github";
 import { pageMetadata } from "@/lib/seo";
 import { getRepoTimeline, recordImprovementEvent } from "@/lib/improvement/timeline";
 import { calculateImprovementFromPreviousEvent } from "@/lib/improvement/diff";
+import { generateAuditReportLd, stringifyJsonLd } from "@/lib/schemaLd";
 import PublicReportView from "./PublicReportView";
 
 export const runtime = "nodejs";
@@ -17,11 +18,27 @@ export async function generateMetadata({
   params: { owner: string; repo: string };
 }): Promise<Metadata> {
   const repo = `${params.owner}/${params.repo}`;
-  return pageMetadata({
-    title: `${repo} — WelcomeScore Public Report`,
-    description: `Evidence-based contributor readiness report and Next Useful Move for ${repo} on WelcomeScore.`,
+  const metadata = pageMetadata({
+    title: `${repo} Contributor Readiness Audit & Health Report | WelcomeScore`,
+    description: `Comprehensive open source contributor onboarding audit and Next Useful Move for ${repo}. Evaluates documentation, Code of Conduct, good first issues, and license compliance.`,
     path: `/report/${params.owner}/${params.repo}`,
   });
+
+  return {
+    ...metadata,
+    keywords: [
+      repo,
+      params.owner,
+      params.repo,
+      "ETHIOR WelcomeScore",
+      `${repo} contributor readiness`,
+      `${repo} good first issues`,
+      `${repo} open source health check`,
+      "CONTRIBUTING.md validator",
+      "repository onboarding audit",
+      "open source maintainer report",
+    ],
+  };
 }
 
 export default async function PublicReportPage({
@@ -56,6 +73,16 @@ export default async function PublicReportPage({
     timelineEvents = [initialEvent];
   }
 
-  return <PublicReportView initialReport={report} initialTimeline={timelineEvents} />;
+  const jsonLd = generateAuditReportLd(params.owner, params.repo, report);
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: stringifyJsonLd(jsonLd) }}
+      />
+      <PublicReportView initialReport={report} initialTimeline={timelineEvents} />
+    </>
+  );
 }
 
