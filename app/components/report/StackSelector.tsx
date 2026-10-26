@@ -59,7 +59,7 @@ export default function StackSelector({
       aria-label="Stack evaluation selector"
       className="flex items-center gap-2 overflow-x-auto pb-1"
     >
-      <div className="flex items-center gap-1.5 rounded-xl border border-muted/25 bg-surface/80 p-1.5 backdrop-blur-sm shadow-md">
+      <div className="flex items-center gap-1.5 rounded-md border border-muted/25 bg-surface p-1.5">
         {availableStacks.map((s) => {
           const isActive = activeStack === s.id;
           return (
@@ -67,9 +67,9 @@ export default function StackSelector({
               key={s.id}
               onClick={() => onSelectStack(s.id)}
               type="button"
-              className={`flex items-center gap-2.5 rounded-lg px-3.5 py-2 font-mono text-xs transition-all duration-150 ${
+              className={`flex items-center gap-2.5 rounded-md px-3.5 py-1.5 font-mono text-xs transition-colors duration-150 ${
                 isActive
-                  ? "bg-accent text-base font-bold shadow"
+                  ? "bg-accent text-base font-semibold shadow-sm"
                   : "text-muted hover:text-text hover:bg-white/5"
               }`}
             >

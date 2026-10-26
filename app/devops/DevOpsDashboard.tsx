@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import BackButton from "@/app/components/BackButton";
 import HeaderControls from "@/app/components/HeaderControls";
-import SiteFooter from "@/app/components/SiteFooter";
 import type { DevOpsDoctorReport } from "@/lib/devops/doctor";
 
 const BENCHMARKS = [
@@ -68,105 +68,121 @@ export default function DevOpsDashboard({
   const directPrUrl =
     activeRepo && report?.recommendedCiPatch
       ? `https://github.com/${activeRepo}/new/main?filename=${encodeURIComponent(
-          ".github/workflows/ci.yml",
+          ".github/workflows/ci.yml"
         )}&value=${encodeURIComponent(report.recommendedCiPatch)}`
       : null;
 
   return (
-    <div className="min-h-screen bg-base text-text selection:bg-accent/30 selection:text-text">
-      {/* Top Header */}
-      <header className="border-b border-muted/20 bg-surface/50 backdrop-blur-md sticky top-0 z-40">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 group">
-            <WelcomeScoreWordmark />
-          </Link>
-          <div className="flex items-center gap-3">
-            <nav className="hidden sm:flex items-center gap-3 font-mono text-xs text-muted">
-              <Link href="/" className="hover:text-text transition">Audits</Link>
-              <Link href="/devops" className="text-accent font-semibold">DevOps Doctor</Link>
-              <Link href="/compare" className="hover:text-text transition">Compare</Link>
-              <Link href="/lounge" className="hover:text-text transition">Dev Lounge</Link>
-            </nav>
+    <main className="min-h-screen bg-base px-4 py-8 text-text sm:px-6 sm:py-12">
+      <div className="mx-auto max-w-6xl space-y-6">
+        {/* Authentic Page Header */}
+        <header className="flex flex-col gap-6 border-b border-muted/20 pb-8 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+              DevOps CI/CD Pipeline Doctor
+            </p>
+            <h1 className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-3xl text-text sm:text-5xl">
+              <WelcomeScoreWordmark badgeClassName="sm:mt-1.5" />
+              <span className="font-mono font-bold tracking-tight">Pipeline Doctor</span>
+            </h1>
+            <p className="mt-3 max-w-2xl font-sans text-sm leading-6 text-muted sm:text-base">
+              Audit GitHub Actions and workflow efficiency. Eliminate wasted billable runner minutes, plug supply chain vulnerabilities, and resolve license copyleft conflicts.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <BackButton />
+            <Link
+              href="/"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98] sm:h-10"
+            >
+              Check a repository
+            </Link>
             <HeaderControls />
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 space-y-8">
-        {/* Hero Section */}
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3.5 py-1 font-mono text-xs text-accent">
-            <span className="h-2 w-2 rounded-full bg-accent animate-ping" />
-            ETHIOR DevOps CI/CD Pipeline Doctor & License Radar
-          </div>
-          <h1 className="font-mono text-2xl sm:text-4xl font-extrabold tracking-tight text-text">
-            Audit GitHub Actions & Pipeline Efficiency
-          </h1>
-          <p className="mx-auto max-w-2xl font-sans text-sm text-muted leading-relaxed">
-            Eliminate wasted billable runner minutes, plug supply chain vulnerabilities, resolve license copyleft conflicts, and generate 1-click CI workflow optimizations.
+        {/* Authentic Notice Callout */}
+        <section className="rounded-lg border border-accent/25 bg-surface px-5 py-4 sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <p className="font-sans text-sm leading-6 text-text">
+            DevOps Doctor diagnostics inspect workflow triggers, runner cache misses, unpinned actions, and license copyleft risks.
           </p>
+          <span className="mt-2 inline-block shrink-0 font-mono text-xs text-muted sm:mt-0">
+            Zero tokens required · Read-only audit
+          </span>
+        </section>
 
-          {/* Search Form */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void handleAnalyze(repoInput);
-            }}
-            className="mx-auto max-w-xl pt-2 flex flex-col sm:flex-row gap-2"
+        {/* Search Form */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleAnalyze(repoInput);
+          }}
+          className="flex w-full flex-col gap-3 sm:flex-row"
+        >
+          <label className="sr-only" htmlFor="devops-repo-input">
+            Repository
+          </label>
+          <input
+            id="devops-repo-input"
+            type="text"
+            value={repoInput}
+            onChange={(e) => setRepoInput(e.target.value)}
+            placeholder="owner/repo — e.g. vercel/next.js"
+            className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-base text-text outline-none placeholder:text-muted focus:border-accent sm:text-sm"
+          />
+          <button
+            type="submit"
+            disabled={loading || !repoInput.trim()}
+            className="h-12 shrink-0 rounded-md bg-accent px-6 font-sans text-sm font-semibold text-base active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted"
           >
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={repoInput}
-                onChange={(e) => setRepoInput(e.target.value)}
-                placeholder="e.g. vercel/next.js or owner/repo"
-                className="w-full rounded-lg border border-muted/30 bg-surface/80 px-4 py-3 font-mono text-sm text-text placeholder-muted/60 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading || !repoInput.trim()}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-6 py-3 font-mono text-sm font-semibold text-base transition duration-150 hover:bg-accent/90 disabled:opacity-50 cursor-pointer shadow-lg shadow-accent/10"
-            >
-              {loading ? "Diagnosing..." : "Diagnose Pipeline"}
-            </button>
-          </form>
+            {loading ? "Diagnosing..." : "Diagnose Pipeline"}
+          </button>
+        </form>
 
-          {/* Benchmark Quick Chips */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-            <span className="font-mono text-xs text-muted/70">Popular benchmarks:</span>
-            {BENCHMARKS.map((bm) => (
-              <button
-                key={bm.name}
-                type="button"
-                onClick={() => {
-                  setRepoInput(bm.name);
-                  void handleAnalyze(bm.name);
-                }}
-                className="rounded-md border border-muted/20 bg-surface/40 px-2.5 py-1 font-mono text-xs text-muted hover:border-accent hover:text-accent transition"
-              >
-                {bm.label}
-              </button>
-            ))}
-          </div>
+        {/* Popular Benchmarks Chips */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-xs uppercase tracking-wider text-muted">
+            Popular benchmarks:
+          </span>
+          {BENCHMARKS.map((bm) => (
+            <button
+              key={bm.name}
+              type="button"
+              onClick={() => {
+                setRepoInput(bm.name);
+                void handleAnalyze(bm.name);
+              }}
+              className="rounded-md border border-muted/30 bg-surface px-3 py-1 font-mono text-xs text-muted hover:border-accent/40 hover:text-text transition"
+            >
+              {bm.label}
+            </button>
+          ))}
         </div>
 
-        {/* Error Banner */}
+        {/* Loading State */}
+        {loading && (
+          <div className="rounded-lg border border-accent/25 bg-surface/50 p-8 text-center space-y-3 font-mono">
+            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+            <p className="text-sm text-accent">Inspecting GitHub Actions workflows and license files for {activeRepo}...</p>
+          </div>
+        )}
+
+        {/* Error State */}
         {error && (
-          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400">
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400">
             ⚠ {error}
           </div>
         )}
 
-        {/* Diagnostic Results Report */}
-        {report && (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            {/* Top Score & Grade Banner */}
-            <section className="rounded-2xl border border-muted/25 bg-surface/90 p-6 sm:p-8 shadow-xl relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        {/* Results Container */}
+        {report && !loading && (
+          <div className="space-y-6">
+            {/* Top Overview Card */}
+            <section className="rounded-lg border border-muted/25 bg-surface p-6 sm:p-8 space-y-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="font-mono text-xs uppercase tracking-wider text-accent font-semibold">
-                    DevOps Diagnostic Overview · {activeRepo}
+                    DevOps Diagnostic Report: {activeRepo}
                   </p>
                   <h2 className="mt-1 font-mono text-2xl sm:text-3xl font-bold text-text">
                     Pipeline Health: Grade {report.grade}
@@ -176,7 +192,7 @@ export default function DevOpsDashboard({
                   </p>
                 </div>
 
-                <div className="flex items-center gap-4 bg-base/60 border border-muted/20 rounded-xl px-5 py-4">
+                <div className="flex items-center gap-4 bg-base/60 border border-muted/20 rounded-md px-5 py-4">
                   <div>
                     <span className="block font-mono text-4xl sm:text-5xl font-extrabold text-accent">
                       {report.score}
@@ -210,7 +226,7 @@ export default function DevOpsDashboard({
                     href={directPrUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-good/20 px-3 py-1.5 font-mono text-xs font-semibold text-good border border-good/40 hover:bg-good/30 transition shadow-sm"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-good/20 px-3 py-1.5 font-mono text-xs font-semibold text-good border border-good/40 hover:bg-good/30 transition shadow-sm"
                   >
                     🚀 Apply 1-Click CI Optimizer PR ↗
                   </a>
@@ -220,25 +236,25 @@ export default function DevOpsDashboard({
 
             {/* 4 Pillars Subscores */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="rounded-xl border border-muted/20 bg-surface/50 p-4 space-y-1">
+              <div className="rounded-lg border border-muted/20 bg-surface/50 p-4 space-y-1">
                 <span className="font-mono text-[11px] text-muted uppercase tracking-wider block">Dependency Cache</span>
                 <span className="font-mono text-2xl font-bold text-text">{report.metrics.cachingScore}%</span>
                 <p className="font-sans text-xs text-muted">npm/pnpm/yarn cache re-use</p>
               </div>
 
-              <div className="rounded-xl border border-muted/20 bg-surface/50 p-4 space-y-1">
+              <div className="rounded-lg border border-muted/20 bg-surface/50 p-4 space-y-1">
                 <span className="font-mono text-[11px] text-muted uppercase tracking-wider block">Supply Chain Safety</span>
                 <span className="font-mono text-2xl font-bold text-text">{report.metrics.securityScore}%</span>
                 <p className="font-sans text-xs text-muted">Pinned immutable actions</p>
               </div>
 
-              <div className="rounded-xl border border-muted/20 bg-surface/50 p-4 space-y-1">
+              <div className="rounded-lg border border-muted/20 bg-surface/50 p-4 space-y-1">
                 <span className="font-mono text-[11px] text-muted uppercase tracking-wider block">Concurrency Guard</span>
                 <span className="font-mono text-2xl font-bold text-text">{report.metrics.concurrencyScore}%</span>
                 <p className="font-sans text-xs text-muted">Cancels obsolete builds</p>
               </div>
 
-              <div className="rounded-xl border border-muted/20 bg-surface/50 p-4 space-y-1">
+              <div className="rounded-lg border border-muted/20 bg-surface/50 p-4 space-y-1">
                 <span className="font-mono text-[11px] text-muted uppercase tracking-wider block">License Radar</span>
                 <span className="font-mono text-2xl font-bold text-text">{report.metrics.licenseScore}%</span>
                 <p className="font-sans text-xs text-muted">{report.licenseCompliance.classification} ({report.licenseCompliance.licenseSpdx})</p>
@@ -246,37 +262,37 @@ export default function DevOpsDashboard({
             </div>
 
             {/* Tabs Navigation */}
-            <div className="flex border-b border-muted/20 gap-2 font-mono text-xs">
+            <div className="flex flex-wrap gap-2 border-b border-muted/20 pb-3 font-mono text-xs">
               <button
                 type="button"
                 onClick={() => setActiveTab("overview")}
-                className={`pb-2.5 px-3 border-b-2 font-semibold transition ${
+                className={
                   activeTab === "overview"
-                    ? "border-accent text-accent"
-                    : "border-transparent text-muted hover:text-text"
-                }`}
+                    ? "rounded-md border border-accent bg-accent/20 px-3 py-1.5 font-semibold text-accent"
+                    : "rounded-md border border-muted/30 bg-surface px-3 py-1.5 text-muted hover:border-accent/40 hover:text-text"
+                }
               >
                 Diagnostic Issues ({report.issues.length})
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("license")}
-                className={`pb-2.5 px-3 border-b-2 font-semibold transition ${
+                className={
                   activeTab === "license"
-                    ? "border-accent text-accent"
-                    : "border-transparent text-muted hover:text-text"
-                }`}
+                    ? "rounded-md border border-accent bg-accent/20 px-3 py-1.5 font-semibold text-accent"
+                    : "rounded-md border border-muted/30 bg-surface px-3 py-1.5 text-muted hover:border-accent/40 hover:text-text"
+                }
               >
                 License Radar ({report.licenseCompliance.licenseSpdx})
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("patch")}
-                className={`pb-2.5 px-3 border-b-2 font-semibold transition ${
+                className={
                   activeTab === "patch"
-                    ? "border-accent text-accent"
-                    : "border-transparent text-muted hover:text-text"
-                }`}
+                    ? "rounded-md border border-accent bg-accent/20 px-3 py-1.5 font-semibold text-accent"
+                    : "rounded-md border border-muted/30 bg-surface px-3 py-1.5 text-muted hover:border-accent/40 hover:text-text"
+                }
               >
                 Optimized CI Patch
               </button>
@@ -286,14 +302,14 @@ export default function DevOpsDashboard({
             {activeTab === "overview" && (
               <div className="space-y-3">
                 {report.issues.length === 0 ? (
-                  <div className="rounded-xl border border-good/30 bg-good/10 p-6 text-center font-mono text-xs text-good">
+                  <div className="rounded-lg border border-good/30 bg-good/10 p-6 text-center font-mono text-xs text-good">
                     ✓ Clean bill of health! No critical DevOps or license inefficiencies detected.
                   </div>
                 ) : (
                   report.issues.map((issue) => (
                     <article
                       key={issue.id}
-                      className="rounded-xl border border-muted/20 bg-surface/60 p-5 space-y-3"
+                      className="rounded-lg border border-muted/20 bg-surface/60 p-5 space-y-3"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
@@ -326,7 +342,7 @@ export default function DevOpsDashboard({
                         {issue.description}
                       </p>
 
-                      <div className="rounded-lg border border-muted/15 bg-base/60 p-3 space-y-1.5 font-mono text-xs">
+                      <div className="rounded-md border border-muted/15 bg-base/60 p-3 space-y-1.5 font-mono text-xs">
                         <span className="text-accent font-semibold block">Recommended Action:</span>
                         <p className="text-text/90 font-sans">{issue.remediation}</p>
                         {issue.suggestedPatch && (
@@ -343,7 +359,7 @@ export default function DevOpsDashboard({
 
             {/* Tab: License Radar */}
             {activeTab === "license" && (
-              <div className="rounded-xl border border-muted/20 bg-surface/60 p-6 space-y-6">
+              <div className="rounded-lg border border-muted/20 bg-surface/60 p-6 space-y-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <span className="font-mono text-xs uppercase text-accent font-semibold">
@@ -371,19 +387,19 @@ export default function DevOpsDashboard({
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-muted/15 pt-4">
-                  <div className="rounded-lg border border-muted/20 bg-base/50 p-3">
+                  <div className="rounded-md border border-muted/20 bg-base/50 p-3">
                     <span className="font-mono text-[11px] text-muted uppercase block">Commercial Use</span>
                     <strong className={`font-mono text-sm ${report.licenseCompliance.commercialUsePermitted ? "text-good" : "text-red-400"}`}>
                       {report.licenseCompliance.commercialUsePermitted ? "✓ Permitted" : "✗ Restricted"}
                     </strong>
                   </div>
-                  <div className="rounded-lg border border-muted/20 bg-base/50 p-3">
+                  <div className="rounded-md border border-muted/20 bg-base/50 p-3">
                     <span className="font-mono text-[11px] text-muted uppercase block">Modification Allowed</span>
                     <strong className={`font-mono text-sm ${report.licenseCompliance.modificationAllowed ? "text-good" : "text-red-400"}`}>
                       {report.licenseCompliance.modificationAllowed ? "✓ Allowed" : "✗ Restricted"}
                     </strong>
                   </div>
-                  <div className="rounded-lg border border-muted/20 bg-base/50 p-3">
+                  <div className="rounded-md border border-muted/20 bg-base/50 p-3">
                     <span className="font-mono text-[11px] text-muted uppercase block">Source Disclosure</span>
                     <strong className={`font-mono text-sm ${report.licenseCompliance.disclosureRequired ? "text-accent" : "text-good"}`}>
                       {report.licenseCompliance.disclosureRequired ? "⚠ Required (Copyleft)" : "✓ Not Required"}
@@ -395,7 +411,7 @@ export default function DevOpsDashboard({
 
             {/* Tab: Optimized CI Patch */}
             {activeTab === "patch" && report.recommendedCiPatch && (
-              <div className="rounded-xl border border-muted/20 bg-surface/60 p-6 space-y-4">
+              <div className="rounded-lg border border-muted/20 bg-surface/60 p-6 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h3 className="font-mono text-base font-bold text-text">
@@ -409,7 +425,7 @@ export default function DevOpsDashboard({
                     <button
                       type="button"
                       onClick={() => void copyPatch(report.recommendedCiPatch!)}
-                      className="rounded-lg border border-accent/40 bg-accent/15 px-3 py-1.5 font-mono text-xs font-semibold text-accent hover:bg-accent/25 transition cursor-pointer"
+                      className="rounded-md border border-accent/40 bg-accent/15 px-3 py-1.5 font-mono text-xs font-semibold text-accent hover:bg-accent/25 transition cursor-pointer"
                     >
                       {copiedPatch ? "✓ Copied!" : "Copy YAML"}
                     </button>
@@ -418,7 +434,7 @@ export default function DevOpsDashboard({
                         href={directPrUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-lg bg-good/20 px-3 py-1.5 font-mono text-xs font-semibold text-good border border-good/40 hover:bg-good/30 transition"
+                        className="rounded-md bg-good/20 px-3 py-1.5 font-mono text-xs font-semibold text-good border border-good/40 hover:bg-good/30 transition"
                       >
                         🚀 1-Click PR on GitHub ↗
                       </a>
@@ -426,16 +442,14 @@ export default function DevOpsDashboard({
                   </div>
                 </div>
 
-                <pre className="overflow-x-auto rounded-lg border border-muted/25 bg-base p-4 font-mono text-xs text-text/90 leading-relaxed">
+                <pre className="overflow-x-auto rounded-md border border-muted/25 bg-base p-4 font-mono text-xs text-text/90 leading-relaxed">
                   <code>{report.recommendedCiPatch}</code>
                 </pre>
               </div>
             )}
           </div>
         )}
-      </main>
-
-      <SiteFooter />
-    </div>
+      </div>
+    </main>
   );
 }

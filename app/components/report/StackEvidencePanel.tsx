@@ -51,7 +51,7 @@ export default function StackEvidencePanel({ report }: StackEvidencePanelProps) 
           return (
             <div
               key={check.id}
-              className="rounded-xl border border-muted/20 bg-surface/70 p-4 transition-all"
+              className="rounded-md border border-muted/20 bg-surface p-4"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">

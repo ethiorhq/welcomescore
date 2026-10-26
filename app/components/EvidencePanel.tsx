@@ -76,7 +76,7 @@ export default function EvidencePanel({
                 </span>
               </div>
 
-              <div className="divide-y divide-muted/10 rounded-xl border border-muted/20 bg-surface/40 overflow-hidden">
+              <div className="divide-y divide-muted/10 rounded-md border border-muted/20 bg-surface/40 overflow-hidden">
                 {categoryChecks.map((check) => {
                   const badge = STATUS_BADGES[check.status];
 

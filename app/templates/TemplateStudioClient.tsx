@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import BackButton from "@/app/components/BackButton";
 import HeaderControls from "@/app/components/HeaderControls";
-import SiteFooter from "@/app/components/SiteFooter";
 import {
   getAllAvailableTemplates,
   getGitHubDirectNewFileUrl,
@@ -99,42 +99,46 @@ export default function TemplateStudioClient() {
   }
 
   return (
-    <div className="min-h-screen bg-base text-text selection:bg-accent/30 selection:text-text">
-      {/* Header */}
-      <header className="border-b border-muted/20 bg-surface/50 backdrop-blur-md sticky top-0 z-40">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 group">
-            <WelcomeScoreWordmark />
-          </Link>
-          <div className="flex items-center gap-3">
-            <nav className="hidden sm:flex items-center gap-3 font-mono text-xs text-muted">
-              <Link href="/" className="hover:text-text transition">Audits</Link>
-              <Link href="/devops" className="hover:text-text transition">DevOps Doctor</Link>
-              <Link href="/org" className="hover:text-text transition">Fleet Cockpit</Link>
-              <Link href="/templates" className="text-accent font-semibold">Studio</Link>
-            </nav>
+    <main className="min-h-screen bg-base px-4 py-8 text-text sm:px-6 sm:py-12">
+      <div className="mx-auto max-w-6xl space-y-6">
+        {/* Authentic Page Header */}
+        <header className="flex flex-col gap-6 border-b border-muted/20 pb-8 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+              Open-Source Community & CI Studio
+            </p>
+            <h1 className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-3xl text-text sm:text-5xl">
+              <WelcomeScoreWordmark badgeClassName="sm:mt-1.5" />
+              <span className="font-mono font-bold tracking-tight">Template Studio</span>
+            </h1>
+            <p className="mt-3 max-w-2xl font-sans text-sm leading-6 text-muted sm:text-base">
+              Tailor and 1-click dispatch GitHub CONTRIBUTING.md, issue forms, PR templates, Dependabot configs, and CI workflows.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <BackButton />
+            <Link
+              href="/"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98] sm:h-10"
+            >
+              Check a repository
+            </Link>
             <HeaderControls />
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 space-y-8">
-        {/* Hero */}
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3.5 py-1 font-mono text-xs text-accent">
-            <span className="h-2 w-2 rounded-full bg-accent animate-ping" />
-            ETHIOR Open-Source Template & CI Studio
-          </div>
-          <h1 className="font-mono text-2xl sm:text-4xl font-extrabold tracking-tight text-text">
-            Tailor & 1-Click Dispatch GitHub Community Files
-          </h1>
-          <p className="mx-auto max-w-2xl font-sans text-sm text-muted leading-relaxed">
-            Generate production-grade <code className="text-accent font-mono">CONTRIBUTING.md</code>, issue forms, GitHub Actions CI workflows, and security policies tailored to your ecosystem. Dispatches directly to GitHub without requiring OAuth tokens.
+        {/* Authentic Notice Callout */}
+        <section className="rounded-lg border border-accent/25 bg-surface px-5 py-4 sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <p className="font-sans text-sm leading-6 text-text">
+            Tailor templates to your primary language ecosystem and dispatch pull requests to GitHub with zero token overhead.
           </p>
-        </div>
+          <span className="mt-2 inline-block shrink-0 font-mono text-xs text-muted sm:mt-0">
+            Zero token requirement · 1-Click PR
+          </span>
+        </section>
 
         {/* Global Controls Grid */}
-        <div className="rounded-2xl border border-muted/20 bg-surface/80 p-5 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-lg border border-muted/20 bg-surface p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block font-mono text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
               Target Repository
@@ -144,7 +148,7 @@ export default function TemplateStudioClient() {
               value={repoInput}
               onChange={(e) => setRepoInput(e.target.value)}
               placeholder="owner/repo"
-              className="w-full rounded-xl border border-muted/30 bg-base px-3.5 py-2 font-mono text-sm text-text placeholder-muted/50 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="h-11 w-full rounded-md border border-muted/45 bg-base px-3.5 font-mono text-sm text-text placeholder-muted/50 focus:border-accent focus:outline-none"
             />
           </div>
 
@@ -157,7 +161,7 @@ export default function TemplateStudioClient() {
               value={branchInput}
               onChange={(e) => setBranchInput(e.target.value)}
               placeholder="main"
-              className="w-full rounded-xl border border-muted/30 bg-base px-3.5 py-2 font-mono text-sm text-text placeholder-muted/50 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="h-11 w-full rounded-md border border-muted/45 bg-base px-3.5 font-mono text-sm text-text placeholder-muted/50 focus:border-accent focus:outline-none"
             />
           </div>
 
@@ -168,7 +172,7 @@ export default function TemplateStudioClient() {
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="w-full rounded-xl border border-muted/30 bg-base px-3.5 py-2 font-mono text-sm text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="h-11 w-full rounded-md border border-muted/45 bg-base px-3.5 font-mono text-sm text-text focus:border-accent focus:outline-none"
             >
               {LANGUAGES.map((lang) => (
                 <option key={lang.id} value={lang.id} className="bg-surface text-text">
@@ -194,10 +198,10 @@ export default function TemplateStudioClient() {
                     key={tpl.id}
                     type="button"
                     onClick={() => setSelectedTemplateId(tpl.id)}
-                    className={`w-full text-left rounded-xl p-3.5 transition flex flex-col gap-1 border ${
+                    className={`w-full text-left rounded-md p-3 transition flex flex-col gap-1 border ${
                       isActive
-                        ? "border-accent bg-accent/10 shadow-sm"
-                        : "border-muted/15 bg-surface/50 hover:border-muted/40 hover:bg-surface/80"
+                        ? "border-accent bg-accent/15"
+                        : "border-muted/20 bg-surface/60 hover:border-muted/40 hover:bg-surface"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -219,7 +223,7 @@ export default function TemplateStudioClient() {
 
           {/* Editor & Preview Pane */}
           <div className="lg:col-span-8 space-y-4">
-            <div className="rounded-2xl border border-muted/20 bg-surface/80 p-5 space-y-4 shadow-xl">
+            <div className="rounded-lg border border-muted/20 bg-surface p-5 space-y-4">
               {/* File Header Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-muted/15 pb-4">
                 <div>
@@ -242,21 +246,21 @@ export default function TemplateStudioClient() {
                     type="button"
                     onClick={handleResetTemplate}
                     title="Reset to generated default"
-                    className="rounded-lg border border-muted/30 bg-base px-2.5 py-1.5 font-mono text-xs text-muted hover:text-text transition"
+                    className="rounded-md border border-muted/30 bg-base px-2.5 py-1.5 font-mono text-xs text-muted hover:text-text transition"
                   >
                     Reset
                   </button>
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="rounded-lg border border-muted/30 bg-base px-3 py-1.5 font-mono text-xs font-medium text-text hover:border-accent hover:text-accent transition flex items-center gap-1.5"
+                    className="rounded-md border border-muted/30 bg-base px-3 py-1.5 font-mono text-xs font-medium text-text hover:border-accent hover:text-accent transition flex items-center gap-1.5"
                   >
                     {copied ? "✓ Copied" : "Copy"}
                   </button>
                   <button
                     type="button"
                     onClick={handleDownload}
-                    className="rounded-lg border border-muted/30 bg-base px-3 py-1.5 font-mono text-xs font-medium text-text hover:border-accent hover:text-accent transition"
+                    className="rounded-md border border-muted/30 bg-base px-3 py-1.5 font-mono text-xs font-medium text-text hover:border-accent hover:text-accent transition"
                   >
                     Download
                   </button>
@@ -264,7 +268,7 @@ export default function TemplateStudioClient() {
                     href={directPrUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-lg bg-accent px-3.5 py-1.5 font-mono text-xs font-bold text-base hover:bg-accent/90 transition shadow-sm flex items-center gap-1.5"
+                    className="rounded-md bg-accent px-3.5 py-1.5 font-mono text-xs font-bold text-base hover:bg-accent/90 transition shadow-sm flex items-center gap-1.5"
                   >
                     <span>1-Click PR to GitHub</span>
                     <span>↗</span>
@@ -273,7 +277,7 @@ export default function TemplateStudioClient() {
               </div>
 
               {/* Why it Matters Note */}
-              <div className="rounded-xl border border-accent/20 bg-accent/5 p-3 font-sans text-xs text-text/80 flex items-start gap-2.5">
+              <div className="rounded-md border border-accent/20 bg-accent/5 p-3 font-sans text-xs text-text/80 flex items-start gap-2.5">
                 <span className="font-mono text-accent text-sm leading-none mt-0.5">💡</span>
                 <div>
                   <strong className="font-semibold text-accent font-mono text-xs block">Why this matters:</strong>
@@ -293,7 +297,7 @@ export default function TemplateStudioClient() {
                   }
                   rows={20}
                   spellCheck={false}
-                  className="w-full rounded-xl border border-muted/30 bg-base/95 p-4 font-mono text-xs text-text leading-relaxed selection:bg-accent/30 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-y"
+                  className="w-full rounded-md border border-muted/30 bg-base/95 p-4 font-mono text-xs text-text leading-relaxed selection:bg-accent/30 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-y"
                 />
               </div>
 
@@ -305,9 +309,7 @@ export default function TemplateStudioClient() {
             </div>
           </div>
         </div>
-      </main>
-
-      <SiteFooter />
-    </div>
+      </div>
+    </main>
   );
 }

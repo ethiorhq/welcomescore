@@ -8,7 +8,6 @@ import EvidencePanel from "@/app/components/EvidencePanel";
 import ReportFreshness from "@/app/components/ReportFreshness";
 import ActionDraftModal from "@/app/components/ActionDraftModal";
 import { ImprovementTimeline } from "@/app/components/ImprovementTimeline";
-import SiteFooter from "@/app/components/SiteFooter";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
 import StackSelector from "@/app/components/report/StackSelector";
 import StackEvidencePanel from "@/app/components/report/StackEvidencePanel";
@@ -134,7 +133,7 @@ export default function PublicReportView({
         {/* Repository Header & Score Card */}
         <section
           aria-labelledby="repo-header-heading"
-          className="rounded-2xl border border-muted/25 bg-surface p-6 sm:p-8 shadow-xl space-y-6"
+          className="rounded-lg border border-muted/25 bg-surface p-6 sm:p-8 space-y-6"
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
@@ -165,7 +164,7 @@ export default function PublicReportView({
             </div>
 
             {/* Score & Grade Display */}
-            <div className="flex items-baseline gap-3 rounded-xl border border-muted/25 bg-base/60 px-6 py-4">
+            <div className="flex items-baseline gap-3 rounded-md border border-muted/25 bg-base/60 px-6 py-4">
               <span className="font-mono text-5xl sm:text-6xl font-bold tracking-tight text-accent">
                 {currentScore}
               </span>
@@ -215,7 +214,7 @@ export default function PublicReportView({
         {currentStackReport && currentStackReport.nextUsefulMove && (
           <section
             aria-labelledby="stack-next-move-heading"
-            className="rounded-2xl border-2 border-accent/40 bg-surface/90 p-6 sm:p-8 shadow-xl relative overflow-hidden"
+            className="rounded-lg border border-accent/35 bg-surface p-6 sm:p-8 relative overflow-hidden"
           >
             <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-accent font-semibold mb-2">
               <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
@@ -279,10 +278,8 @@ export default function PublicReportView({
         {!currentStackReport && report.nextUsefulMove && (
           <section
             aria-labelledby="next-move-heading"
-            className="rounded-2xl border-2 border-accent/40 bg-surface/90 p-6 sm:p-8 shadow-xl relative overflow-hidden"
+            className="rounded-lg border border-accent/35 bg-surface p-6 sm:p-8 relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-32 h-32 bg-accent/10 rounded-full blur-2xl pointer-events-none" />
-
             <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-accent font-semibold mb-2">
               <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
               Recommended Next Useful Move
@@ -453,7 +450,7 @@ export default function PublicReportView({
         <SubscriberBanner source="welcomescore_report" />
 
         {/* Limitations & Ethical Boundary Disclaimer */}
-        <section aria-labelledby="limits-heading" className="rounded-xl border border-muted/20 bg-surface/40 p-6 space-y-3 font-sans text-xs text-muted leading-relaxed">
+        <section aria-labelledby="limits-heading" className="rounded-lg border border-muted/20 bg-surface/40 p-6 space-y-3 font-sans text-xs text-muted leading-relaxed">
           <h2 id="limits-heading" className="font-mono text-xs uppercase tracking-wider text-muted font-bold">
             Methodology & Honest Limitations
           </h2>
@@ -467,9 +464,6 @@ export default function PublicReportView({
           </p>
         </section>
       </main>
-
-      {/* Global Footer */}
-      <SiteFooter />
 
       {/* Auto-Fix Modal */}
       {activeAutoFix && (

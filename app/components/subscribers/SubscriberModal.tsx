@@ -205,7 +205,7 @@ export default function SubscriberModal() {
         if (e.target === e.currentTarget) closeModal();
       }}
     >
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#151724] p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-lg border border-white/10 bg-[#151724] p-6 sm:p-8 shadow-2xl space-y-6">
         {/* Ambient Top Glow */}
         <div
           className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-accent/15 blur-3xl"

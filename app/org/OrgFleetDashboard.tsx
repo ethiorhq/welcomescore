@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import BackButton from "@/app/components/BackButton";
 import HeaderControls from "@/app/components/HeaderControls";
-import SiteFooter from "@/app/components/SiteFooter";
 import type { OrgFleetReport } from "@/lib/org/fleetEngine";
 
 const FEATURED_ORGS = [
@@ -70,95 +70,112 @@ export default function OrgFleetDashboard({
   });
 
   return (
-    <div className="min-h-screen bg-base text-text selection:bg-accent/30 selection:text-text">
-      {/* Header */}
-      <header className="border-b border-muted/20 bg-surface/50 backdrop-blur-md sticky top-0 z-40">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 group">
-            <WelcomeScoreWordmark />
-          </Link>
-          <div className="flex items-center gap-3">
-            <nav className="hidden sm:flex items-center gap-3 font-mono text-xs text-muted">
-              <Link href="/" className="hover:text-text transition">Audits</Link>
-              <Link href="/devops" className="hover:text-text transition">DevOps Doctor</Link>
-              <Link href="/org" className="text-accent font-semibold">Fleet Cockpit</Link>
-              <Link href="/compare" className="hover:text-text transition">Compare</Link>
-              <Link href="/lounge" className="hover:text-text transition">Dev Lounge</Link>
-            </nav>
+    <main className="min-h-screen bg-base px-4 py-8 text-text sm:px-6 sm:py-12">
+      <div className="mx-auto max-w-6xl space-y-6">
+        {/* Authentic Page Header */}
+        <header className="flex flex-col gap-6 border-b border-muted/20 pb-8 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+              Multi-Repo Fleet Intelligence
+            </p>
+            <h1 className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-3xl text-text sm:text-5xl">
+              <WelcomeScoreWordmark badgeClassName="sm:mt-1.5" />
+              <span className="font-mono font-bold tracking-tight">Fleet Cockpit</span>
+            </h1>
+            <p className="mt-3 max-w-2xl font-sans text-sm leading-6 text-muted sm:text-base">
+              Audit entire GitHub organizations at scale. Contributor health distribution, stale repository radars, and actionable fleet metrics.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <BackButton />
+            <Link
+              href="/"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98] sm:h-10"
+            >
+              Check a repository
+            </Link>
             <HeaderControls />
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 space-y-8">
-        {/* Hero Section */}
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3.5 py-1 font-mono text-xs text-accent">
-            <span className="h-2 w-2 rounded-full bg-accent animate-ping" />
-            ETHIOR Multi-Repo Fleet Cockpit
-          </div>
-          <h1 className="font-mono text-2xl sm:text-4xl font-extrabold tracking-tight text-text">
-            Organization-Wide Contributor Readiness & Health
-          </h1>
-          <p className="mx-auto max-w-2xl font-sans text-sm text-muted leading-relaxed">
-            Audit dozens of repositories in one cockpit. Track fleet-wide contributor readiness, identify abandoned or unlicensed codebases, and maintain organization-wide OSS excellence.
+        {/* Authentic Notice Callout */}
+        <section className="rounded-lg border border-accent/25 bg-surface px-5 py-4 sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <p className="font-sans text-sm leading-6 text-text">
+            Organization fleet scans compute aggregate onboarding readiness, grade distributions, and flag maintenance focus areas.
           </p>
+          <span className="mt-2 inline-block shrink-0 font-mono text-xs text-muted sm:mt-0">
+            Public org audit · Read-only
+          </span>
+        </section>
 
-          {/* Search Form */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void handleSearch(orgInput);
-            }}
-            className="mx-auto max-w-xl pt-2 flex flex-col sm:flex-row gap-2"
+        {/* Search Form */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSearch(orgInput);
+          }}
+          className="flex w-full flex-col gap-3 sm:flex-row"
+        >
+          <label className="sr-only" htmlFor="org-fleet-input">
+            GitHub Organization
+          </label>
+          <input
+            id="org-fleet-input"
+            type="text"
+            value={orgInput}
+            onChange={(e) => setOrgInput(e.target.value)}
+            placeholder="e.g. vercel, facebook, supabase"
+            className="h-12 w-full rounded-md border border-muted/45 bg-surface px-4 font-mono text-base text-text outline-none placeholder:text-muted focus:border-accent sm:text-sm"
+          />
+          <button
+            type="submit"
+            disabled={loading || !orgInput.trim()}
+            className="h-12 shrink-0 rounded-md bg-accent px-6 font-sans text-sm font-semibold text-base active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted"
           >
-            <input
-              type="text"
-              value={orgInput}
-              onChange={(e) => setOrgInput(e.target.value)}
-              placeholder="e.g. vercel, facebook, supabase"
-              className="w-full rounded-lg border border-muted/30 bg-surface/80 px-4 py-3 font-mono text-sm text-text placeholder-muted/60 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-            />
-            <button
-              type="submit"
-              disabled={loading || !orgInput.trim()}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-6 py-3 font-mono text-sm font-semibold text-base transition duration-150 hover:bg-accent/90 disabled:opacity-50 cursor-pointer shadow-lg shadow-accent/10 shrink-0"
-            >
-              {loading ? "Inspecting Fleet..." : "Scan Fleet"}
-            </button>
-          </form>
+            {loading ? "Inspecting Fleet..." : "Scan Fleet"}
+          </button>
+        </form>
 
-          {/* Popular Organizations */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-            <span className="font-mono text-xs text-muted/70">Featured Fleets:</span>
-            {FEATURED_ORGS.map((org) => (
-              <button
-                key={org.name}
-                type="button"
-                onClick={() => {
-                  setOrgInput(org.name);
-                  void handleSearch(org.name);
-                }}
-                className="rounded-md border border-muted/20 bg-surface/40 px-2.5 py-1 font-mono text-xs text-muted hover:border-accent hover:text-accent transition"
-              >
-                {org.label}
-              </button>
-            ))}
-          </div>
+        {/* Featured Organizations */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-xs uppercase tracking-wider text-muted">
+            Featured Fleets:
+          </span>
+          {FEATURED_ORGS.map((org) => (
+            <button
+              key={org.name}
+              type="button"
+              onClick={() => {
+                setOrgInput(org.name);
+                void handleSearch(org.name);
+              }}
+              className="rounded-md border border-muted/30 bg-surface px-3 py-1 font-mono text-xs text-muted hover:border-accent/40 hover:text-text transition"
+            >
+              {org.label}
+            </button>
+          ))}
         </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="rounded-lg border border-accent/25 bg-surface/50 p-8 text-center space-y-3 font-mono">
+            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+            <p className="text-sm text-accent">Querying GitHub repositories and evaluating contributor health for @{orgInput}...</p>
+          </div>
+        )}
 
         {/* Error Banner */}
         {error && (
-          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400">
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400">
             ⚠ {error}
           </div>
         )}
 
         {/* Fleet Cockpit Results */}
-        {report && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+        {report && !loading && (
+          <div className="space-y-6">
             {/* Top Fleet Health Banner */}
-            <section className="rounded-2xl border border-muted/25 bg-surface/90 p-6 sm:p-8 shadow-xl relative overflow-hidden">
+            <section className="rounded-lg border border-muted/25 bg-surface p-6 sm:p-8 space-y-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div>
                   <div className="flex items-center gap-2">
@@ -182,7 +199,7 @@ export default function OrgFleetDashboard({
                   </p>
                 </div>
 
-                <div className="flex items-center gap-4 bg-base/60 border border-muted/20 rounded-xl px-5 py-4 shrink-0">
+                <div className="flex items-center gap-4 bg-base/60 border border-muted/20 rounded-md px-5 py-4 shrink-0">
                   <div>
                     <span className="block font-mono text-4xl sm:text-5xl font-extrabold text-accent">
                       {report.fleetAverageScore}
@@ -200,7 +217,7 @@ export default function OrgFleetDashboard({
               </div>
 
               {/* Aggregated Fleet Stat Tiles */}
-              <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-muted/15 pt-5 font-mono text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-muted/15 pt-5 font-mono text-xs">
                 <div>
                   <span className="text-muted uppercase text-[11px] block">Public Repos</span>
                   <strong className="text-text text-base">{report.totalRepos}</strong>
@@ -222,14 +239,14 @@ export default function OrgFleetDashboard({
               </div>
 
               {/* Grade Distribution Bar */}
-              <div className="mt-6 space-y-2 border-t border-muted/15 pt-4">
+              <div className="space-y-2 border-t border-muted/15 pt-4">
                 <div className="flex items-center justify-between font-mono text-xs text-muted">
                   <span>Fleet Grade Distribution:</span>
                   <span>
                     A+: {report.gradeDistribution["A+"]} · A: {report.gradeDistribution.A} · B: {report.gradeDistribution.B} · C: {report.gradeDistribution.C} · D: {report.gradeDistribution.D} · F: {report.gradeDistribution.F}
                   </span>
                 </div>
-                <div className="h-3 w-full rounded-full bg-base/80 overflow-hidden flex">
+                <div className="h-2.5 w-full rounded-md bg-base/80 overflow-hidden flex">
                   {report.totalRepos > 0 && (
                     <>
                       <div
@@ -281,12 +298,12 @@ export default function OrgFleetDashboard({
                     value={filterText}
                     onChange={(e) => setFilterText(e.target.value)}
                     placeholder="Filter by repo name or stack..."
-                    className="rounded-lg border border-muted/30 bg-surface px-3 py-1.5 font-mono text-xs text-text placeholder-muted/60 focus:border-accent focus:outline-none"
+                    className="rounded-md border border-muted/30 bg-surface px-3 py-1.5 font-mono text-xs text-text placeholder-muted/60 focus:border-accent focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => setFilterOnlyAttention(!filterOnlyAttention)}
-                    className={`rounded-lg border px-3 py-1.5 font-mono text-xs font-semibold transition ${
+                    className={`rounded-md border px-3 py-1.5 font-mono text-xs font-semibold transition ${
                       filterOnlyAttention
                         ? "border-accent bg-accent/20 text-accent"
                         : "border-muted/30 bg-surface text-muted hover:text-text"
@@ -297,7 +314,7 @@ export default function OrgFleetDashboard({
                 </div>
               </div>
 
-              <div className="divide-y divide-muted/10 rounded-xl border border-muted/20 bg-surface/50 overflow-hidden">
+              <div className="divide-y divide-muted/10 rounded-lg border border-muted/20 bg-surface/50 overflow-hidden">
                 {filteredRepos.length === 0 ? (
                   <div className="p-8 text-center font-mono text-xs text-muted">
                     No repositories matching current filters.
@@ -352,7 +369,7 @@ export default function OrgFleetDashboard({
                           <span className="text-muted/70 block">{repo.forksCount} forks</span>
                         </div>
 
-                        <div className="flex items-center gap-2 bg-base/70 border border-muted/20 rounded-lg px-3 py-2">
+                        <div className="flex items-center gap-2 bg-base/70 border border-muted/20 rounded-md px-3 py-2">
                           <span className="font-mono text-lg font-bold text-accent">{repo.score}</span>
                           <span className="font-mono text-sm font-bold text-good">{repo.grade}</span>
                         </div>
@@ -379,9 +396,7 @@ export default function OrgFleetDashboard({
             </section>
           </div>
         )}
-      </main>
-
-      <SiteFooter />
-    </div>
+      </div>
+    </main>
   );
 }
