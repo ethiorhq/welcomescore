@@ -8,7 +8,7 @@ import EvidencePanel from "@/app/components/EvidencePanel";
 import ReportFreshness from "@/app/components/ReportFreshness";
 import ActionDraftModal from "@/app/components/ActionDraftModal";
 import { ImprovementTimeline } from "@/app/components/ImprovementTimeline";
-import WelcomeScoreWordmark from "@/app/components/WelcomeScoreWordmark";
+import BackButton from "@/app/components/BackButton";
 import StackSelector from "@/app/components/report/StackSelector";
 import StackEvidencePanel from "@/app/components/report/StackEvidencePanel";
 import SubscriberBanner from "@/app/components/subscribers/SubscriberBanner";
@@ -87,31 +87,21 @@ export default function PublicReportView({
   }
 
   return (
-    <div className="min-h-screen bg-base text-text selection:bg-accent/30 selection:text-text">
-      {/* Top Navigation */}
-      <header className="border-b border-muted/20 bg-surface/50 backdrop-blur-md sticky top-0 z-40 safe-top">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 group">
-            <WelcomeScoreWordmark />
-          </Link>
-
-          <div className="flex items-center gap-2.5 sm:gap-4">
-            <nav aria-label="Breadcrumb navigation" className="hidden sm:flex items-center gap-2 font-mono text-xs text-muted">
-              <Link href="/" className="hover:text-text transition">
-                ← Audits
-              </Link>
-              <span aria-hidden="true" className="text-muted/40">/</span>
-              <span className="text-text font-medium truncate max-w-[140px] md:max-w-[220px]">
-                {repo}
-              </span>
-            </nav>
-            <div className="hidden sm:block h-4 w-px bg-muted/20" aria-hidden="true" />
+    <main className="min-h-screen bg-base px-4 py-8 text-text sm:px-6 sm:py-12 selection:bg-accent/30 selection:text-text">
+      <div className="mx-auto max-w-6xl space-y-8">
+        {/* Top Header Row matching Hall of Fame & Compare */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-muted/20 pb-6">
+          <BackButton fallbackHref="/" />
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-accent/45 bg-accent/10 px-4 font-sans text-sm font-medium text-accent transition-colors duration-180 ease-out hover:bg-accent/15 active:scale-[0.98]"
+            >
+              Check a repository
+            </Link>
             <HeaderControls />
           </div>
         </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-8">
         {/* Freshness Banner */}
         <ReportFreshness
           analyzedAt={report.analyzedAt}
@@ -463,7 +453,7 @@ export default function PublicReportView({
             WelcomeScore does not rank repositories for popularity, generate artificial star activity, or offer legal or security certifications.
           </p>
         </section>
-      </main>
+      </div>
 
       {/* Auto-Fix Modal */}
       {activeAutoFix && (
@@ -520,6 +510,6 @@ export default function PublicReportView({
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }

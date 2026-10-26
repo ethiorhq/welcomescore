@@ -41,16 +41,16 @@ export async function GET(
   const fresh = searchParams.get("fresh") === "true";
 
   try {
-    // 1. Attempt to fetch org repos
+    // 1. Attempt to fetch org repos (STRICTLY type=public to protect privacy)
     let reposRes = await githubFetch(
-      `${GITHUB_API}/orgs/${encodeURIComponent(cleanOrg)}/repos?per_page=60&sort=pushed`,
+      `${GITHUB_API}/orgs/${encodeURIComponent(cleanOrg)}/repos?type=public&per_page=100&sort=pushed`,
       fresh,
     );
 
     // If 404, check if it's a GitHub user/account instead of organization
     if (reposRes.status === 404) {
       reposRes = await githubFetch(
-        `${GITHUB_API}/users/${encodeURIComponent(cleanOrg)}/repos?per_page=60&sort=pushed`,
+        `${GITHUB_API}/users/${encodeURIComponent(cleanOrg)}/repos?type=public&per_page=100&sort=pushed`,
         fresh,
       );
     }
@@ -92,8 +92,12 @@ export async function GET(
       );
     }
 
-    const reposData = (await reposRes.json()) as RawOrgRepoInput[];
-    const report = aggregateOrgFleet(cleanOrg, reposData);
+    const rawRepos = (await reposRes.json()) as Array<RawOrgRepoInput & { private?: boolean; visibility?: string }>;
+    // STRICT PRIVACY FIREWALL: ONLY PUBLIC REPOSITORIES CAN EVER BE INCLUDED
+    const publicRepos = Array.isArray(rawRepos)
+      ? rawRepos.filter((r) => !r.private && (!r.visibility || r.visibility === "public"))
+      : [];
+    const report = aggregateOrgFleet(cleanOrg, publicRepos);
 
     return NextResponse.json(
       {

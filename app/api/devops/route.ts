@@ -90,7 +90,17 @@ export async function GET(request: Request) {
       default_branch?: string;
       license?: { spdx_id?: string } | null;
       language?: string | null;
+      private?: boolean;
+      visibility?: string;
     };
+
+    // STRICT PRIVACY FIREWALL: Private repos must return 404 Not Found
+    if (repoData.private || (repoData.visibility && repoData.visibility !== "public")) {
+      return NextResponse.json(
+        { ok: false, error: "Repository not found or is private on GitHub" },
+        { status: 404 },
+      );
+    }
 
     const defaultBranch = repoData.default_branch || "main";
     const licenseSpdx = repoData.license?.spdx_id || null;

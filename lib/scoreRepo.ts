@@ -34,6 +34,8 @@ type GitHubRepository = {
   stargazers_count: number | null;
   forks_count: number | null;
   language: string | null;
+  private?: boolean;
+  visibility?: string;
 };
 
 type GitHubFile = {
@@ -103,6 +105,11 @@ export async function scoreRepo(
   }
 
   const repository = (await repositoryResponse.json()) as GitHubRepository;
+
+  // STRICT PRIVACY FIREWALL: Private repositories MUST return 404 Not Found
+  if (repository.private || (repository.visibility && repository.visibility !== "public")) {
+    throw new ScoreRepoError("not-found", 404);
+  }
   const issueQuery = [
     `repo:${owner}/${repo}`,
     "is:issue",

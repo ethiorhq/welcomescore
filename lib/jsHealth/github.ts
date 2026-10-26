@@ -10,6 +10,8 @@ const WORKFLOW_CONTENT_LIMIT = 64_000;
 type GitHubRepository = {
   default_branch?: string;
   name?: string;
+  private?: boolean;
+  visibility?: string;
 };
 
 type GitHubTree = {
@@ -44,6 +46,9 @@ export async function readGitHubJsHealthSnapshot(reference: string): Promise<JsH
   }
 
   const repositoryPayload = await repositoryResponse.json() as GitHubRepository;
+  if (repositoryPayload.private || (repositoryPayload.visibility && repositoryPayload.visibility !== "public")) {
+    throw new ScoreRepoError("not-found", 404);
+  }
   const branch = repositoryPayload.default_branch || "main";
   const [treeResponse, packageResponse, labelsResponse] = await Promise.all([
     githubFetch(`${basePath}/git/trees/${encodeURIComponent(branch)}?recursive=1`),
