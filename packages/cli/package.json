@@ -1,17 +1,21 @@
 {
   "name": "@ethiorhq/welcomescore",
-  "version": "0.2.1",
-  "description": "Local JavaScript and TypeScript repository health checks for package, tooling, CI, and contributor foundations.",
+  "version": "1.0.0",
+  "description": "Deterministic open-source contributor readiness & DevOps audit CLI by ETHIOR",
   "keywords": [
+    "welcomescore",
+    "ethior",
+    "contributor-readiness",
+    "github-audit",
+    "open-source",
+    "devops",
     "javascript",
     "typescript",
     "npm",
     "cli",
-    "repository-health",
-    "open-source",
     "maintainers"
   ],
-  "homepage": "https://welcomescore.vercel.app/js",
+  "homepage": "https://www.welcomescore.is-local.org",
   "bugs": {
     "url": "https://github.com/ethiorhq/welcomescore/issues"
   },

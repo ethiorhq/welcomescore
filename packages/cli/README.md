@@ -75,4 +75,4 @@ The default audit is completely local. It **does not upload** source code, manif
 
 WelcomeScore audits public repository signals. It is **not** a security audit, code-quality certification, legal advice, package safety guarantee, popularity ranking, or endorsement.
 
-For online audits and badge generation, visit [WelcomeScore](https://welcomescore.vercel.app).
+For online audits and badge generation, visit [ETHIOR WelcomeScore](https://www.welcomescore.is-local.org).
