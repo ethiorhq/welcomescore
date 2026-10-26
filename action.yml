@@ -1,0 +1,65 @@
+name: 'WelcomeScore'
+description: 'Evidence-based contributor readiness audit and Next Useful Move for GitHub repositories.'
+author: 'ETHIOR'
+
+inputs:
+  threshold:
+    description: 'Minimum required score (0-100). Fails the step if score is below threshold and fail-on is "threshold".'
+    required: false
+    default: '80'
+  comment-on-pr:
+    description: 'Update an idempotent WelcomeScore comment on the pull request with score and Next Useful Move.'
+    required: false
+    default: 'false'
+  upload-report:
+    description: 'Whether to upload the generated report artifact using actions/upload-artifact.'
+    required: false
+    default: 'true'
+  format:
+    description: 'Report artifact format: "json" or "markdown".'
+    required: false
+    default: 'json'
+  fail-on:
+    description: 'Failure trigger: "threshold" or "never".'
+    required: false
+    default: 'threshold'
+  cwd:
+    description: 'Project directory to inspect.'
+    required: false
+    default: '.'
+  github-token:
+    description: 'GitHub token with pull-requests:write permission if comment-on-pr is enabled.'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  score:
+    description: 'Numeric repository score (0-100).'
+  grade:
+    description: 'Letter grade (A, B, C, D, or F).'
+  report-path:
+    description: 'Local file path to the generated JSON or Markdown report artifact.'
+  next-useful-move:
+    description: 'Title of the recommended Next Useful Move.'
+  report-url:
+    description: 'Public explanation and evidence URL on WelcomeScore.'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run WelcomeScore CLI
+      shell: bash
+      env:
+        INPUT_THRESHOLD: ${{ inputs.threshold }}
+        INPUT_COMMENT-ON-PR: ${{ inputs.comment-on-pr }}
+        INPUT_UPLOAD-REPORT: ${{ inputs.upload-report }}
+        INPUT_FORMAT: ${{ inputs.format }}
+        INPUT_FAIL-ON: ${{ inputs.fail-on }}
+        INPUT_CWD: ${{ inputs.cwd }}
+        INPUT_GITHUB-TOKEN: ${{ inputs.github-token }}
+      run: |
+        npx --yes @ethiorhq/welcomescore --ci --threshold="${{ inputs.threshold }}" --format="${{ inputs.format }}" --output=".welcomescore/report.${{ inputs.format == 'markdown' && 'md' || 'json' }}"
+
+branding:
+  icon: 'award'
+  color: 'yellow'
