@@ -193,7 +193,7 @@ The cache lifetimes and headers above are the single source of truth in `lib/aud
 
 ## API routes
 
-`GET /api/score?repo=owner/repo` returns the JSON score result for a deliberate, direct audit. It requests current public GitHub data and is not cached. The `repo` parameter also accepts a full `github.com/owner/repo` URL.
+`GET /api/score?repo=owner/repo` returns the JSON score result for a deliberate, direct audit. It requests current public GitHub data and is not cached. The `repo` parameter also accepts a full `github.com/owner/repo` URL. The result includes `checkedAt`, the ISO timestamp of the server check.
 
 `GET /api/badge?repo=owner/repo` returns the existing 600 × 315 PNG score badge suitable for sharing. It uses the cached badge pipeline described above. Existing copied badge URLs remain supported.
 

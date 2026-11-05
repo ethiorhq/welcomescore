@@ -26,6 +26,8 @@ export type ScoreResult = {
   isEligibleForLeaderboard: boolean;
   goodFirstIssueCount: number;
   goodFirstIssues: GoodFirstIssue[];
+  /** ISO 8601 timestamp generated on the server when this audit finished. */
+  checkedAt: string;
 };
 
 type GitHubRepository = {
@@ -229,6 +231,7 @@ export async function scoreRepo(
     isEligibleForLeaderboard,
     goodFirstIssueCount: beginnerIssueCount,
     goodFirstIssues,
+    checkedAt: new Date().toISOString(),
   };
 }
 

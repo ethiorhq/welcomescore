@@ -146,6 +146,7 @@ describe("createReportFromAudit adapter", () => {
       hasLicense: true,
       isEligibleForLeaderboard: true,
       goodFirstIssueCount: 2,
+      checkedAt: "2026-10-20T02:00:00.000Z",
       goodFirstIssues: [
         {
           title: "docs: update setup section in README",

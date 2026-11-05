@@ -40,6 +40,7 @@ function makeResult({
     isEligibleForLeaderboard: false,
     goodFirstIssueCount,
     goodFirstIssues: [],
+    checkedAt: "2026-10-20T02:00:00.000Z",
   };
 }
 
