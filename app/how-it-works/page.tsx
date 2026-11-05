@@ -70,7 +70,25 @@ const sections: PolicySection[] = [
           When you request an audit, WelcomeScore reads the public repository data necessary for the documented checks from GitHub. This can include public repository metadata, the default branch, the presence of contributor documents, license metadata, the public README, publicly searchable issue labels, and the repository’s publicly reported recent push date.
         </p>
         <p>
-          To reduce unnecessary external requests, public scoring data is cached for a short period. Cached data can be stale, unavailable, rate-limited, incomplete, renamed, or differently interpreted by GitHub. If a repository is private, deleted, inaccessible, malformed, or temporarily unavailable, the audit may be unable to return a result.
+          A direct audit and an embedded badge do not show the same freshness. A direct audit is the current check; a badge is a shareable copy that may lag behind it for a short time.
+        </p>
+        <PolicyTable>
+          <thead className="border-b border-muted/25 font-mono text-xs uppercase tracking-[0.12em] text-muted">
+            <tr>
+              <th className="px-4 py-3 font-semibold">Surface</th>
+              <th className="px-4 py-3 font-semibold">GitHub data</th>
+              <th className="px-4 py-3 font-semibold">What that means for you</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-muted/15 text-muted">
+            <tr><td className="px-4 py-3 font-mono text-text">Direct audit</td><td className="px-4 py-3">Current public GitHub data for that check</td><td className="px-4 py-3">Pressing Check or Compare requests current data and is not served from a cache. Use this after you change a repository.</td></tr>
+            <tr><td className="px-4 py-3 font-mono text-text">Shareable report</td><td className="px-4 py-3">Cached for up to 5 minutes</td><td className="px-4 py-3">A cached report may be served for up to 24 hours while a fresh copy is prepared in the background.</td></tr>
+            <tr><td className="px-4 py-3 font-mono text-text">SVG badge</td><td className="px-4 py-3">Cached for up to 5 minutes</td><td className="px-4 py-3">A badge embedded in a README may be served from cache for up to 24 hours while a fresh copy is prepared in the background.</td></tr>
+            <tr><td className="px-4 py-3 font-mono text-text">PNG badge</td><td className="px-4 py-3">Cached for up to 5 minutes</td><td className="px-4 py-3">A badge embedded in a README may be served from cache for up to 5 minutes while a fresh copy is prepared in the background.</td></tr>
+          </tbody>
+        </PolicyTable>
+        <p>
+          Cached data can be stale, unavailable, rate-limited, incomplete, renamed, or differently interpreted by GitHub. WelcomeScore does not promise real-time GitHub indexing, and a cached badge does not guarantee that GitHub has indexed every recent change. If a repository is private, deleted, inaccessible, malformed, or temporarily unavailable, the audit may be unable to return a result.
         </p>
       </>
     ),

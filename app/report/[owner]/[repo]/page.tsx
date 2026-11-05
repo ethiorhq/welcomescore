@@ -8,11 +8,12 @@ import { getRepoTimeline, recordImprovementEvent } from "@/lib/improvement/timel
 import { calculateImprovementFromPreviousEvent } from "@/lib/improvement/diff";
 import { generateAuditReportLd, stringifyJsonLd } from "@/lib/schemaLd";
 import PublicReportView from "./PublicReportView";
+import { GITHUB_DATA_CACHE_SECONDS } from "@/lib/auditFreshness";
 
 import ReportErrorNotice from "./ReportErrorNotice";
 
 export const runtime = "nodejs";
-export const revalidate = 300;
+export const revalidate = GITHUB_DATA_CACHE_SECONDS;
 
 export async function generateMetadata({
   params,

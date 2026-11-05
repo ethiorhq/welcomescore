@@ -1,4 +1,5 @@
 import "server-only";
+import { GITHUB_DATA_CACHE_SECONDS } from "./auditFreshness";
 export type Check = {
   label: string;
   passed: boolean;
@@ -78,7 +79,7 @@ export class ScoreRepoError extends Error {
 }
 
 const GITHUB_API = "https://api.github.com";
-const CACHE_OPTIONS = { next: { revalidate: 300 } };
+const CACHE_OPTIONS = { next: { revalidate: GITHUB_DATA_CACHE_SECONDS } };
 const repositorySegment = /^[A-Za-z0-9_.-]+$/;
 
 export async function scoreRepo(
