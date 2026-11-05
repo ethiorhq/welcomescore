@@ -1,6 +1,6 @@
 {
   "name": "@ethiorhq/welcomescore",
-  "version": "1.0.0",
+  "version": "2.2.0",
   "description": "Deterministic open-source contributor readiness & DevOps audit CLI by ETHIOR",
   "keywords": [
     "welcomescore",

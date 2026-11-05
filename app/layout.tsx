@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import SiteFooter from "@/app/components/SiteFooter";
 import AlgofoxPetProvider from "@/app/components/pet/AlgofoxPetProvider";
 import AlgofoxWidget from "@/app/components/pet/AlgofoxWidget";
@@ -9,16 +9,35 @@ import { homepageMetadata } from "@/lib/seo";
 import { ETHIOR_URL, SITE_DESCRIPTION, SITE_DISPLAY_NAME, SITE_URL, THEME_COLOR } from "@/lib/site";
 import "./globals.css";
 
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
+const ibmPlexMono = localFont({
+  src: [
+    {
+      path: "./fonts/ibm-plex-mono-400.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/ibm-plex-mono-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/ibm-plex-mono-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-mono",
   display: "swap",
 });
 
-const ibmPlexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const ibmPlexSans = localFont({
+  src: [
+    {
+      path: "./fonts/ibm-plex-sans-variable.woff2",
+      style: "normal",
+    },
+  ],
   variable: "--font-sans",
   display: "swap",
 });
