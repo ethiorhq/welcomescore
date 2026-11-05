@@ -11,6 +11,7 @@ import {
   CONTRIBUTING_TEMPLATE,
 } from "@/lib/templates";
 import type { Check, ScoreResult } from "@/lib/scoreRepo";
+import { formatCheckedAt, relativeCheckedAt } from "@/lib/checkedAt";
 import { resolveAutoFix, type AutoFixPackage } from "@/lib/autofix/engine";
 import AutoFixModal from "@/app/components/report/AutoFixModal";
 
@@ -111,6 +112,8 @@ export default function ScoreCard({
   }
 
   const issueCount = result.goodFirstIssueCount;
+  const checkedAtLabel = formatCheckedAt(result.checkedAt);
+  const checkedAtRelative = relativeCheckedAt(result.checkedAt);
   const cardId = result.repo.replace(/[^a-z0-9]/gi, "-").toLowerCase();
   const issueSearchUrl = `https://github.com/${result.repo}/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22`;
 
@@ -133,6 +136,14 @@ export default function ScoreCard({
           {result.grade}
         </span>
       </div>
+
+      {checkedAtLabel ? (
+        <p className="mt-3 font-sans text-xs leading-5 text-muted">
+          Checked <time dateTime={result.checkedAt}>{checkedAtLabel}</time>
+          {checkedAtRelative ? ` (${checkedAtRelative})` : ""}
+          {" · "}Point-in-time public audit
+        </p>
+      ) : null}
 
       <div className="mt-8 flex flex-wrap gap-2" aria-label={`${result.repo} repository checks`}>
         {result.checks.map((check) => (

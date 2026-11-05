@@ -32,6 +32,7 @@ function makeResult(overrides: Partial<ScoreResult> = {}): ScoreResult {
     hasReadme: true,
     hasLicense: true,
     isEligibleForLeaderboard: false,
+    checkedAt: "2026-08-27T00:00:00.000Z",
     ...overrides,
   };
 }
