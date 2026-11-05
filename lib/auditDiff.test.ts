@@ -39,6 +39,7 @@ function makeResult(
     isEligibleForLeaderboard: false,
     goodFirstIssueCount: 0,
     goodFirstIssues: [],
+    checkedAt: "2026-11-06T02:00:00.000Z",
   };
 }
 
