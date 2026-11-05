@@ -89,6 +89,27 @@ export default async function PublicReportPage({
     const initialEvent = calculateImprovementFromPreviousEvent(report, null);
     await recordImprovementEvent(initialEvent);
     timelineEvents = [initialEvent];
+  } else {
+    // The timeline previously never advanced past the first audit: no new
+    // event was recorded on repeat visits, so the latest event kept a null
+    // delta forever. Record a new event when this audit's score differs
+    // from the latest recorded one, so the score delta and grade change
+    // actually move. When the score is unchanged, record nothing — the
+    // latest event already describes the current state, and recording an
+    // "unchanged" event on every page view would flood the timeline.
+    // The new event is prepended, never replacing earlier events, so any
+    // per-check changes recorded on earlier events stay visible.
+    // Note: per-check changes for this transition are not derivable here —
+    // only the previous event summary is available, not the previous
+    // report (see `calculateImprovementFromPreviousEvent`). The new event
+    // therefore carries the score/grade delta; its changedSignals is empty
+    // by design, not because nothing changed.
+    const latestEvent = timelineEvents[0];
+    if (latestEvent.newScore !== report.score) {
+      const changeEvent = calculateImprovementFromPreviousEvent(report, latestEvent);
+      await recordImprovementEvent(changeEvent);
+      timelineEvents = [changeEvent, ...timelineEvents];
+    }
   }
 
   const jsonLd = generateAuditReportLd(params.owner, params.repo, report);
