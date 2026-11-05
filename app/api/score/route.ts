@@ -4,12 +4,13 @@ import {
   scoreRepo,
   ScoreRepoError,
 } from "@/lib/scoreRepo";
+import { DIRECT_AUDIT_CACHE_CONTROL } from "@/lib/auditFreshness";
 
 export const dynamic = "force-dynamic";
 
 const noStore = {
   headers: {
-    "Cache-Control": "no-store, max-age=0",
+    "Cache-Control": DIRECT_AUDIT_CACHE_CONTROL,
   },
 };
 

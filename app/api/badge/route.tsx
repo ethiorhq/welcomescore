@@ -1,8 +1,9 @@
 import { ImageResponse } from "next/og";
 import { parseRepository, scoreRepo } from "@/lib/scoreRepo";
 import { badgeResponse, createBadgeSvg, createErrorBadgeSvg, normalizeBadgeStyle } from "@/lib/badgeEngine";
+import { BADGE_PNG_CACHE_CONTROL, GITHUB_DATA_CACHE_SECONDS } from "@/lib/auditFreshness";
 
-export const revalidate = 300;
+export const revalidate = GITHUB_DATA_CACHE_SECONDS;
 
 let regularFontPromise: Promise<ArrayBuffer> | null = null;
 let boldFontPromise: Promise<ArrayBuffer> | null = null;
@@ -217,7 +218,7 @@ function imageOptions(regular: ArrayBuffer, bold?: ArrayBuffer) {
         : []),
     ],
     headers: {
-      "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=300",
+      "Cache-Control": BADGE_PNG_CACHE_CONTROL,
     },
   };
 }

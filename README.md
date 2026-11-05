@@ -174,17 +174,32 @@ The score ranges from 0 to 100 and uses these checks:
 | Beginner-friendly open issues | 25 |
 | Activity within the last three months | 15 |
 
-WelcomeScore returns a grade from **A** through **F** alongside the individual checks. A deliberate homepage or comparison audit requests current public GitHub data. Shareable PNG and SVG badge routes retain a short bounded GitHub-data cache so README embeds remain reliable.
+WelcomeScore returns a grade from **A** through **F** alongside the individual checks.
+
+### Fresh audits vs cached badges
+
+A direct audit and an embedded badge do not show the same freshness. This is deliberate, so embeds stay reliable without re-checking GitHub on every README load.
+
+| Surface | What you trigger | GitHub data | Response cache |
+| --- | --- | --- | --- |
+| Direct audit | Pressing **Check** on the homepage, or **Compare** | Current public GitHub data for that check; not served from a cache (`Cache-Control: no-store, max-age=0`) | `no-store` |
+| Shareable report | Opening `/report/owner/repo` or `GET /api/report` | Public GitHub data cached for up to 5 minutes | `public, s-maxage=300, stale-while-revalidate=86400` |
+| SVG badge | Embedding `/badge/owner/repo.svg` in a README | Public GitHub data cached for up to 5 minutes | `public, max-age=0, s-maxage=300, stale-while-revalidate=86400` — a cached badge may be served for up to 24 hours while a fresh copy is prepared in the background |
+| PNG badge | Embedding `/api/badge?repo=owner/repo` in a README | Public GitHub data cached for up to 5 minutes | `public, max-age=0, s-maxage=300, stale-while-revalidate=300` — a cached badge may be served for up to 5 minutes while a fresh copy is prepared in the background |
+
+In short: if you just merged a fix, press **Check** again for the current result. A badge in a README may lag behind that direct audit for a short time. WelcomeScore does not promise real-time GitHub indexing, and a cached badge does not guarantee that GitHub has indexed every recent change.
+
+The cache lifetimes and headers above are the single source of truth in `lib/auditFreshness.ts`. The scoring routes import those values instead of re-typing them, and `lib/auditFreshness.test.ts` fails if this section stops matching them.
 
 ## API routes
 
-`GET /api/score?repo=owner/repo` returns the JSON score result. The `repo` parameter also accepts a full `github.com/owner/repo` URL.
+`GET /api/score?repo=owner/repo` returns the JSON score result for a deliberate, direct audit. It requests current public GitHub data and is not cached. The `repo` parameter also accepts a full `github.com/owner/repo` URL.
 
-`GET /api/badge?repo=owner/repo` returns the existing 600 × 315 PNG score badge suitable for sharing. Existing copied badge URLs remain supported.
+`GET /api/badge?repo=owner/repo` returns the existing 600 × 315 PNG score badge suitable for sharing. It uses the cached badge pipeline described above. Existing copied badge URLs remain supported.
 
 ### Dynamic SVG rank badges
 
-`GET /api/badge/owner/repo?style=1` returns a compact, live SVG contributor-health badge suitable for a repository README. The badge recalculates from the same cached scoring pipeline used by the audit API and returns cache headers suitable for repeated README loads.
+`GET /api/badge/owner/repo?style=1` returns a compact SVG contributor-health badge suitable for a repository README. Unlike a direct audit, the badge uses the cached scoring pipeline described above (public GitHub data cached for up to 5 minutes) and returns cache headers suitable for repeated README loads.
 
 | Style | Query value | Purpose |
 | --- | --- | --- |

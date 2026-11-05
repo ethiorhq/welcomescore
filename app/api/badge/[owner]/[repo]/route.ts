@@ -8,9 +8,10 @@ import { parseRepository, scoreRepo } from "@/lib/scoreRepo";
 import { getGitHubStackEvaluation } from "@/lib/stacks/github";
 import { STACK_DEFINITIONS, type StackId } from "@/lib/stacks/types";
 import { diagnoseDevOps } from "@/lib/devops/doctor";
+import { GITHUB_DATA_CACHE_SECONDS } from "@/lib/auditFreshness";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 300;
+export const revalidate = GITHUB_DATA_CACHE_SECONDS;
 
 export async function GET(
   request: Request,

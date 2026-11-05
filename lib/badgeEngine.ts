@@ -1,3 +1,5 @@
+import { BADGE_SVG_CACHE_CONTROL } from "./auditFreshness";
+
 export const BADGE_STYLE_IDS = [
   "1",
   "2",
@@ -28,7 +30,7 @@ export type RankConfig = {
   emblem: "circle" | "shield" | "star" | "crown";
 };
 
-const CACHE_CONTROL = "public, max-age=0, s-maxage=300, stale-while-revalidate=86400";
+const CACHE_CONTROL = BADGE_SVG_CACHE_CONTROL;
 
 export function getRankConfig(score: number): RankConfig {
   if (score >= 95) {

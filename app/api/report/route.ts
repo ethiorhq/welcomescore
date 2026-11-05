@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { parseRepository, scoreRepo, ScoreRepoError } from "@/lib/scoreRepo";
 import { createReportFromAudit } from "@/lib/report/schema";
 import { getGitHubStackEvaluation } from "@/lib/stacks/github";
+import { SHAREABLE_REPORT_CACHE_CONTROL } from "@/lib/auditFreshness";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
+          "Cache-Control": SHAREABLE_REPORT_CACHE_CONTROL,
         },
       },
     );
