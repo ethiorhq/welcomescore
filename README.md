@@ -176,6 +176,10 @@ The score ranges from 0 to 100 and uses these checks:
 
 WelcomeScore returns a grade from **A** through **F** alongside the individual checks.
 
+### Audit diff
+
+A score is a snapshot; the report page also shows what changed since the previous audit. The diff is deterministic, computed from the two audits being compared: the score delta (for example +12 or −8), any grade change, and the per-check changes, each linked to its evidence on GitHub. A first audit has no delta — it says so instead of showing a fake baseline. The timeline records a new event only when the score actually changes, so repeat visits do not flood it with unchanged entries.
+
 ### Fresh audits vs cached badges
 
 A direct audit and an embedded badge do not show the same freshness. This is deliberate, so embeds stay reliable without re-checking GitHub on every README load.

@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { ImprovementEvent } from "@/lib/improvement/types";
+import { evidenceUrlForCheck } from "@/lib/auditDiff";
 
 interface ImprovementTimelineProps {
   repo: string;
@@ -44,6 +45,9 @@ export function ImprovementTimeline({
     );
   }
 
+  const latestEvent = events[0];
+  const latestDelta = latestEvent.scoreDelta;
+
   return (
     <div className="w-full rounded-xl border border-white/10 bg-[#1B1E29] p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-2 mb-6">
@@ -61,6 +65,33 @@ export function ImprovementTimeline({
         <span className="text-xs font-mono text-[#8B8F9E] self-start sm:self-auto bg-white/5 px-2.5 py-1 rounded-md border border-white/5">
           {events.length} {events.length === 1 ? "audit recorded" : "audits recorded"}
         </span>
+      </div>
+
+      {/* Latest audit diff, shown prominently. A first audit has no previous
+          score to compare, so it says so instead of showing a fake delta. */}
+      <div
+        aria-label="Latest audit change"
+        className="mb-6 rounded-md border border-white/10 bg-[#12141C]/60 px-4 py-3 font-mono text-xs text-[#8B8F9E]"
+      >
+        {latestDelta === null ? (
+          <span>First audit — no previous score to compare.</span>
+        ) : latestDelta === 0 ? (
+          <span>
+            No change since the previous audit — score {latestEvent.newScore} (grade {latestEvent.newGrade}).
+          </span>
+        ) : (
+          <span>
+            Since the previous audit:{" "}
+            <span className={latestDelta > 0 ? "font-bold text-[#7A9B76]" : "font-bold text-rose-400"}>
+              {latestDelta > 0 ? `+${latestDelta}` : latestDelta}
+            </span>{" "}
+            ({latestEvent.previousScore} → {latestEvent.newScore}
+            {latestEvent.previousGrade !== null && latestEvent.previousGrade !== latestEvent.newGrade
+              ? `, grade ${latestEvent.previousGrade} → ${latestEvent.newGrade}`
+              : ""}
+            )
+          </span>
+        )}
       </div>
 
       <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-white/10">
@@ -133,9 +164,13 @@ export function ImprovementTimeline({
                 </div>
 
                 {/* Score transition note */}
-                {evt.previousScore !== null && (
+                {evt.previousScore !== null ? (
                   <p className="text-xs text-[#8B8F9E] mb-3">
                     Progressed from score <span className="font-mono text-[#F2EEE6]">{evt.previousScore}</span> ({evt.previousGrade}) to <span className="font-mono text-[#F2EEE6]">{evt.newScore}</span> ({evt.newGrade}).
+                  </p>
+                ) : (
+                  <p className="text-xs text-[#8B8F9E] mb-3">
+                    First audit — no previous score to compare.
                   </p>
                 )}
 
@@ -161,16 +196,20 @@ export function ImprovementTimeline({
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {evt.changedSignals.map((sig) => (
-                        <span
+                        <a
                           key={sig.id}
-                          className={`text-[11px] font-mono px-2 py-0.5 rounded border ${
+                          href={evidenceUrlForCheck(sig.label, repo, evt.defaultBranch ?? "main")}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`View evidence for ${sig.label} on GitHub`}
+                          className={`text-[11px] font-mono px-2 py-0.5 rounded border hover:underline underline-offset-2 ${
                             sig.afterPassed
                               ? "bg-[#7A9B76]/10 text-[#7A9B76] border-[#7A9B76]/20"
                               : "bg-rose-500/10 text-rose-300 border-rose-500/20"
                           }`}
                         >
-                          {sig.afterPassed ? "✓" : "✗"} {sig.label} ({sig.pointsDelta >= 0 ? `+${sig.pointsDelta}` : sig.pointsDelta} pts)
-                        </span>
+                          {sig.afterPassed ? "✓" : "✗"} {sig.label} ({sig.pointsDelta >= 0 ? `+${sig.pointsDelta}` : sig.pointsDelta} pts) ↗
+                        </a>
                       ))}
                     </div>
                   </div>

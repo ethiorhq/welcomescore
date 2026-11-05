@@ -129,6 +129,45 @@ describe("Improvement Timeline Engine", () => {
     expect(diff.remainingMoveId).toBe("contributing-guide");
   });
 
+  it("does not fabricate per-check changes from an event summary", () => {
+    // The previous event knows its own score and its own changed signals,
+    // but not the previous per-check states. Copying its changedSignals
+    // into the new event would misattribute the previous transition's
+    // changes to this one, so the new event reports them as not derivable.
+    // The previous event itself is left untouched — its signals stay
+    // visible in the timeline under that earlier audit.
+    const prevEvent = {
+      id: "evt-prev-2",
+      repo: "ethiorhq/welcomescore",
+      analyzedAt: "2026-10-18T00:00:00Z",
+      previousScore: 45,
+      newScore: 65,
+      scoreDelta: 20,
+      previousGrade: "D",
+      newGrade: "C",
+      changedSignals: [
+        {
+          id: "contributing-guide",
+          label: "CONTRIBUTING.md",
+          beforePassed: false,
+          afterPassed: true,
+          pointsDelta: 20,
+        },
+      ],
+      completedMoves: [],
+      remainingMoveId: "readme-setup",
+    };
+
+    const diff = calculateImprovementFromPreviousEvent(validReportFixture, prevEvent);
+
+    expect(diff.previousScore).toBe(65);
+    expect(diff.newScore).toBe(85);
+    expect(diff.scoreDelta).toBe(20);
+    expect(diff.changedSignals).toEqual([]);
+    expect(prevEvent.changedSignals).toHaveLength(1);
+    expect(prevEvent.changedSignals[0].id).toBe("contributing-guide");
+  });
+
   it("stores and retrieves timeline events in chronological order", async () => {
     const event1 = calculateImprovementEvent(validReportFixture, null, "evt-1");
     await recordImprovementEvent(event1);
