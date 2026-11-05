@@ -6,6 +6,7 @@
 
 - **Primary Cloudflare Production:** https://www.welcomescore.is-local.org/ (and https://welcomescore.pages.dev/)
 - **Vercel High-Availability Mirror:** https://welcomescore.vercel.app/
+- **GitHub Pages Global Mirror:** https://ethiorhq.github.io/welcomescore/
 - **Source Repository:** https://github.com/ethiorhq/welcomescore
 - **Brand / Publisher:** ETHIOR (https://ethior.com)
 

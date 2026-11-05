@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { CLOUDFLARE_PRODUCTION_URL, VERCEL_MIRROR_URL } from "@/lib/site";
+import {
+  CLOUDFLARE_PAGES_URL,
+  GITHUB_PAGES_MIRROR_URL,
+  VERCEL_MIRROR_URL,
+} from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -21,20 +25,25 @@ export async function GET(request: Request) {
     host.includes("vercel.app")
   );
 
+  const isGitHubPages = Boolean(
+    host.includes("github.io")
+  );
+
   const activeServer = isVercel
     ? "vercel-serverless-mirror"
+    : isGitHubPages
+    ? "github-pages-static-mirror"
     : isCloudflare
     ? "cloudflare-edge-primary"
     : "local-node-dev";
 
   const activePlatform = isVercel
     ? "Vercel Edge / Serverless Mirror"
+    : isGitHubPages
+    ? "GitHub Pages Global CDN Mirror"
     : isCloudflare
     ? "Cloudflare Workers & Pages (OpenNext Workerd)"
     : "Local Node.js Development";
-
-  const mirrorUrl = isVercel ? CLOUDFLARE_PRODUCTION_URL : VERCEL_MIRROR_URL;
-  const mirrorName = isVercel ? "Cloudflare Edge Primary" : "Vercel Serverless Mirror";
 
   // Check Supabase connectivity if configured
   let databaseStatus = "unconfigured";
@@ -66,23 +75,46 @@ export async function GET(request: Request) {
       server: activeServer,
       platform: activePlatform,
       activeHost: host,
-      region: cfRay ? `Cloudflare [${cfRay.split("-").pop() || "GLOBAL"}]` : vercelId ? `Vercel [${vercelId.split("::").shift() || "EDGE"}]` : "local",
-      mirror: {
-        name: mirrorName,
-        url: mirrorUrl,
-        status: "operational",
-      },
+      region: cfRay
+        ? `Cloudflare [${cfRay.split("-").pop() || "GLOBAL"}]`
+        : vercelId
+        ? `Vercel [${vercelId.split("::").shift() || "EDGE"}]`
+        : isGitHubPages
+        ? "GitHub Global CDN"
+        : "local",
+      mirrors: [
+        {
+          name: "Cloudflare Edge Primary",
+          url: CLOUDFLARE_PAGES_URL,
+          domain: "welcomescore.pages.dev",
+          status: "operational",
+        },
+        {
+          name: "Vercel Serverless Mirror",
+          url: VERCEL_MIRROR_URL,
+          domain: "welcomescore.vercel.app",
+          status: "operational",
+        },
+        {
+          name: "GitHub Pages Mirror",
+          url: GITHUB_PAGES_MIRROR_URL,
+          domain: "ethiorhq.github.io/welcomescore",
+          status: "operational",
+        },
+      ],
       database: databaseStatus,
       latencyMs,
       timestamp: new Date().toISOString(),
       version: "2.2.0-multi-edge",
       multiServerPolicy: {
-        architecture: "Active-Active Multi-Cloud (Cloudflare + Vercel)",
-        primaryEdge: "Cloudflare Workers / Pages via OpenNext",
+        architecture: "Active-Active Triple-Cloud Mesh (Cloudflare + Vercel + GitHub Pages)",
+        primaryEdge: "Cloudflare Workers / Pages via OpenNext (workerd)",
         failoverMirror: "Vercel Serverless Mirror",
+        staticMirror: "GitHub Pages Global CDN Mirror",
         unifiedState: "Supabase PostgreSQL Database",
         targetUptime: "99.99%",
         automaticFailover: "Supported via DNS & Client Switcher",
+        altSvcPolicy: "clear (QUIC bypassed for standard TCP HTTP/2 reliability)",
       },
     },
     {
@@ -91,6 +123,7 @@ export async function GET(request: Request) {
         "Cache-Control": "no-store, max-age=0",
         "Access-Control-Allow-Origin": "*",
         "X-Server-Node": activeServer,
+        "alt-svc": "clear",
       },
     }
   );

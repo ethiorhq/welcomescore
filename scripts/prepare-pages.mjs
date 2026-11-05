@@ -10,10 +10,21 @@ fs.writeFileSync(
   path.join(assetsDir, "_worker.js"),
   `export default {
   async fetch(request, env, ctx) {
+    let response;
     if (env.NEXT_WORKER) {
-      return env.NEXT_WORKER.fetch(request);
+      response = await env.NEXT_WORKER.fetch(request);
+    } else if (env.ASSETS) {
+      response = await env.ASSETS.fetch(request);
+    } else {
+      response = new Response("Not found", { status: 404 });
     }
-    return env.ASSETS ? env.ASSETS.fetch(request) : new Response("Not found", { status: 404 });
+    const headers = new Headers(response.headers);
+    headers.set("alt-svc", "clear");
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers
+    });
   }
 };`
 );

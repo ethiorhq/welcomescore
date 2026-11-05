@@ -12,7 +12,8 @@
 - **Primary Edge Host:** https://www.welcomescore.is-local.org/ (Cloudflare Workers & Pages)
 - **High-Availability Mirror:** https://welcomescore.vercel.app/ (Vercel Edge Network)
 - **Pages Fallback:** https://welcomescore.pages.dev/
-- **License:** Source-Available Attribution License 1.0 (ETHIOR)
+- **GitHub Pages Global Mirror:** https://ethiorhq.github.io/welcomescore/
+- **License:** MIT License (ETHIOR)
 
 ETHIOR WelcomeScore provides deterministic, evidence-bound scoring (0–100) of public GitHub repositories to assess how prepared a codebase is to receive and onboard first-time open source contributors.
 

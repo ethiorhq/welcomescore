@@ -4,8 +4,8 @@ import PolicyPage, { PolicyCallout, PolicyTable, type PolicySection } from "@/ap
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "WelcomeScore Multi-Server High Availability Policy: Dual-Cloud Active-Active Architecture",
-  description: "Enterprise multi-cloud architecture, active-active failover, 99.99% uptime SLA, and real-time synchronization between Cloudflare Edge and Vercel Mirror.",
+  title: "WelcomeScore Multi-Server High Availability Policy: Triple-Cloud Active-Active Architecture",
+  description: "Enterprise multi-cloud architecture, active-active failover, 99.99% uptime SLA, and real-time synchronization between Cloudflare Edge, Vercel Mirror, and GitHub Pages.",
   path: "/policies/multi-server",
   imagePath: "/opengraph-image",
   imageAlt: "WelcomeScore Multi-Server High Availability Policy",
@@ -14,11 +14,11 @@ export const metadata: Metadata = pageMetadata({
 const sections: PolicySection[] = [
   {
     id: "architecture-overview",
-    title: "Dual-Cloud Active-Active Architecture",
+    title: "Triple-Cloud Active-Active Architecture",
     content: (
       <>
         <p>
-          WelcomeScore is engineered with an active-active, dual-cloud infrastructure to eliminate single points of failure and deliver low latency across the globe. Rather than relying on a single cloud vendor, WelcomeScore operates simultaneously across two premier edge compute networks:
+          WelcomeScore is engineered with an active-active, triple-cloud infrastructure mesh to eliminate single points of failure and deliver low latency across the globe. Rather than relying on a single cloud vendor, WelcomeScore operates simultaneously across three global edge networks:
         </p>
         <PolicyTable>
           <thead className="border-b border-muted/25 font-mono text-xs uppercase tracking-[0.12em] text-muted">
@@ -34,13 +34,19 @@ const sections: PolicySection[] = [
               <td className="px-4 py-3 font-mono text-text">Primary Edge</td>
               <td className="px-4 py-3">Cloudflare Workers & Pages via OpenNext</td>
               <td className="px-4 py-3">Workerd V8 Isolates across 275+ global cities with sub-10ms TTFB and 0ms cold starts</td>
-              <td className="px-4 py-3 font-mono text-accent">welcomescore.is-local.org</td>
+              <td className="px-4 py-3 font-mono text-accent">welcomescore.pages.dev / is-local.org</td>
             </tr>
             <tr>
               <td className="px-4 py-3 font-mono text-text">Failover Mirror</td>
               <td className="px-4 py-3">Vercel Edge Network & Serverless Mirror</td>
               <td className="px-4 py-3">Node.js / Edge hybrid compute with instant edge caching and automated fallback</td>
               <td className="px-4 py-3 font-mono text-accent">welcomescore.vercel.app</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-3 font-mono text-text">Static CDN Mirror</td>
+              <td className="px-4 py-3">GitHub Pages Global CDN</td>
+              <td className="px-4 py-3">High-speed global static asset edge cache hosted directly on GitHub infrastructure</td>
+              <td className="px-4 py-3 font-mono text-accent">ethiorhq.github.io/welcomescore</td>
             </tr>
             <tr>
               <td className="px-4 py-3 font-mono text-text">Unified Persistence</td>
@@ -99,13 +105,16 @@ const sections: PolicySection[] = [
         </p>
         <ul className="list-disc pl-5 space-y-2 text-muted">
           <li>
-            Displays a live green beacon when running on <strong>Cloudflare Edge</strong>, with a one-click link to failover to Vercel.
+            Displays a live green beacon when running on <strong>Cloudflare Edge</strong> (Primary workerd runtime).
           </li>
           <li>
-            Displays a live amber beacon when running on <strong>Vercel Mirror</strong>, with a one-click link to switch back to Cloudflare.
+            Displays a live amber beacon when running on <strong>Vercel Mirror</strong> (Serverless / Edge hybrid failover).
           </li>
           <li>
-            Preserves the visitor’s exact route path, URL query parameters, and audit context across transitions.
+            Displays a live sky blue beacon when running on <strong>GitHub Pages Mirror</strong> (Static global CDN).
+          </li>
+          <li>
+            Allows instantaneous 1-click switching between all 3 mirrors via a persistent floating menu, preserving the visitor&apos;s exact route path, URL query parameters, and audit context across transitions.
           </li>
         </ul>
       </>
